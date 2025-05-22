@@ -49,19 +49,35 @@ TestPlacedParticleInitializer::TestPlacedParticleInitializer(const InputParamete
 std::vector<InitialParticleData>
 TestPlacedParticleInitializer::getParticleData() const
 {
-
-  std::vector<InitialParticleData> data = std::vector<InitialParticleData>(_start_points.size());
+  std::vector<InitialParticleData> particle_data;
 
   for (unsigned int i = 0; i < _start_points.size(); ++i)
   {
-    data[i].position = _start_points[i];
-    data[i].velocity = _start_velocities[i];
-    data[i].mass = _mass;
-    data[i].charge = _charge;
-    data[i].weight = _weight;
-    data[i].elem = nullptr;
-    data[i].species = "";
+    const Elem * particle_elem = nullptr; 
+    // we'll check to see if this processor owns any of the points
+    // where we want to put particles. We coudl do this with replicated rays
+    // however we don't want to have to use replicated rays everytime we need 
+    // a new ray during the transient study
+    for (auto elem : *_fe_problem.mesh().getActiveLocalElementRange())
+    {
+      if (elem->contains_point(_start_points[i]))
+      {
+        particle_elem = elem;
+      }
+    }
+    // the pointer will be null in the case that the processor doesn't own the point
+    if (particle_elem == nullptr)
+      continue;
+    auto & data = particle_data.emplace_back(); 
+
+    data.position = _start_points[i];
+    data.velocity = _start_velocities[i];
+    data.mass = _mass;
+    data.charge = _charge;
+    data.weight = _weight;
+    data.species = "";
+    data.elem = particle_elem;
   }
 
-  return data;
+  return particle_data;
 }

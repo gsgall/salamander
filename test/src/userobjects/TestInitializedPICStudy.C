@@ -25,7 +25,7 @@ InputParameters
 TestInitializedPICStudy::validParams()
 {
   auto params = PICStudyBase::validParams();
-  params.addRequiredParam<UserObjectName>("initializer",
+  params.addRequiredParam<std::vector<UserObjectName>>("initializers",
                                           "The initializer that will place particles");
   params.addParam<unsigned int>(
       "particles_per_element", 0, "The number of particles that will be placed in each element");
@@ -40,11 +40,15 @@ TestInitializedPICStudy::validParams()
 
 TestInitializedPICStudy::TestInitializedPICStudy(const InputParameters & parameters)
   : PICStudyBase(parameters),
-    _initializer(getUserObject<ParticleInitializerBase>("initializer")),
+    _initializer_names(getParam<std::vector<UserObjectName>>("initializers")),
     _use_custom_id_scheme(getParam<bool>("use_custom_rayids")),
     _particles_per_element(getParam<unsigned int>("particles_per_element")),
     _curr_elem_id(0)
 {
+  if (_initializer_names.empty())
+    paramError("intializers", "At least one initializer must be provided"); 
+  for (const auto name : _initializer_names) 
+    _initializer.push_back(&getUserObjectByName<ParticleInitializerBase>(name));
   if (_use_custom_id_scheme && _particles_per_element == 0)
     paramError(
         "particles_per_element",
@@ -54,8 +58,13 @@ TestInitializedPICStudy::TestInitializedPICStudy(const InputParameters & paramet
 void
 TestInitializedPICStudy::initializeParticles()
 {
-  auto initial_data = _initializer.getParticleData();
-  // if there are no rays on this processor: do nothing
+  std::vector<InitialParticleData> initial_data; 
+  for (const auto initializer : _initializer)
+  {
+    const auto temporary_data = initializer->getParticleData();
+    initial_data.insert(initial_data.end(), temporary_data.begin(), temporary_data.end()); 
+  }
+  
   if (initial_data.size() == 0)
     return;
 
@@ -64,8 +73,7 @@ TestInitializedPICStudy::initializeParticles()
   if (initial_data[0].elem == nullptr)
     replicated_rays = true;
 
-  std::vector<std::shared_ptr<Ray>> rays(initial_data.size());
-
+  _banked_rays.resize(initial_data.size());
   // keeping track of the current element so we can base
   // ray ids off of the element id
   // this makes it parallel consistent if `allow_renumbering = false`
@@ -85,27 +93,27 @@ TestInitializedPICStudy::initializeParticles()
           _curr_elem_id = initial_data[i].elem->id();
         _curr_elem_ray_count = 0;
       }
-      rays[i] = acquireRay();
+      _banked_rays[i] = acquireRay();
     }
     else
     {
-      rays[i] = acquireReplicatedRay();
+      _banked_rays[i] = acquireReplicatedRay();
     }
 
-    setInitialParticleData(rays[i], initial_data[i]);
+    setInitialParticleData(_banked_rays[i], initial_data[i]);
 
     if (!replicated_rays)
     {
-      getVelocity(*rays[i], _temporary_velocity);
+      getVelocity(*_banked_rays[i], _temporary_velocity);
       _stepper.setupStep(
-          *rays[i], _temporary_velocity, rays[i]->data(_charge_index) / rays[i]->data(_mass_index));
-      setVelocity(*rays[i], _temporary_velocity);
+          *_banked_rays[i], _temporary_velocity, _banked_rays[i]->data(_charge_index) / _banked_rays[i]->data(_mass_index));
+      setVelocity(*_banked_rays[i], _temporary_velocity);
     }
   }
 
   if (!replicated_rays)
   {
-    moveRaysToBuffer(rays);
+    moveRaysToBuffer(_banked_rays);
     return;
   }
   // The unclaimed rays that we're going to generate
@@ -118,7 +126,7 @@ TestInitializedPICStudy::initializeParticles()
   // generate the rays for the local rays that we care about
   // and the claiming probably won't be necessary
   std::vector<std::shared_ptr<Ray>> claimed_rays;
-  ClaimRays claim_rays(*this, rays, claimed_rays, false);
+  ClaimRays claim_rays(*this, _banked_rays, claimed_rays, false);
   claim_rays.claim();
   // lets loop through the claimed rays and set them up for the step
   // we need to do so because before they are claimed the ray does not

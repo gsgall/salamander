@@ -44,7 +44,8 @@ protected:
    */
   virtual void initializeParticles() override final;
   /// the object that will supply initial data needed for rays
-  const ParticleInitializerBase & _initializer;
+  const std::vector<UserObjectName> & _initializer_names;
+  std::vector<const ParticleInitializerBase *> _initializer;
   /// wether or not the id generation scheme from raytracing study will be used or the one in this user object will be
   const bool _use_custom_id_scheme;
   /// the number of particles that will be placed in each element
