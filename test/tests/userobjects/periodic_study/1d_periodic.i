@@ -49,14 +49,14 @@
 []
 
 [Postprocessors]
-  [ray_count]
+  [particle_count]
     type = RayTracingStudyResult
     result = "total_rays_started"
     study = study
   []
 []
 [VectorPostprocessors]
-  [ray_data]
+  [particle_data]
     type = TestPeriodicParticleDataVectorPostprocessor
     study = study
     additional_ray_data_outputs = 'charge mass weight'
@@ -78,6 +78,7 @@
 [Outputs]
   [particle_data]
     type = CSV
+    file_base = '1d_periodic'
     execute_on = 'TIMESTEP_END'
   []
 []

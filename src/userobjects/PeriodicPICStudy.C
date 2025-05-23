@@ -36,7 +36,10 @@ PeriodicPICStudy::PeriodicPICStudy(const InputParameters & parameters)
   _x_min(std::numeric_limits<float>::max()),
   _x_max(std::numeric_limits<float>::lowest()),
   _domain_length(0)
-{ 
+{
+  if (_fe_problem.mesh().dimension() != 1)
+    mooseError("Periodic PIC simulations can only be performed with one spatial dimension.");
+
   for (const auto elem : *_fe_problem.mesh().getActiveLocalElementRange())
   {
     _domain_length += elem->volume();
@@ -84,14 +87,7 @@ PeriodicPICStudy::reinitializeParticles()
     return;
 
   for (const auto i : make_range(_periodic_particles.size()))
-  {
-    auto & ray = _banked_particles.emplace_back(acquireRay());
-    setInitialParticleData(ray, _periodic_particles[i]);
-    getVelocity(*ray, _temporary_velocity);
-    _stepper.setupStep(
-        *ray, _temporary_velocity, ray->data(_charge_index) / ray->data(_mass_index));
-    setVelocity(*ray, _temporary_velocity);
-  }
+   _banked_particles.emplace_back(createParticle(_periodic_particles[i]));
 }
 
 void

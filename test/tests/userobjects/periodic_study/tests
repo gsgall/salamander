@@ -1,0 +1,35 @@
+[Tests]
+  design = 'PeriodicPICStudy.md PeriodicParticleVectorPostprocessor.md'
+  issues = '#1'
+  [invalid_dimension]
+    type = 'RunException'
+    input = '1d_periodic.i'
+    allow_test_objects = true
+    allow_warnings = true
+    cli_args = 'Mesh/gmg/dim=2'
+    expect_err = 'Periodic PIC simulations can only be performed with one spatial dimension.'
+    detail = "The system shall return a useful error when the user tries to perform a periodic simulation not in 1D"
+  []
+  [periodic]
+    requirement = 'The system shall support periodic PIC simulations in 1D and'
+    [particles]
+      input = '1d_periodic.i'
+      type = 'CSVDiff'
+      csvdiff = '1d_periodic_particle_data_0001.csv
+                 1d_periodic_particle_data_0002.csv
+                 1d_periodic_particle_data_0003.csv'
+      allow_test_objects = true
+      allow_warnings = true
+      detail = 'ensure particles are consistent when they are periodic and that particle data is output properly for all particles in the system.'
+    []
+    [particle_count]
+      input = '1d_periodic.i'
+      type = 'CSVDiff'
+      should_execute = false
+      csvdiff = '1d_periodic.csv'
+      allow_test_objects = true
+      allow_warnings = true
+      detail = 'ensure no particles are lost or created.'
+    []
+  []
+[]

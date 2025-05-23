@@ -14,20 +14,29 @@
 //*
 
 #pragma once
-#include "PeriodicParticleDataVectorPostprocessor.h"
+#include "ParticleDataVectorPostprocessor.h"
 
 class PeriodicPICStudy;
 
-class TestPeriodicParticleDataVectorPostprocessor : public PeriodicParticleDataVectorPostprocessor
+class PeriodicParticleDataVectorPostprocessor : public ParticleDataVectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  TestPeriodicParticleDataVectorPostprocessor(const InputParameters & parameters);
+  PeriodicParticleDataVectorPostprocessor(const InputParameters & parameters);
+  /**
+   * adds the ray id to the particle data for sorting results
+   * This will help ensure testability
+   */
+  virtual void execute() override;
   /**
    * In the testing version of this the finalize not only
    * communicates between processors but also sorts the data by ray
    * id so that it will be consistent in testing
    */
   virtual void finalize() override;
+
+protected:
+  const PeriodicPICStudy & _periodic_study; 
+  const unsigned int _additional_output_count;
 };
