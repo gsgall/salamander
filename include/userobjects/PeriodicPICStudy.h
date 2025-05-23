@@ -30,7 +30,7 @@ public:
 
   static InputParameters validParams();
 
-  const std::vector<InitialParticleData> & getPeriodicRays() const
+  const std::vector<InitialParticleData> & getPeriodicParticles() const
   {
     return _periodic_particles;
   };

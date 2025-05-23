@@ -40,7 +40,7 @@ NumberDensityAccumulator::execute()
     std::unique_ptr<SALAMANDER::AccumulatorBase> accumulator =
         std::make_unique<SALAMANDER::ResidualAccumulator>(_fe_problem, this, _var_name, 0);
 
-    auto particles = _study.getBankedRays();
+    auto particles = _study.getBankedParticles();
 
     for (auto & p : particles)
     {

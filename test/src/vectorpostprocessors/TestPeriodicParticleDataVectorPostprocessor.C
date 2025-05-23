@@ -44,9 +44,9 @@ TestPeriodicParticleDataVectorPostprocessor::execute()
   // use without requiring it to store meta data that is not important for them.
   ParticleDataVectorPostprocessor::execute();
 
-  const auto & periodic_rays = _periodic_study.getPeriodicRays(); 
+  const auto & periodic_particles = _periodic_study.getPeriodicParticles(); 
 
-  for (const auto & data : periodic_rays)
+  for (const auto & data : periodic_particles)
   {
     // storing the time at which the particle position is known
     _data_values[0]->push_back(_t);

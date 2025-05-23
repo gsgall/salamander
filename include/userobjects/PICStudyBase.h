@@ -34,7 +34,10 @@ public:
    * Method for getting the rays after they have finished tracing
    * useful for looking at the rays data if needed by another object
    */
-  const std::vector<std::shared_ptr<Ray>> & getBankedRays() const;
+  const std::vector<std::shared_ptr<Ray>> & getBankedParticles() const
+  {
+    return _banked_particles;
+  };
 
 protected:
   /// The banked rays to be used on the next timestep (restartable)

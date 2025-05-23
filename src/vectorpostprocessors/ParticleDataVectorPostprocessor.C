@@ -72,7 +72,7 @@ void
 ParticleDataVectorPostprocessor::execute()
 {
 
-  const auto rays = _study.getBankedRays();
+  const auto rays = _study.getBankedParticles();
   for (const auto & ray : rays)
   {
     // storing the time at which the particle position is known
