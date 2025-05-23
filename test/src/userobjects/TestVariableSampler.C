@@ -36,7 +36,7 @@ void
 TestVariableSampler::postExecuteStudy()
 {
   TestInitializedPICStudy::postExecuteStudy();
-  for (auto & ray : _banked_rays)
+  for (auto & ray : _banked_particles)
   {
     ray->data(_field_idx) = _sampler.sampleVariable(ray->currentPoint(), ray->currentElem());
   }

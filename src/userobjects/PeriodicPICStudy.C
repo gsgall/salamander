@@ -60,7 +60,7 @@ void
 PeriodicPICStudy::reinitializeParticles()
 {
   // Reset each ray
-  for (auto & ray : _banked_rays)
+  for (auto & ray : _banked_particles)
   {
     // Store off the ray's info before we reset it
     const auto elem = ray->currentElem();
@@ -85,7 +85,7 @@ PeriodicPICStudy::reinitializeParticles()
 
   for (const auto i : make_range(_periodic_particles.size()))
   {
-    auto & ray = _banked_rays.emplace_back(acquireRay());
+    auto & ray = _banked_particles.emplace_back(acquireRay());
     setInitialParticleData(ray, _periodic_particles[i]);
     getVelocity(*ray, _temporary_velocity);
     _stepper.setupStep(
@@ -98,17 +98,17 @@ void
 PeriodicPICStudy::postExecuteStudy() {  
 
   _periodic_particles.clear(); 
-  _banked_rays = rayBank(); 
+  _banked_particles = rayBank(); 
 
   // we have to store all this data in seperate vectors since 
   // TIMPI does not support allgather with structs
   std::vector<Real> x_pos, mass, charge, weight, vx, vy, vz; 
   std::vector<int> species; 
 
-  _banked_rays.erase(
+  _banked_particles.erase(
     std::remove_if(
-      _banked_rays.begin(),
-      _banked_rays.end(),
+      _banked_particles.begin(),
+      _banked_particles.end(),
       [&](const std::shared_ptr<Ray> & ray)
       {
         // check if any of the particles stopped early in tracing 
@@ -136,7 +136,7 @@ PeriodicPICStudy::postExecuteStudy() {
 
         return true; 
       }),
-   _banked_rays.end());
+   _banked_particles.end());
 
   // gather all of the data from all the ranks 
   // we need to do this since a periodic particle could be anywhere in the domain 

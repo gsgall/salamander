@@ -42,8 +42,9 @@ protected:
    * This implementation simply gets particles based on the initializer
    * and then creates the ray objects which represent the particles
    */
-  virtual void initializeParticles() override final;
+  virtual std::shared_ptr<Ray> createParticle(const InitialParticleData & data) override final;
   /// the object that will supply initial data needed for rays
+  /// wether or not the id generation scheme from raytracing study will be used or the one in this user object will be
   const bool _use_custom_id_scheme;
   /// the number of particles that will be placed in each element
   unsigned int _particles_per_element;

@@ -38,7 +38,7 @@ TestChargeAccumulator::postExecuteStudy()
   // lets make a new accumulator each time so we can reset the aux variable each time
   TestInitializedPICStudy::postExecuteStudy();
   SALAMANDER::AuxAccumulator accumulator = SALAMANDER::AuxAccumulator(_fe_problem, _var_name);
-  for (auto & ray : _banked_rays)
+  for (auto & ray : _banked_particles)
   {
     accumulator.add(*ray->currentElem(), ray->currentPoint(), 1);
   }

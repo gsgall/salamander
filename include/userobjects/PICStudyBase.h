@@ -16,8 +16,8 @@
 #pragma once
 
 #include "RayTracingStudy.h"
-
 #include "ParticleInitializerBase.h"
+
 class ParticleStepperBase;
 class ParticleInitializerBase;
 
@@ -38,7 +38,7 @@ public:
 
 protected:
   /// The banked rays to be used on the next timestep (restartable)
-  std::vector<std::shared_ptr<Ray>> & _banked_rays;
+  std::vector<std::shared_ptr<Ray>> & _banked_particles;
 
   virtual void postExecuteStudy() override;
   /// Ray data for storing velocity components
@@ -84,7 +84,8 @@ protected:
    *  Method that users should override for their custom particle initialization
    *  This is only called when the study first starts up
    */
-  virtual void initializeParticles() = 0;
+  virtual void initializeParticles();
+  virtual std::shared_ptr<Ray> createParticle(const InitialParticleData & data);
   /**
    * Method that defines how to reuse particles this will be called on
    * every step after the initialization has been called
@@ -92,7 +93,7 @@ protected:
   virtual void reinitializeParticles();
 
   virtual void setInitialParticleData(std::shared_ptr<Ray> & ray, const InitialParticleData & data);
-
+  
 private:
   /// Whether or not we've generated rays yet (restartable)
   bool & _has_generated;

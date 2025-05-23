@@ -13,8 +13,10 @@
 //* ALL RIGHTS RESERVED
 //*
 
+#include "MooseError.h"
 #include "PICStudyBase.h"
 #include "ParticleStepperBase.h"
+#include <algorithm>
 
 InputParameters
 PICStudyBase::validParams()
@@ -39,8 +41,8 @@ PICStudyBase::validParams()
 
 PICStudyBase::PICStudyBase(const InputParameters & parameters)
   : RayTracingStudy(parameters),
-    _banked_rays(
-        declareRestartableDataWithContext<std::vector<std::shared_ptr<Ray>>>("_banked_rays", this)),
+    _banked_particles(
+        declareRestartableDataWithContext<std::vector<std::shared_ptr<Ray>>>("_banked_particles", this)),
     _v_x_index(registerRayData("v_x")),
     _v_y_index(registerRayData("v_y")),
     _v_z_index(registerRayData("v_z")),
@@ -73,16 +75,51 @@ PICStudyBase::generateRays()
   {
     reinitializeParticles();
     // Add the rays to be traced
-    moveRaysToBuffer(_banked_rays);
-    _banked_rays.clear();
+    moveRaysToBuffer(_banked_particles);
+    _banked_particles.clear();
   }
+}
+
+
+std::shared_ptr<Ray>
+PICStudyBase::createParticle(const InitialParticleData & data)
+{
+  auto ray = acquireRay();
+  setInitialParticleData(ray, data);
+  getVelocity(*ray, _temporary_velocity);
+  _stepper.setupStep(
+      *ray, _temporary_velocity, ray->data(_charge_index) / ray->data(_mass_index));
+  setVelocity(*ray, _temporary_velocity);
+  return ray;
+}
+
+void 
+PICStudyBase::initializeParticles()
+{
+  std::vector<InitialParticleData> initial_data; 
+  // collect all of the data for all the various types of particles that will exist
+  for (const auto initializer : _initializers)
+  {
+    const auto temporary_data = initializer->getParticleData();
+    initial_data.insert(initial_data.end(), temporary_data.begin(), temporary_data.end()); 
+  }
+  // if this processor doesn't have any paricles we don't need to do anything else
+  if (initial_data.size() == 0)
+    return;
+  _banked_particles.resize(initial_data.size());
+
+  for (unsigned int i = 0; i < initial_data.size(); ++i)
+  {
+    _banked_particles[i] = createParticle(initial_data[i]);
+  }
+  moveRaysToBuffer(_banked_particles);
 }
 
 void
 PICStudyBase::reinitializeParticles()
 {
   // Reset each ray
-  for (auto & ray : _banked_rays)
+  for (auto & ray : _banked_particles)
   {
     // Store off the ray's info before we reset it
     const auto elem = ray->currentElem();
@@ -108,10 +145,10 @@ PICStudyBase::postExecuteStudy()
 {
   // we are going to be re using the same rays which just took a step so
   // we store them here to reset them in the generateRays method
-  _banked_rays = rayBank();
+  _banked_particles = rayBank();
   // removing all of the rays which were killed during their tracing
-  _banked_rays.erase(std::remove_if(_banked_rays.begin(),
-                                    _banked_rays.end(),
+  _banked_particles.erase(std::remove_if(_banked_particles.begin(),
+                                    _banked_particles.end(),
                                     [](const std::shared_ptr<Ray> & ray)
                                     {
                                       if (ray->stationary())
@@ -121,7 +158,7 @@ PICStudyBase::postExecuteStudy()
                                                  ray->maxDistance() >
                                              1e-6;
                                     }),
-                     _banked_rays.end());
+                     _banked_particles.end());
 }
 
 void
@@ -143,12 +180,13 @@ PICStudyBase::setVelocity(Ray & ray, const Point & v) const
 const std::vector<std::shared_ptr<Ray>> &
 PICStudyBase::getBankedRays() const
 {
-  return _banked_rays;
+  return _banked_particles;
 }
 
 void
 PICStudyBase::setInitialParticleData(std::shared_ptr<Ray> & ray, const InitialParticleData & data)
 {
+  mooseAssert(data.elem != nullptr, "Cannot create particle since the provided starting element is null");
   ray->setStart(data.position, data.elem);
   ray->data(_v_x_index) = data.velocity(0);
   ray->data(_v_y_index) = data.velocity(1);
