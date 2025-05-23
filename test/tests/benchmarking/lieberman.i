@@ -118,7 +118,7 @@ num_samples = ${fparse num_elem + 1}
   [study]
     type = TestInitializedPICStudy
     stepper = stepper
-    initializer = initializer
+    initializers = initializer
     always_cache_traces = true
     data_on_cache_traces = true
     particles_per_element = 1

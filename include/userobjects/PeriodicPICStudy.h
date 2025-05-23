@@ -23,10 +23,10 @@
  * assuming that element ids do not change as a function of the number processes being
  * used to solve this
  */
-class Test1DPeriodicStudy : public TestInitializedPICStudy
+class PeriodicPICStudy : public TestInitializedPICStudy
 {
 public:
-  Test1DPeriodicStudy(const InputParameters & parameters);
+  PeriodicPICStudy(const InputParameters & parameters);
 
   static InputParameters validParams();
 

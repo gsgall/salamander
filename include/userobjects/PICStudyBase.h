@@ -19,6 +19,7 @@
 
 #include "ParticleInitializerBase.h"
 class ParticleStepperBase;
+class ParticleInitializerBase;
 
 class PICStudyBase : public RayTracingStudy
 {
@@ -58,6 +59,8 @@ protected:
   /// the velocity updater object which we will hold the rules for how our
   /// particles velocities are updated
   const ParticleStepperBase & _stepper;
+  /// the actual initializers that will provide the initial particle data
+  std::vector<const ParticleInitializerBase *> _initializers;
 
   /// temporary variable used when resetting rays
   Point _temporary_velocity;
@@ -93,4 +96,6 @@ protected:
 private:
   /// Whether or not we've generated rays yet (restartable)
   bool & _has_generated;
+  /// the name of the particle initializers that will be used to place the initial particle distribution
+  const std::vector<UserObjectName> & _initializer_names;
 };

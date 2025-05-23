@@ -31,6 +31,7 @@ ParticleInitializerBase::validParams()
   params.addRequiredParam<std::vector<DistributionName>>(
       "velocity_distributions",
       "The distribution names to be sampled when initializing the velocity of each particle");
+  params.addParam<bool>("sample_velocity_magnitude", false, "Whether or not you want to sample each velocity component seperately or just sample the magnitude");
   return params;
 }
 
@@ -41,8 +42,17 @@ ParticleInitializerBase::ParticleInitializerBase(const InputParameters & paramet
     _species(getParam<std::string>("species")),
     _seed(getParam<unsigned int>("seed")),
     _mesh_dimension(_fe_problem.mesh().dimension()),
+    _sample_magnitude(getParam<bool>("sample_velocity_magnitude")),
     _distribution_names(getParam<std::vector<DistributionName>>("velocity_distributions"))
 {
+  if (_sample_magnitude)
+  {
+    if (_distribution_names.size() != 1)
+      paramError("velocity_distributions",
+                 "Only one distribution may be provided when sampling the velocity magnitude.");
+    return;
+  }
+
   if (_distribution_names.size() != 3)
     paramError("velocity_distributions",
                "You must provide 3 distributions, one for each velocity component.");

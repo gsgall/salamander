@@ -13,24 +13,25 @@
 //* ALL RIGHTS RESERVED
 //*
 
+#include "Moose.h"
 #include "MooseUtils.h"
-#include "Test1DPeriodicStudy.h"
+#include "PeriodicPICStudy.h"
 #include "ParticleStepperBase.h"
 #include "ClaimRays.h"
 #include <algorithm>
 #include <cmath>
 #include <limits>
 
-registerMooseObject("SalamanderApp", Test1DPeriodicStudy);
+registerMooseObject("SalamanderApp", PeriodicPICStudy);
 
 InputParameters
-Test1DPeriodicStudy::validParams()
+PeriodicPICStudy::validParams()
 {
   auto params = TestInitializedPICStudy::validParams();
   return params;
 }
 
-Test1DPeriodicStudy::Test1DPeriodicStudy(const InputParameters & parameters)
+PeriodicPICStudy::PeriodicPICStudy(const InputParameters & parameters)
   : TestInitializedPICStudy(parameters),
   _x_min(std::numeric_limits<float>::max()),
   _x_max(std::numeric_limits<float>::lowest()),
@@ -56,7 +57,7 @@ Test1DPeriodicStudy::Test1DPeriodicStudy(const InputParameters & parameters)
   comm().max(_x_max);
 }
 void
-Test1DPeriodicStudy::reinitializeParticles()
+PeriodicPICStudy::reinitializeParticles()
 {
   // Reset each ray
   for (auto & ray : _banked_rays)
@@ -94,7 +95,7 @@ Test1DPeriodicStudy::reinitializeParticles()
 }
 
 void
-Test1DPeriodicStudy::postExecuteStudy() {  
+PeriodicPICStudy::postExecuteStudy() {  
 
   _periodic_particles.clear(); 
   _banked_rays = rayBank(); 

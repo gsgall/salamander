@@ -74,8 +74,11 @@ protected:
   const unsigned int _seed;
   /// the dimension of the finite element mesh
   const Real _mesh_dimension;
+  /// whether or not the initializer will sample the velocity magnitude or components seperately
+  const bool _sample_magnitude;
   /// the distributions that will be used for set the initial particle velocities
   std::vector<Distribution const *> _velocity_distributions;
   /// Velocity distribution names
   const std::vector<DistributionName> & _distribution_names;
+
 };

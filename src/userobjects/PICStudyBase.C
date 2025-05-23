@@ -28,6 +28,8 @@ PICStudyBase::validParams()
       "stepper",
       "The ParticleStepper UserObject that has the rules for how particle"
       "velocities should be updated");
+  params.addRequiredParam<std::vector<UserObjectName>>("initializers",
+                                          "The initializer that will place particles");
   // We're not going to use registration because we don't care to name our rays because
   // we will have a lot of them
   params.set<bool>("_use_ray_registration") = false;
@@ -47,8 +49,14 @@ PICStudyBase::PICStudyBase(const InputParameters & parameters)
     _mass_index(registerRayData("mass")),
     _species_index(registerRayData("species")),
     _stepper(getUserObject<ParticleStepperBase>("stepper")),
-    _has_generated(declareRestartableData<bool>("has_generated", false))
+    _has_generated(declareRestartableData<bool>("has_generated", false)),
+    _initializer_names(getParam<std::vector<UserObjectName>>("initializers"))
+
 {
+  if (_initializer_names.empty())
+    paramError("intializers", "At least one initializer must be provided"); 
+  for (const auto name : _initializer_names) 
+    _initializers.push_back(&getUserObjectByName<ParticleInitializerBase>(name));
 }
 
 void

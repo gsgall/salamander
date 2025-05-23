@@ -101,7 +101,7 @@
   [study]
     type = TestInitializedPICStudy
     stepper = stepper
-    initializer = initializer
+    initializers = initializer
     use_custom_rayids = false
     always_cache_traces = true
     data_on_cache_traces = true

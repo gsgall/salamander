@@ -13,7 +13,7 @@
 //* ALL RIGHTS RESERVED
 //*
 
-#include "Test1DPeriodicStudy.h"
+#include "PeriodicPICStudy.h"
 #include "PICStudyBase.h"
 #include "TestPeriodicParticleDataVectorPostprocessor.h"
 
@@ -29,7 +29,7 @@ TestPeriodicParticleDataVectorPostprocessor::validParams()
 TestPeriodicParticleDataVectorPostprocessor::TestPeriodicParticleDataVectorPostprocessor(
     const InputParameters & parameters)
   : ParticleDataVectorPostprocessor(parameters), 
-  _periodic_study(getUserObject<Test1DPeriodicStudy>("study")),
+  _periodic_study(getUserObject<PeriodicPICStudy>("study")),
   _additional_output_count(getParam<std::vector<std::string>>("additional_ray_data_outputs").size())
 {
 }

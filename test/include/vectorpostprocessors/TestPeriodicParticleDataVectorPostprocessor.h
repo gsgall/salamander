@@ -15,7 +15,8 @@
 
 #pragma once
 #include "ParticleDataVectorPostprocessor.h"
-#include "Test1DPeriodicStudy.h"
+
+class PeriodicPICStudy;
 
 class TestPeriodicParticleDataVectorPostprocessor : public ParticleDataVectorPostprocessor
 {
@@ -36,6 +37,6 @@ public:
   virtual void finalize() override;
 
 protected:
-  const Test1DPeriodicStudy & _periodic_study; 
+  const PeriodicPICStudy & _periodic_study; 
   const unsigned int _additional_output_count;
 };

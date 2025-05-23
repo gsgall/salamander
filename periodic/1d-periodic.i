@@ -25,13 +25,12 @@
   []
 
   [study]
-    type = Test1DPeriodicStudy
+    type = PeriodicPICStudy
     stepper = stepper
     initializers = initializer
     use_custom_rayids = false
     always_cache_traces = true
     data_on_cache_traces = true
-    verify_rays = false
     execute_on = 'TIMESTEP_BEGIN'
   []
 []
@@ -77,12 +76,6 @@
 []
 
 [Outputs]
-  # [rays]
-  #   type = RayTracingExodus
-  #   study = study
-  #   output_data = true
-  #   execute_on = 'TIMESTEP_END'
-  # []
   [particle_data]
     type = CSV
     execute_on = 'TIMESTEP_END'

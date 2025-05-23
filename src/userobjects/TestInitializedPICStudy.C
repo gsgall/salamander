@@ -40,15 +40,10 @@ TestInitializedPICStudy::validParams()
 
 TestInitializedPICStudy::TestInitializedPICStudy(const InputParameters & parameters)
   : PICStudyBase(parameters),
-    _initializer_names(getParam<std::vector<UserObjectName>>("initializers")),
     _use_custom_id_scheme(getParam<bool>("use_custom_rayids")),
     _particles_per_element(getParam<unsigned int>("particles_per_element")),
     _curr_elem_id(0)
 {
-  if (_initializer_names.empty())
-    paramError("intializers", "At least one initializer must be provided"); 
-  for (const auto name : _initializer_names) 
-    _initializer.push_back(&getUserObjectByName<ParticleInitializerBase>(name));
   if (_use_custom_id_scheme && _particles_per_element == 0)
     paramError(
         "particles_per_element",
@@ -59,7 +54,7 @@ void
 TestInitializedPICStudy::initializeParticles()
 {
   std::vector<InitialParticleData> initial_data; 
-  for (const auto initializer : _initializer)
+  for (const auto initializer : _initializers)
   {
     const auto temporary_data = initializer->getParticleData();
     initial_data.insert(initial_data.end(), temporary_data.begin(), temporary_data.end()); 
