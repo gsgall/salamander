@@ -86,6 +86,7 @@ Extensions:
               MOOSE FAQ page: https://mooseframework.inl.gov/help/faq/index.html
               MOOSE Discussion Forum: https://github.com/idaholab/moose/discussions
     MooseDocs.extensions.appsyntax:
+        active: false
         executable: ${ROOT_DIR}
         remove:
             framework: !include ${MOOSE_DIR}/framework/doc/remove.yml
