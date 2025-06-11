@@ -1,4 +1,5 @@
-//* This file is part of SALAMANDER: Software for Advanced Large-scale Analysis of MAgnetic confinement for Numerical Design, Engineering & Research,
+//* This file is part of SALAMANDER: Software for Advanced Large-scale Analysis of MAgnetic
+// confinement for Numerical Design, Engineering & Research,
 //* A multiphysics application for modeling plasma facing components
 //* https://github.com/idaholab/salamander
 //* https://mooseframework.inl.gov/salamander
@@ -31,7 +32,7 @@ PICStudyBase::validParams()
       "The ParticleStepper UserObject that has the rules for how particle"
       "velocities should be updated");
   params.addRequiredParam<std::vector<UserObjectName>>("initializers",
-                                          "The initializer that will place particles");
+                                                       "The initializer that will place particles");
   // We're not going to use registration because we don't care to name our rays because
   // we will have a lot of them
   params.set<bool>("_use_ray_registration") = false;
@@ -41,8 +42,8 @@ PICStudyBase::validParams()
 
 PICStudyBase::PICStudyBase(const InputParameters & parameters)
   : RayTracingStudy(parameters),
-    _banked_particles(
-        declareRestartableDataWithContext<std::vector<std::shared_ptr<Ray>>>("_banked_particles", this)),
+    _banked_particles(declareRestartableDataWithContext<std::vector<std::shared_ptr<Ray>>>(
+        "_banked_particles", this)),
     _v_x_index(registerRayData("v_x")),
     _v_y_index(registerRayData("v_y")),
     _v_z_index(registerRayData("v_z")),
@@ -56,8 +57,8 @@ PICStudyBase::PICStudyBase(const InputParameters & parameters)
 
 {
   if (_initializer_names.empty())
-    paramError("intializers", "At least one initializer must be provided"); 
-  for (const auto name : _initializer_names) 
+    paramError("intializers", "At least one initializer must be provided");
+  for (const auto name : _initializer_names)
     _initializers.push_back(&getUserObjectByName<ParticleInitializerBase>(name));
 }
 
@@ -80,28 +81,26 @@ PICStudyBase::generateRays()
   }
 }
 
-
 std::shared_ptr<Ray>
 PICStudyBase::createParticle(const InitialParticleData & data)
 {
   auto ray = acquireRay();
   setInitialParticleData(ray, data);
   getVelocity(*ray, _temporary_velocity);
-  _stepper.setupStep(
-      *ray, _temporary_velocity, ray->data(_charge_index) / ray->data(_mass_index));
+  _stepper.setupStep(*ray, _temporary_velocity, ray->data(_charge_index) / ray->data(_mass_index));
   setVelocity(*ray, _temporary_velocity);
   return ray;
 }
 
-void 
+void
 PICStudyBase::initializeParticles()
 {
-  std::vector<InitialParticleData> initial_data; 
+  std::vector<InitialParticleData> initial_data;
   // collect all of the data for all the various types of particles that will exist
   for (const auto initializer : _initializers)
   {
     const auto temporary_data = initializer->getParticleData();
-    initial_data.insert(initial_data.end(), temporary_data.begin(), temporary_data.end()); 
+    initial_data.insert(initial_data.end(), temporary_data.begin(), temporary_data.end());
   }
   // if this processor doesn't have any paricles we don't need to do anything else
   if (initial_data.size() == 0)
@@ -148,17 +147,17 @@ PICStudyBase::postExecuteStudy()
   _banked_particles = rayBank();
   // removing all of the rays which were killed during their tracing
   _banked_particles.erase(std::remove_if(_banked_particles.begin(),
-                                    _banked_particles.end(),
-                                    [](const std::shared_ptr<Ray> & ray)
-                                    {
-                                      if (ray->stationary())
-                                        return false;
+                                         _banked_particles.end(),
+                                         [](const std::shared_ptr<Ray> & ray)
+                                         {
+                                           if (ray->stationary())
+                                             return false;
 
-                                      return std::abs(ray->distance() - ray->maxDistance()) /
-                                                 ray->maxDistance() >
-                                             1e-6;
-                                    }),
-                     _banked_particles.end());
+                                           return std::abs(ray->distance() - ray->maxDistance()) /
+                                                      ray->maxDistance() >
+                                                  1e-6;
+                                         }),
+                          _banked_particles.end());
 }
 
 void
@@ -167,6 +166,16 @@ PICStudyBase::getVelocity(const Ray & ray, Point & v) const
   v(0) = ray.data(_v_x_index);
   v(1) = ray.data(_v_y_index);
   v(2) = ray.data(_v_z_index);
+}
+
+Point
+PICStudyBase::getVelocity(const std::shared_ptr<Ray> ray) const
+{
+  Point v;
+  v(0) = ray->data(_v_x_index);
+  v(1) = ray->data(_v_y_index);
+  v(2) = ray->data(_v_z_index);
+  return v;
 }
 
 void
@@ -180,7 +189,8 @@ PICStudyBase::setVelocity(Ray & ray, const Point & v) const
 void
 PICStudyBase::setInitialParticleData(std::shared_ptr<Ray> & ray, const InitialParticleData & data)
 {
-  mooseAssert(data.elem != nullptr, "Cannot create particle since the provided starting element is null");
+  mooseAssert(data.elem != nullptr,
+              "Cannot create particle since the provided starting element is null");
   ray->setStart(data.position, data.elem);
   ray->data(_v_x_index) = data.velocity(0);
   ray->data(_v_y_index) = data.velocity(1);

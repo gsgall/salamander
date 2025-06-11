@@ -34,7 +34,6 @@ charge_density = 0
   []
 []
 
-
 [AuxVariables]
   [dump_value]
   []
@@ -75,7 +74,7 @@ charge_density = 0
     stepper = stepper
     always_cache_traces = true
     data_on_cache_traces = true
-    execute_on=TIMESTEP_BEGIN
+    execute_on = TIMESTEP_BEGIN
   []
 
   [potential_accumulator]
@@ -92,7 +91,6 @@ charge_density = 0
   []
 []
 
-
 [RayKernels]
   [null]
     type = NullRayKernel
@@ -105,7 +103,6 @@ charge_density = 0
     expression = ${charge_density}
   []
 []
-
 
 [Postprocessors]
   [potential_l2]

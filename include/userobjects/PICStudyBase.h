@@ -1,4 +1,5 @@
-//* This file is part of SALAMANDER: Software for Advanced Large-scale Analysis of MAgnetic confinement for Numerical Design, Engineering & Research,
+//* This file is part of SALAMANDER: Software for Advanced Large-scale Analysis of MAgnetic
+// confinement for Numerical Design, Engineering & Research,
 //* A multiphysics application for modeling plasma facing components
 //* https://github.com/idaholab/salamander
 //* https://mooseframework.inl.gov/salamander
@@ -75,6 +76,7 @@ protected:
    * @param v the point where the rays velocity will be stored
    */
   void getVelocity(const Ray & ray, Point & v) const;
+  Point getVelocity(const std::shared_ptr<Ray> ray) const;
 
   /**
    * Method for updating the rays velocity data given a new velocity
@@ -96,7 +98,7 @@ protected:
   virtual void reinitializeParticles();
 
   virtual void setInitialParticleData(std::shared_ptr<Ray> & ray, const InitialParticleData & data);
-  
+
 private:
   /// Whether or not we've generated rays yet (restartable)
   bool & _has_generated;

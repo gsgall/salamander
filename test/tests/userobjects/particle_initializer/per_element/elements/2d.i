@@ -7,7 +7,7 @@
     nx = 10
     ny = 10
     xmax = 1
-    ymax=1
+    ymax = 1
   []
   allow_renumbering = false
 []
