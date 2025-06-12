@@ -1,4 +1,5 @@
-//* This file is part of SALAMANDER: Software for Advanced Large-scale Analysis of MAgnetic confinement for Numerical Design, Engineering & Research,
+//* This file is part of SALAMANDER: Software for Advanced Large-scale Analysis of MAgnetic
+// confinement for Numerical Design, Engineering & Research,
 //* A multiphysics application for modeling plasma facing components
 //* https://github.com/idaholab/salamander
 //* https://mooseframework.inl.gov/salamander
@@ -82,8 +83,19 @@ PerElementParticleInitializer::getParticleData() const
       data[particle_index].charge = _charge;
       data[particle_index].position = physical_points[i];
       data[particle_index].velocity = Point();
-      for (const auto i : make_range(uint(3)))
-        data[particle_index].velocity(i) = _velocity_distributions[i]->quantile(generator.rand());
+
+      Real speed = _velocity_distributions[0]->quantile(generator.rand()) + 1e-3;
+      Real cos_chi = 2 * generator.rand() - 1;
+      Real sin_chi = std::sqrt(1 - cos_chi * cos_chi);
+      Real eps = 2 * M_PI * generator.rand();
+
+      data[particle_index].velocity(0) = speed * cos_chi;
+      data[particle_index].velocity(1) = speed * sin_chi * std::cos(eps);
+      data[particle_index].velocity(2) = speed * sin_chi * std::sin(eps);
+
+      //      for (const auto i : make_range(uint(3)))
+      //        data[particle_index].velocity(i) =
+      // data[particle_index].velocity(i) = _velocity_distributions[i]->quantile(generator.rand());
     }
     elem_count++;
   }

@@ -45,13 +45,16 @@ CollisionalPICStudy::postExecuteStudy()
   PICStudyBase::postExecuteStudy();
 
   unsigned int elem_idx;
+  std::vector<unsigned int> elem_ids;
+  for (const auto elem : *_fe_problem.mesh().getActiveLocalElementRange())
+    elem_ids.push_back(elem->id());
   // collect all of the particles in each element
   for (const auto i : make_range(_banked_particles.size()))
   {
     elem_idx = 0;
-    for (const auto elem : *_fe_problem.mesh().getActiveLocalElementRange())
+    for (const auto id : elem_ids)
     {
-      if (elem == _banked_particles[i]->currentElem())
+      if (id == _banked_particles[i]->currentElem()->id())
       {
         _particle_indicies[elem_idx].push_back(i);
         break;
@@ -60,29 +63,16 @@ CollisionalPICStudy::postExecuteStudy()
     }
   }
 
-  Real sigma_cr_max = 0;
-  Real sigma_cr_temp = 0;
+  // this assumes maxwell molecules with
+  // a cross section of 1
+  Real sigma_cr_max = _cross_section;
+  Real sigma_cr_temp = _cross_section;
   unsigned int index_1, index_2;
   Point v1, v2;
   for (auto & indicies : _particle_indicies)
   {
     if (indicies.size() < 2)
       continue;
-
-    for (const auto i : indicies)
-    {
-      for (const auto j : indicies)
-      {
-        if (i == j)
-          continue;
-
-        sigma_cr_temp =
-            (getVelocity(_banked_particles[i]) - getVelocity(_banked_particles[j])).norm() *
-            _cross_section;
-        if (sigma_cr_temp > sigma_cr_max)
-          sigma_cr_max = sigma_cr_temp;
-      }
-    }
 
     auto volume = _banked_particles[indicies.front()]->currentElem()->volume();
     // for now we are assuming a constant particle weight
@@ -91,15 +81,14 @@ CollisionalPICStudy::postExecuteStudy()
 
     unsigned int pairs = 0.5 * indicies.size() * indicies.size() * sigma_cr_max * Fn * _dt / volume;
 
-    unsigned int collision_count = 0;
-    for (const auto i : make_range(pairs))
+    for (const auto i [[maybe_unused]] : make_range(pairs))
     {
-      index_1 = (indicies.size() * _generator.rand());
+      index_1 = indicies[(unsigned int)(indicies.size() * _generator.rand())];
       do
       {
-        index_2 = (indicies.size()) * _generator.rand();
+        index_2 = indicies[(unsigned int)(indicies.size() * _generator.rand())];
       } while (index_1 == index_2);
-
+      // convert from indicies index to _banked_particles index
       Point v1 = getVelocity(_banked_particles[index_1]);
       Real m1 = _banked_particles[index_1]->data(_mass_index);
 
@@ -109,7 +98,9 @@ CollisionalPICStudy::postExecuteStudy()
       Point cr = v1 - v2;
       Real cr_mag = cr.norm();
       Point cm = (m1 * v1 + m2 * v2) / (m1 + m2);
-      sigma_cr_temp = cr.norm() * _cross_section;
+      // we are getting setting this to the same as the cross section
+      // this will assume maxwell molecules
+      // sigma_cr_temp = cr.norm() * _cross_section;
 
       if (sigma_cr_temp / sigma_cr_max < _generator.rand())
         continue;
@@ -127,10 +118,7 @@ CollisionalPICStudy::postExecuteStudy()
 
       setVelocity(*_banked_particles[index_1], v1);
       setVelocity(*_banked_particles[index_2], v2);
-
-      collision_count++;
     }
-    std::cout << "Collision Frequency " << collision_count / (indicies.size() * _dt) << std::endl;
 
     // clear all of the particle indicies ones we
     // have collided all of the particles in the element
