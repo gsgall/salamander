@@ -1,9 +1,16 @@
 # the number of computational particles to be put in each element
-particles_per_element = 5e4
+particles_per_element = 1e3
 # the analytic solution for the charge density
 # set by cli args for each case since it is needed by all
 # tests but changes based on the dimension of the problem
 number_density = 1
+
+m = 6.6e-26
+k_B = 1.380649e-23
+T_x = 373
+T_yz = 273
+sigma_x = '${fparse sqrt(k_B * T_x / m)}'
+sigma_yz = '${fparse sqrt(k_B * T_yz / m)}'
 
 [Problem]
   solve = false
@@ -13,40 +20,40 @@ number_density = 1
   [gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 1
-    ny = 2
-    xmax = 1
-    ymax = 1
+    nx = 20
+    ny = 20
+    xmax = 1e6
+    ymax = 1e6
   []
   allow_renumbering = false
 []
 
 [Distributions]
-  [zero]
-    type = Constant
-    value = 0
+  [v_x]
+    type = Normal
+    mean = 0
+    standard_deviation = '${sigma_x}'
   []
-
-  [uniform]
-    type = Uniform
-    lower_bound = -0.5
-    upper_bound = 0.5
+  [v_yz]
+    type = Normal
+    mean = 0
+    standard_deviation = '${sigma_yz}'
   []
 []
 
 [UserObjects]
   [stepper]
-    # type = TestSimpleStepper
-    type = TestStationaryStepper
+    type = TestSimpleStepper
+    # type = TestStationaryStepper
   []
 
   [initializer]
     type = PerElementParticleInitializer
-    mass = 1
+    mass = ${m}
     charge = 1
     number_density = ${number_density}
     particles_per_element = ${particles_per_element}
-    velocity_distributions = 'uniform uniform uniform'
+    velocity_distributions = 'v_x v_yz v_yz'
   []
 
   [study]
@@ -83,9 +90,14 @@ number_density = 1
   []
 []
 [VectorPostprocessors]
-  [particles]
-    type = ParticleDataVectorPostprocessor
+  [velocities]
+    type = ParticleVelocityVectorPostprocessor
     study = study
+  []
+  [distribution]
+    type = HistogramVectorPostprocessor
+    num_bins = 40
+    vpp = velocities
   []
 []
 
@@ -94,11 +106,14 @@ number_density = 1
   dt = 1e-2
   # dt = 1e-10
   # num_steps = 1
-  num_steps = 101
+  num_steps = 1000
 []
 
 [Outputs]
   exodus = false
-  csv = true
-  interval = 100
+  [csv]
+    type = CSV
+    show = 'distribution particle_count'
+  []
+  interval = 10
 []

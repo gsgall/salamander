@@ -52,7 +52,10 @@ ParticleDataVectorPostprocessor::ParticleDataVectorPostprocessor(const InputPara
       getParam<std::vector<std::string>>("additional_ray_data_outputs");
 
   if (additional_ray_data.empty())
-    return;
+  {
+    _data_values.push_back(&declareVector("elem_id"));
+  }
+  return;
 
   const auto & additional_data_indicies = _study.getRayDataIndices(additional_ray_data);
   _ray_data_indices.insert(
@@ -60,6 +63,8 @@ ParticleDataVectorPostprocessor::ParticleDataVectorPostprocessor(const InputPara
 
   for (const auto & data_name : additional_ray_data)
     _data_values.push_back(&declareVector(data_name));
+
+  _data_values.push_back(&declareVector("elem_id"));
 }
 
 void
@@ -85,7 +90,10 @@ ParticleDataVectorPostprocessor::execute()
       _data_values[i]->push_back(point(i - 2));
 
     for (const auto i : make_range(5, int(5 + _ray_data_indices.size())))
+    {
       _data_values[i]->push_back(ray->data(_ray_data_indices[i - 5]));
+    }
+    _data_values[5 + _ray_data_indices.size()]->push_back(ray->currentElem()->id());
   }
 }
 
