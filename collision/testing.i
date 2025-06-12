@@ -20,8 +20,8 @@ sigma_yz = '${fparse sqrt(k_B * T_yz / m)}'
   [gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 20
-    ny = 20
+    nx = 90
+    ny = 90
     xmax = 1e6
     ymax = 1e6
   []
@@ -43,8 +43,8 @@ sigma_yz = '${fparse sqrt(k_B * T_yz / m)}'
 
 [UserObjects]
   [stepper]
-    type = TestSimpleStepper
-    # type = TestStationaryStepper
+    # type = TestSimpleStepper
+    type = TestStationaryStepper
   []
 
   [initializer]
@@ -96,7 +96,7 @@ sigma_yz = '${fparse sqrt(k_B * T_yz / m)}'
   []
   [distribution]
     type = HistogramVectorPostprocessor
-    num_bins = 40
+    num_bins = 30
     vpp = velocities
   []
 []
