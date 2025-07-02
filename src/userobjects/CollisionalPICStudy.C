@@ -16,6 +16,7 @@
 
 #include "CollisionalPICStudy.h"
 #include "MooseRandom.h"
+#include "RankTwoTensor.h"
 
 registerMooseObject("SalamanderApp", CollisionalPICStudy);
 
@@ -40,7 +41,6 @@ CollisionalPICStudy::CollisionalPICStudy(const InputParameters & parameters)
 void
 CollisionalPICStudy::postExecuteStudy()
 {
-
   // clears all of rays that are dead
   PICStudyBase::postExecuteStudy();
 
@@ -75,12 +75,16 @@ CollisionalPICStudy::postExecuteStudy()
       continue;
 
     auto volume = _banked_particles[indicies.front()]->currentElem()->volume();
-    // for now we are assuming a constant particle weight
-    // Fn is birds notation
+    //  for now we are assuming a constant particle weight
+    //  Fn is birds notation
     auto Fn = _banked_particles[indicies.front()]->data(_weight_index);
+    //    Real temp_pairs = 0.5 * indicies.size() * indicies.size() * sigma_cr_max * Fn * _dt /
+    //    volume +
+    //                      _generator.rand();
+    Real temp_pairs =
+        0.5 * indicies.size() * indicies.size() * sigma_cr_max * Fn * _dt / volume + 0.5;
 
-    unsigned int pairs = 0.5 * indicies.size() * indicies.size() * sigma_cr_max * Fn * _dt / volume;
-
+    unsigned int pairs = temp_pairs;
     for (const auto i [[maybe_unused]] : make_range(pairs))
     {
       index_1 = indicies[(unsigned int)(indicies.size() * _generator.rand())];
@@ -89,6 +93,7 @@ CollisionalPICStudy::postExecuteStudy()
         index_2 = indicies[(unsigned int)(indicies.size() * _generator.rand())];
       } while (index_1 == index_2);
       // convert from indicies index to _banked_particles index
+
       Point v1 = getVelocity(_banked_particles[index_1]);
       Real m1 = _banked_particles[index_1]->data(_mass_index);
 

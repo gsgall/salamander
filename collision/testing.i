@@ -1,5 +1,5 @@
 # the number of computational particles to be put in each element
-particles_per_element = 1e3
+particles_per_element = 4e2
 # the analytic solution for the charge density
 # set by cli args for each case since it is needed by all
 # tests but changes based on the dimension of the problem
@@ -12,6 +12,7 @@ T_yz = 273
 sigma_x = '${fparse sqrt(k_B * T_x / m)}'
 sigma_yz = '${fparse sqrt(k_B * T_yz / m)}'
 
+seed = 9182374
 [Problem]
   solve = false
 []
@@ -20,8 +21,8 @@ sigma_yz = '${fparse sqrt(k_B * T_yz / m)}'
   [gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 90
-    ny = 90
+    nx = 100
+    ny = 100
     xmax = 1e6
     ymax = 1e6
   []
@@ -43,8 +44,8 @@ sigma_yz = '${fparse sqrt(k_B * T_yz / m)}'
 
 [UserObjects]
   [stepper]
-    # type = TestSimpleStepper
-    type = TestStationaryStepper
+    type = TestSimpleStepper
+    # type = TestStationaryStepper
   []
 
   [initializer]
@@ -53,7 +54,8 @@ sigma_yz = '${fparse sqrt(k_B * T_yz / m)}'
     charge = 1
     number_density = ${number_density}
     particles_per_element = ${particles_per_element}
-    velocity_distributions = 'v_x v_yz v_yz'
+    velocity_distributions = 'v_yz v_yz v_x'
+    seed = ${seed}
   []
 
   [study]
@@ -76,7 +78,7 @@ sigma_yz = '${fparse sqrt(k_B * T_yz / m)}'
 
 [RayBCs]
   [walls]
-    type = ReflectRayBC
+    type = ReflectParticleBC
     boundary = 'left right top bottom'
   []
 []
@@ -96,7 +98,7 @@ sigma_yz = '${fparse sqrt(k_B * T_yz / m)}'
   []
   [distribution]
     type = HistogramVectorPostprocessor
-    num_bins = 30
+    num_bins = 250
     vpp = velocities
   []
 []
@@ -105,8 +107,8 @@ sigma_yz = '${fparse sqrt(k_B * T_yz / m)}'
   type = Transient
   dt = 1e-2
   # dt = 1e-10
-  # num_steps = 1
-  num_steps = 1000
+  # num_steps = 2
+  num_steps = 100
 []
 
 [Outputs]
@@ -115,5 +117,5 @@ sigma_yz = '${fparse sqrt(k_B * T_yz / m)}'
     type = CSV
     show = 'distribution particle_count'
   []
-  interval = 10
+  interval = 5
 []
