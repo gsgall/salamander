@@ -1,4 +1,5 @@
-//* This file is part of SALAMANDER: Software for Advanced Large-scale Analysis of MAgnetic confinement for Numerical Design, Engineering & Research,
+//* This file is part of SALAMANDER: Software for Advanced Large-scale Analysis of MAgnetic
+// confinement for Numerical Design, Engineering & Research,
 //* A multiphysics application for modeling plasma facing components
 //* https://github.com/idaholab/salamander
 //* https://mooseframework.inl.gov/salamander
@@ -24,7 +25,6 @@ class PICStudyBase : public RayTracingStudy
 {
 public:
   PICStudyBase(const InputParameters & parameters);
-
   static InputParameters validParams();
 
   virtual void generateRays() override;
@@ -34,6 +34,8 @@ public:
    * useful for looking at the rays data if needed by another object
    */
   const std::vector<std::shared_ptr<Ray>> & getBankedRays() const;
+
+  virtual void execute() override;
 
 protected:
   /// The banked rays to be used on the next timestep (restartable)
@@ -61,6 +63,13 @@ protected:
 
   /// temporary variable used when resetting rays
   Point _temporary_velocity;
+
+  /// the tag for the residual to which a current density source is being contributed
+  const TagName & _residual_tag_name;
+  /// whether or not the particles have already been traced
+  bool & _has_traced;
+  /// whether or not the study needs to contribute a current density source to residuals
+  bool & _calculate_current_density;
   /**
    * Method for getting a rays velocity as a vector
    * Each component is retrieved from ray data and given
