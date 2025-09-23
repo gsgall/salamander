@@ -16,6 +16,7 @@
 
 #include "PICStudyBase.h"
 #include "ParticleStepperBase.h"
+#include "ParticleInitializerBase.h"
 #include "libmesh/int_range.h"
 
 InputParameters
@@ -30,6 +31,8 @@ PICStudyBase::validParams()
       "stepper",
       "The ParticleStepper UserObject that has the rules for how particle"
       "velocities should be updated");
+  params.addRequiredParam<std::vector<UserObjectName>>("initializers",
+                                                       "The initializer that will place particles");
   // We're not going to use registration because we don't care to name our rays because
   // we will have a lot of them
   params.set<bool>("_use_ray_registration") = false;
@@ -51,6 +54,11 @@ PICStudyBase::PICStudyBase(const InputParameters & parameters)
     _stepper(getUserObject<ParticleStepperBase>("stepper")),
     _has_generated(declareRestartableData<bool>("has_generated", false))
 {
+  const auto & initializer_names = getParam<std::vector<UserObjectName>>("initializers");
+  if (initializer_names.empty())
+    paramError("intializers", "At least one initializer must be provided");
+  for (const auto name : initializer_names)
+    _initializers.push_back(&getUserObjectByName<ParticleInitializerBase>(name));
 }
 
 void
