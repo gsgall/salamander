@@ -81,6 +81,40 @@ PICStudyBase::generateRays()
 }
 
 void
+PICStudyBase::initializeParticles()
+{
+  std::vector<InitialParticleData> initial_data;
+  // collect all of the data for all the various types of particles that will exist
+  for (const auto & initializer : _initializers)
+  {
+    const auto temporary_data = initializer->getParticleData();
+    initial_data.insert(initial_data.end(), temporary_data.begin(), temporary_data.end());
+  }
+  // if this processor doesn't have any paricles we don't need to do anything else
+  if (initial_data.empty())
+    return;
+
+  _banked_rays.resize(initial_data.size());
+
+  for (unsigned int i = 0; i < initial_data.size(); ++i)
+  {
+    _banked_rays[i] = createParticle(initial_data[i]);
+  }
+  moveRaysToBuffer(_banked_rays);
+}
+
+std::shared_ptr<Ray>
+PICStudyBase::createParticle(const InitialParticleData & data)
+{
+  auto ray = acquireRay();
+  setInitialParticleData(ray, data);
+  getVelocity(*ray, _temporary_velocity);
+  _stepper.setupStep(*ray, _temporary_velocity, ray->data(_charge_index) / ray->data(_mass_index));
+  setVelocity(*ray, _temporary_velocity);
+  return ray;
+}
+
+void
 PICStudyBase::reinitializeParticles()
 {
   // Reset each ray

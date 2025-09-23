@@ -61,6 +61,7 @@
                     1 0 0
                     1 0 0'
     velocity_initializer = 'velocity_initializer'
+    species = "test"
   []
 
   [study]
