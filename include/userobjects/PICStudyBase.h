@@ -95,7 +95,7 @@ protected:
    *  Method that users should override for their custom particle initialization
    *  This is only called when the study first starts up
    */
-  virtual void initializeParticles() = 0;
+  virtual void initializeParticles();
   /**
    * Method that defines how to reuse particles this will be called on
    * every step after the initialization has been called
@@ -108,6 +108,8 @@ protected:
    * @param data the initial particle data that will be given to the day
    */
   virtual void setInitialParticleData(std::shared_ptr<Ray> & ray, const InitialParticleData & data);
+
+  virtual std::shared_ptr<Ray> createParticle(const InitialParticleData & data);
 
 private:
   /// Whether or not we've generated rays yet (restartable)
