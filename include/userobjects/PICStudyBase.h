@@ -19,8 +19,9 @@
 #include "Ray.h"
 #include "RayTracingStudy.h"
 
-#include "ParticleInitializerBase.h"
+struct InitialParticleData;
 class ParticleStepperBase;
+class ParticleInitializerBase;
 
 class PICStudyBase : public RayTracingStudy
 {
@@ -47,6 +48,8 @@ public:
   const std::vector<RayDataIndex> getVelocityIndicies(const bool all_components) const;
 
 protected:
+  /// the name of the particle initializers that will be used to place the initial particle distribution
+  std::vector<const ParticleInitializerBase *> _initializers;
   /// The banked rays to be used on the next timestep (restartable)
   std::vector<std::shared_ptr<Ray>> & _banked_rays;
 

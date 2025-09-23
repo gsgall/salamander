@@ -26,8 +26,6 @@ InputParameters
 TestInitializedPICStudy::validParams()
 {
   auto params = PICStudyBase::validParams();
-  params.addRequiredParam<UserObjectName>("particle_initializer",
-                                          "The initializer that will place particles");
   params.addParam<unsigned int>(
       "particles_per_element", 0, "The number of particles that will be placed in each element");
 
@@ -41,7 +39,6 @@ TestInitializedPICStudy::validParams()
 
 TestInitializedPICStudy::TestInitializedPICStudy(const InputParameters & parameters)
   : PICStudyBase(parameters),
-    _initializer(getUserObject<ParticleInitializerBase>("particle_initializer")),
     _use_custom_id_scheme(getParam<bool>("use_custom_rayids")),
     _particles_per_element(getParam<unsigned int>("particles_per_element")),
     _curr_elem_id(0)
@@ -55,7 +52,15 @@ TestInitializedPICStudy::TestInitializedPICStudy(const InputParameters & paramet
 void
 TestInitializedPICStudy::initializeParticles()
 {
-  auto initial_data = _initializer.getParticleData();
+  std::vector<InitialParticleData> initial_data;
+  for (const auto initializer : _initializers)
+  {
+    const auto temporary_data = initializer->getParticleData();
+    initial_data.insert(initial_data.end(), temporary_data.begin(), temporary_data.end());
+  }
+
+  if (initial_data.size() == 0)
+    return;
   // if there are no rays on this processor: do nothing
   if (initial_data.size() == 0)
     return;

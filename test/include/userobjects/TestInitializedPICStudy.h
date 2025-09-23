@@ -1,4 +1,5 @@
-//* This file is part of SALAMANDER: Software for Advanced Large-scale Analysis of MAgnetic confinement for Numerical Design, Engineering & Research,
+//* This file is part of SALAMANDER: Software for Advanced Large-scale Analysis of MAgnetic
+//confinement for Numerical Design, Engineering & Research,
 //* A multiphysics application for modeling plasma facing components
 //* https://github.com/idaholab/salamander
 //* https://mooseframework.inl.gov/salamander
@@ -43,8 +44,6 @@ protected:
    * and then creates the ray objects which represent the particles
    */
   virtual void initializeParticles() override final;
-  /// the object that will supply initial data needed for rays
-  const ParticleInitializerBase & _initializer;
   /// wether or not the id generation scheme from raytracing study will be used or the one in this user object will be
   const bool _use_custom_id_scheme;
   /// the number of particles that will be placed in each element
