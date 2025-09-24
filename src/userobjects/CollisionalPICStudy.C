@@ -66,9 +66,8 @@ CollisionalPICStudy::postExecuteStudy()
     }
   }
 
-  // this assumes maxwell molecules with
-  // a cross section of 1
-  Real sigma_cr_max = *std::max(_cross_sections.begin(), _cross_sections.end());
+  // this assumes maxwell molecules
+  Real sigma_cr_max = *std::max_element(_cross_sections.begin(), _cross_sections.end());
   unsigned int index_1, index_2;
   Point v1, v2;
   for (auto & indicies : _particle_indicies)
