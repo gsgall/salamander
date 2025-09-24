@@ -18,6 +18,8 @@
 #include "ParticleStepperBase.h"
 #include "ParticleInitializerBase.h"
 #include "libmesh/int_range.h"
+#include <iterator>
+#include <unordered_set>
 
 InputParameters
 PICStudyBase::validParams()
@@ -96,9 +98,22 @@ PICStudyBase::initializeParticles()
 
   _banked_rays.resize(initial_data.size());
 
+  std::unordered_map<std::string, unsigned int> names_map;
+  for (const InitialParticleData & data : initial_data)
+  {
+    names_map.try_emplace(data.species, names_map.size());
+  }
+
+  _species_names.resize(names_map.size());
+  for (const auto & [name, idx] : names_map)
+  {
+    _species_names[idx] = name;
+  }
+
   for (unsigned int i = 0; i < initial_data.size(); ++i)
   {
     _banked_rays[i] = createParticle(initial_data[i]);
+    _banked_rays[i]->data(_species_index) = names_map.at(initial_data[i].species);
   }
   moveRaysToBuffer(_banked_rays);
 }
@@ -204,4 +219,19 @@ PICStudyBase::getVelocityIndicies(const bool all_components) const
     indicies[dim] = getRayDataIndex(std::string("v_") + (dim == 0 ? "x" : (dim == 1 ? "y" : "z")));
 
   return indicies;
+}
+
+const size_t
+PICStudyBase::speciesIdx(const std::string & species_name) const
+{
+  size_t i = 0;
+  for (const std::string & name : _species_names)
+  {
+    if (species_name == name)
+      return i;
+    i++;
+  }
+
+  mooseError("Request species id for species named " + species_name +
+             " but this species is not a PIC species");
 }

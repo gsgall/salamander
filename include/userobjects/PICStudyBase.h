@@ -47,7 +47,16 @@ public:
    */
   const std::vector<RayDataIndex> getVelocityIndicies(const bool all_components) const;
 
+  /**
+   * Method for getting the corresponding id for a given speices name
+   * Species names are stored [0, n-1] for all species that are created at the start of the
+   * simulation
+   * if the request name is not in the list then mooseError is called
+   */
+  const size_t speciesIdx(const std::string & species_name) const;
+
 protected:
+  std::vector<std::string> _species_names;
   /// the name of the particle initializers that will be used to place the initial particle distribution
   std::vector<const ParticleInitializerBase *> _initializers;
   /// The banked rays to be used on the next timestep (restartable)
