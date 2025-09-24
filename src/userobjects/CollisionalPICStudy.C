@@ -1,7 +1,7 @@
 //* This file is part of SALAMANDER: Software for Advanced Large-scale Analysis of MAgnetic
 // confinement for Numerical Design, Engineering & Research,
-//* A multiphysics application for modeling plasma facing components *
-//https://github.com/idaholab/salamander
+//* A multiphysics application for modeling plasma facing components
+//* https://github.com/idaholab/salamander
 //* https://mooseframework.inl.gov/salamander
 //*
 //* SALAMANDER is powered by the MOOSE Framework
@@ -16,20 +16,24 @@
 
 #include "CollisionalPICStudy.h"
 #include "MooseRandom.h"
+#include "RankTwoTensor.h"
 
 registerMooseObject("SalamanderApp", CollisionalPICStudy);
 
 InputParameters
 CollisionalPICStudy::validParams()
 {
-  auto params = TestInitializedPICStudy::validParams();
-  params.addRequiredParam<Real>("cross_section", "The constant cross section for collisions");
+  auto params = PICStudyBase::validParams();
+  params.addRequiredParam<std::vector<Real>>(
+      "cross_sections",
+      "The constant cross section for collisions expected to be in the form of {species0-speces0, "
+      "species1-species1, species0-species1}");
   params.addParam<unsigned int>("seed", 0, "The seed value for the random number generator");
   return params;
 }
 
 CollisionalPICStudy::CollisionalPICStudy(const InputParameters & parameters)
-  : TestInitializedPICStudy(parameters), _cross_section(getParam<Real>("cross_section"))
+  : PICStudyBase(parameters), _cross_sections(getParam<std::vector<Real>>("cross_sections"))
 {
   _generator.seed(getParam<unsigned int>("seed"));
   const auto & elem_range = *_fe_problem.mesh().getActiveLocalElementRange();
@@ -64,8 +68,7 @@ CollisionalPICStudy::postExecuteStudy()
 
   // this assumes maxwell molecules with
   // a cross section of 1
-  Real sigma_cr_max = _cross_section;
-  Real sigma_cr_temp = _cross_section;
+  Real sigma_cr_max = *std::max(_cross_sections.begin(), _cross_sections.end());
   unsigned int index_1, index_2;
   Point v1, v2;
   for (auto & indicies : _particle_indicies)
@@ -73,33 +76,36 @@ CollisionalPICStudy::postExecuteStudy()
     if (indicies.size() < 2)
       continue;
 
-    auto volume = _banked_rays[indicies.front()]->currentElem()->volume();
+    const Real volume = _banked_rays[indicies.front()]->currentElem()->volume();
     //  for now we are assuming a constant particle weight
     //  Fn is birds notation
-    auto Fn = _banked_rays[indicies.front()]->data(_weight_index);
+    const Real Fn = _banked_rays[indicies.front()]->data(_weight_index);
     //    Real temp_pairs = 0.5 * indicies.size() * indicies.size() * sigma_cr_max * Fn * _dt /
     //    volume +
     //                      _generator.rand();
-    Real temp_pairs =
-        0.5 * indicies.size() * indicies.size() * sigma_cr_max * Fn * _dt / volume + 0.5;
+    const Real temp_pairs = 0.5 * static_cast<Real>(indicies.size() * indicies.size()) *
+                                sigma_cr_max * Fn * _dt / volume +
+                            0.5;
 
     unsigned int pairs = temp_pairs;
     for (const auto i [[maybe_unused]] : make_range(pairs))
     {
-      index_1 = indicies[(unsigned int)(indicies.size() * _generator.rand())];
+      index_1 = indicies[static_cast<size_t>(indicies.size() * _generator.rand())];
       do
       {
-        index_2 = indicies[(unsigned int)(indicies.size() * _generator.rand())];
+        index_2 = indicies[static_cast<size_t>(indicies.size() * _generator.rand())];
       } while (index_1 == index_2);
       // convert from indicies index to _banked_rays index
 
       Point v1;
       getVelocity(*_banked_rays[index_1], v1);
       Real m1 = _banked_rays[index_1]->data(_mass_index);
+      const size_t species1 = _banked_rays[index_1]->data(_species_index);
 
       Point v2;
       getVelocity(*_banked_rays[index_2], v2);
       Real m2 = _banked_rays[index_2]->data(_mass_index);
+      const size_t species2 = _banked_rays[index_2]->data(_species_index);
 
       Point cr = v1 - v2;
       Real cr_mag = cr.norm();
@@ -108,7 +114,7 @@ CollisionalPICStudy::postExecuteStudy()
       // this will assume maxwell molecules
       // sigma_cr_temp = cr.norm() * _cross_section;
 
-      if (sigma_cr_temp / sigma_cr_max < _generator.rand())
+      if (_cross_sections[species1 + species2] / sigma_cr_max < _generator.rand())
         continue;
 
       Real cos_chi = 2 * _generator.rand() - 1;

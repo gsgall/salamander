@@ -17,9 +17,9 @@
 #pragma once
 
 #include "MooseRandom.h"
-#include "TestInitializedPICStudy.h"
+#include "PICStudyBase.h"
 
-class CollisionalPICStudy : public TestInitializedPICStudy
+class CollisionalPICStudy : public PICStudyBase
 {
 public:
   CollisionalPICStudy(const InputParameters & parameters);
@@ -29,7 +29,7 @@ public:
   virtual void postExecuteStudy() override;
 
 protected:
-  const Real _cross_section;
+  const std::vector<Real> _cross_sections;
   std::vector<std::vector<unsigned int>> _particle_indicies;
   MooseRandom _generator;
 };
