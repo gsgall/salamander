@@ -6,7 +6,8 @@ particles_per_element = 1000
 number_density = 1e25
 m = 6.6464764e-27
 k_B = 1.380649e-23
-T_alpha = 1020
+# T_alpha = 1020
+T_alpha = 1000
 T_beta = 100
 sigma_alpha = '${fparse sqrt(k_B * T_alpha / m)}'
 sigma_beta = '${fparse sqrt(k_B * T_beta / m)}'
@@ -113,19 +114,30 @@ seed = 9182374
     result = 'total_rays_started'
     study = study
   []
-[]
-[VectorPostprocessors]
-  [velocities]
-    type = ParticleDataVectorPostprocessor
-    additional_ray_data_outputs = 'species'
+
+  [T_alpha]
+    type = SingleSpeciesTemperature
     study = study
+    species_id = 0
   []
+  [T_beta]
+    type = SingleSpeciesTemperature
+    study = study
+    species_id = 1
+  []
+[]
+# [VectorPostprocessors]
+#   [velocities]
+#     type = ParticleDataVectorPostprocessor
+#     additional_ray_data_outputs = 'species'
+#     study = study
+#   []
   # [distribution]
   #   type = HistogramVectorPostprocessor
   #   num_bins = 250
   #   vpp = velocities
   # []
-[]
+# []
 
 [Executioner]
   type = Transient
