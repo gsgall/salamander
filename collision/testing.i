@@ -1,5 +1,5 @@
 # the number of computational particles to be put in each element
-particles_per_element = 1000
+particles_per_element = 5
 # the analytic solution for the charge density
 # set by cli args for each case since it is needed by all
 # tests but changes based on the dimension of the problem
@@ -7,15 +7,17 @@ number_density = 1e25
 m = 6.6464764e-27
 k_B = 1.380649e-23
 # T_alpha = 1020
-T_alpha = 1000
-T_beta = 100
+T_alpha = 1444
+T_beta = 145
 sigma_alpha = '${fparse sqrt(k_B * T_alpha / m)}'
 sigma_beta = '${fparse sqrt(k_B * T_beta / m)}'
-
-sigma_0 = 1e-18
+#sigma_0 = 0
+sigma_0 = 1e-21
 sigma_intra = '${fparse sigma_0 * 100}'
 
-seed = 9182374
+seed = 1234987
+vel_seed_alpha = 0
+vel_seed_beta = 0
 [Problem]
   solve = false
 []
@@ -26,10 +28,10 @@ seed = 9182374
     dim = 2
     nx = 4
     ny = 4
-    xmin = -1e-5
-    xmax = 1e-5
-    ymin = -1e-5
-    ymax = 1e-5
+    xmin = -1e-2
+    xmax = 1e-2
+    ymin = -1e-2
+    ymax = 1e-2
   []
   allow_renumbering = false
 []
@@ -49,14 +51,14 @@ seed = 9182374
 
 [UserObjects]
   [stepper]
-    # type = TestSimpleStepper
-    type = TestStationaryStepper
+    type = TestSimpleStepper
+    # type = TestStationaryStepper
   []
 
   [alpha_vel_initializer]
     type = VelocitiesFromDistributionsVelocityInitializer
     distributions = 'v_alpha v_alpha v_alpha'
-    seed = ${seed}
+    seed = ${vel_seed_alpha}
   []
 
   [alpha_initializer]
@@ -73,7 +75,7 @@ seed = 9182374
   [beta_vel_initializer]
     type = VelocitiesFromDistributionsVelocityInitializer
     distributions = 'v_beta v_beta v_beta'
-    seed = ${seed}
+    seed = ${vel_seed_beta}
   []
 
   [beta_initializer]
@@ -95,7 +97,7 @@ seed = 9182374
     always_cache_traces = true
     data_on_cache_traces = true
     execute_on = TIMESTEP_BEGIN
-    tolerate_failure = true
+    tolerate_failure = false
     ray_kernel_coverage_check = false
   []
 []
@@ -126,23 +128,29 @@ seed = 9182374
     species_id = 1
   []
 []
-# [VectorPostprocessors]
-#   [velocities]
-#     type = ParticleDataVectorPostprocessor
-#     additional_ray_data_outputs = 'species'
-#     study = study
-#   []
-  # [distribution]
-  #   type = HistogramVectorPostprocessor
-  #   num_bins = 250
-  #   vpp = velocities
-  # []
-# []
+#[VectorPostprocessors]
+#  [alpha_speeds]
+#    type = SingleSpeciesSpeedVectorPostprocessor
+#    study = study
+#    species_id = 0
+#  []
+#  [beta_speeds]
+#    type = SingleSpeciesSpeedVectorPostprocessor
+#    study = study
+#    species_id = 1
+#  []
+#  # [distribution]
+#  #   type = HistogramVectorPostprocessor
+#  #   num_bins = 250
+#  #   vpp = velocities
+#  # []
+#[]
 
 [Executioner]
   type = Transient
-  dt = 1e-10
-  num_steps = 2000
+  dt = 1e-7
+  # num_steps = 100
+  num_steps = 100
 []
 
 [Outputs]
@@ -152,5 +160,5 @@ seed = 9182374
   #   type = CSV
   #   show = 'distribution particle_count'
   # []
-  interval = 5
+  #interval = 10
 []

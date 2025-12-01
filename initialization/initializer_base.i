@@ -7,6 +7,7 @@ charge_density = 0
 
 [GlobalParams]
   particles_per_element = ${particles_per_element}
+  seed = 0
 []
 
 [Problem]
@@ -38,6 +39,18 @@ charge_density = 0
 [AuxVariables]
   [dump_value]
   []
+  [Ex]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [Ey]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [Ez]
+    order = CONSTANT
+    family = MONOMIAL
+  []
 []
 
 [AuxKernels]
@@ -47,14 +60,33 @@ charge_density = 0
     vector_tag = dump_value
     v = phi
   []
+  [x_grad]
+    type = NegativeVariableGradientComponent
+    variable = Ex
+    gradient_variable = phi
+    component = 0
+  []
+  [y_grad]
+    type = NegativeVariableGradientComponent
+    variable = Ey
+    gradient_variable = phi
+    component = 1
+  []
+  [z_grad]
+    type = NegativeVariableGradientComponent
+    variable = Ez
+    gradient_variable = phi
+    component = 2
+  []
 []
+
 
 [UserObjects]
   [velocity_initializer]
     type = ConstantVelocityInitializer
     velocities = '0 0 0'
   []
-  [particle_initializer]
+  [initializer]
     type = PerElementParticleInitializer
     mass = 1
     charge = 1
@@ -68,12 +100,10 @@ charge_density = 0
 
   [study]
     type = TestInitializedPICStudy
-    initializers = particle_initializer
+    initializers = initializer
     stepper = stepper
-    verify_rays = false
     always_cache_traces = true
     data_on_cache_traces = true
-    use_custom_rayids = false
     execute_on=TIMESTEP_BEGIN
   []
 
@@ -105,18 +135,80 @@ charge_density = 0
   []
 []
 
+[Functions]
+  [potential]
+    type = ParsedFunction
+    expression = 'x * (1 - x) + y * (1 - y) + z * (1 - z)'
+  []
+  [Ex_analytic]
+    type = ParsedGradFunction
+    expression = '2 * x - 1'
+  []
+  [Ey_analytic]
+    type = ParsedGradFunction
+    expression = '2 * y - 1'
+  []
+  [Ez_analytic]
+    type = ParsedGradFunction
+    expression = '2 * z - 1'
+  []
+[]
+
 
 [Postprocessors]
-  [potential_l2]
+  [potential_l2_error]
     type = ElementL2Error
     variable = phi
     function = potential
   []
 
-  [density_l2]
+  [potential_l2]
+    type = ElementL2Norm
+    variable = phi
+  []
+
+  [Ex_l2_error]
+    type = ElementL2Error
+    variable = Ex
+    function = Ex_analytic
+  []
+
+  [Ex_l2]
+    type = ElementL2Norm
+    variable = Ex
+  []
+
+  [Ey_l2_error]
+    type = ElementL2Error
+    variable = Ey
+    function = Ey_analytic
+  []
+
+  [Ey_l2]
+    type = ElementL2Norm
+    variable = Ey
+  []
+
+  [Ez_l2_error]
+    type = ElementL2Error
+    variable = Ez
+    function = Ez_analytic
+  []
+
+  [Ez_l2]
+    type = ElementL2Norm
+    variable = Ez
+  []
+
+  [density_l2_error]
     type = ElementL2Error
     variable = n
     function = charge_density
+  []
+
+  [density_l2]
+    type = ElementL2Norm
+    variable = n
   []
 
   [particles_per_element]
@@ -145,15 +237,9 @@ charge_density = 0
 []
 
 [Outputs]
-  exodus = false
+  exodus = true
   [csv]
     type = CSV
     execute_on = TIMESTEP_END
   []
-  # [rays]
-  #   type = RayTracingExodus
-  #   study = study
-  #   output_data_names = 'charge weight mass'
-  #   execute_on = TIMESTEP_END
-  # []
 []
