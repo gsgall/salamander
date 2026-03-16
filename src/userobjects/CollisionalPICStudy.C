@@ -82,9 +82,9 @@ CollisionalPICStudy::postExecuteStudy()
     //    Real temp_pairs = 0.5 * indicies.size() * indicies.size() * sigma_cr_max * Fn * _dt /
     //    volume +
     //                      _generator.rand();
-    const Real temp_pairs = 0.5 * static_cast<Real>(indicies.size() * indicies.size()) *
+    const Real temp_pairs = 0.5 * static_cast<Real>(indicies.size() * (indicies.size() - 1)) *
                                 sigma_cr_max * Fn * _dt / volume +
-                            0.5;
+                            _generator.rand();
 
     unsigned int pairs = temp_pairs;
     for (const auto i [[maybe_unused]] : make_range(pairs))

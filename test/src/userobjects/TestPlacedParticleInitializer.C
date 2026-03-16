@@ -45,7 +45,7 @@ TestPlacedParticleInitializer::getParticleData() const
 
   std::vector<InitialParticleData> particle_data;
   particle_data.reserve(_start_points.size());
-  const auto & velocities = _velocity_initializer.getParticleVelocities(_start_points.size());
+  const auto & velocities = _velocity_initializer.getParticleVelocities(_start_points.size(), 0);
 
   for (unsigned int i = 0; i < _start_points.size(); ++i)
   {

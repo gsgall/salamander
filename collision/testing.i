@@ -1,23 +1,24 @@
 # the number of computational particles to be put in each element
-particles_per_element = 5
+particles_per_element = 4
 # the analytic solution for the charge density
 # set by cli args for each case since it is needed by all
 # tests but changes based on the dimension of the problem
-number_density = 1e25
+number_density = 3e23
 m = 6.6464764e-27
 k_B = 1.380649e-23
 # T_alpha = 1020
-T_alpha = 1444
-T_beta = 145
+T_alpha = 600
+T_beta = 500
 sigma_alpha = '${fparse sqrt(k_B * T_alpha / m)}'
 sigma_beta = '${fparse sqrt(k_B * T_beta / m)}'
-#sigma_0 = 0
-sigma_0 = 1e-21
+# sigma_0 = 0
+sigma_0 = 1e-20
 sigma_intra = '${fparse sigma_0 * 100}'
 
-seed = 1234987
-vel_seed_alpha = 0
-vel_seed_beta = 0
+seed = 50
+alpha_seed = 0
+beta_seed = 10
+
 [Problem]
   solve = false
 []
@@ -51,14 +52,14 @@ vel_seed_beta = 0
 
 [UserObjects]
   [stepper]
-    type = TestSimpleStepper
-    # type = TestStationaryStepper
+    # type = TestSimpleStepper
+    type = TestStationaryStepper
   []
 
   [alpha_vel_initializer]
     type = VelocitiesFromDistributionsVelocityInitializer
     distributions = 'v_alpha v_alpha v_alpha'
-    seed = ${vel_seed_alpha}
+    seed = ${alpha_seed}
   []
 
   [alpha_initializer]
@@ -69,13 +70,13 @@ vel_seed_beta = 0
     number_density = ${number_density}
     particles_per_element = ${particles_per_element}
     velocity_initializer = alpha_vel_initializer
-    seed = ${seed}
+    seed = ${alpha_seed}
   []
 
   [beta_vel_initializer]
     type = VelocitiesFromDistributionsVelocityInitializer
     distributions = 'v_beta v_beta v_beta'
-    seed = ${vel_seed_beta}
+    seed = ${beta_seed}
   []
 
   [beta_initializer]
@@ -86,7 +87,7 @@ vel_seed_beta = 0
     number_density = ${number_density}
     particles_per_element = ${particles_per_element}
     velocity_initializer = beta_vel_initializer
-    seed = ${seed}
+    seed = ${beta_seed}
   []
 
   [study]
@@ -94,6 +95,7 @@ vel_seed_beta = 0
     cross_sections = '${sigma_intra} ${sigma_0} ${sigma_intra}'
     stepper = stepper
     initializers = 'alpha_initializer beta_initializer'
+    seed = ${seed}
     always_cache_traces = true
     data_on_cache_traces = true
     execute_on = TIMESTEP_BEGIN
@@ -109,56 +111,53 @@ vel_seed_beta = 0
   []
 []
 
-[Postprocessors]
+# [Postprocessors]
+#   [particle_count]
+#     type = RayTracingStudyResult
+#     result = 'total_rays_started'
+#     study = study
+#   []
+#   [T_alpha]
+#     type = SingleSpeciesTemperature
+#     study = study
+#     species_id = 0
+#   []
+#   [T_beta]
+#     type = SingleSpeciesTemperature
+#     study = study
+#     species_id = 1
+#   []
+# []
 
-  [particle_count]
-    type = RayTracingStudyResult
-    result = 'total_rays_started'
-    study = study
-  []
-
-  [T_alpha]
-    type = SingleSpeciesTemperature
+[VectorPostprocessors]
+  [T_alpha_elem]
+    type = SingleSpeciesPerElementTemperatureVectorPostprocessor
     study = study
     species_id = 0
+    num_elems = 16
   []
-  [T_beta]
-    type = SingleSpeciesTemperature
+  [T_beta_elem]
+    type = SingleSpeciesPerElementTemperatureVectorPostprocessor
     study = study
     species_id = 1
+    num_elems = 16
   []
 []
-#[VectorPostprocessors]
-#  [alpha_speeds]
-#    type = SingleSpeciesSpeedVectorPostprocessor
-#    study = study
-#    species_id = 0
-#  []
-#  [beta_speeds]
-#    type = SingleSpeciesSpeedVectorPostprocessor
-#    study = study
-#    species_id = 1
-#  []
-#  # [distribution]
-#  #   type = HistogramVectorPostprocessor
-#  #   num_bins = 250
-#  #   vpp = velocities
-#  # []
-#[]
+
 
 [Executioner]
   type = Transient
-  dt = 1e-7
-  # num_steps = 100
-  num_steps = 100
+  dt = 1e-6
+  num_steps = 3000
+  # num_steps = 1
 []
 
 [Outputs]
   exodus = false
-  csv = true
-  # [csv]
-  #   type = CSV
-  #   show = 'distribution particle_count'
-  # []
-  #interval = 10
+  # csv = true
+  time_step_interval = 5
+  [csv]
+    type = CSV
+    execute_on = 'FINAL'
+  []
 []

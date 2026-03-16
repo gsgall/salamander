@@ -26,7 +26,8 @@ public:
 
   static InputParameters validParams();
 
-  virtual const std::vector<Point> getParticleVelocities(size_t num_samples) const override;
+  virtual const std::vector<Point> getParticleVelocities(const size_t num_samples,
+                                                         const unsigned int seed) const override;
 
   /**
    * We use this to get the actual distribution object that we need to use in order to sample the

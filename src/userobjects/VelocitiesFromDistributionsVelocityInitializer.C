@@ -50,13 +50,13 @@ VelocitiesFromDistributionsVelocityInitializer::initialSetup()
 }
 
 const std::vector<Point>
-VelocitiesFromDistributionsVelocityInitializer::getParticleVelocities(
-    const size_t num_samples) const
+VelocitiesFromDistributionsVelocityInitializer::getParticleVelocities(const size_t num_samples,
+                                                                      const unsigned int seed) const
 {
   auto velocities = std::vector<Point>(num_samples);
 
   MooseRandom generator;
-  generator.seed(_seed);
+  generator.seed(seed + _seed);
 
   std::generate(velocities.begin(),
                 velocities.end(),

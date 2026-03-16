@@ -12,39 +12,40 @@ supress_output = True
 
 seed(0)
 
-runs = 2
 
+ppe = [2**i for i in range(3, 9)]
+runs =[2**i for i in range(10, 4, -1)]
 
-np_changes = 6
-max_runs = 10**4
-# min number of particles per cell
-min_np = 5
-
-ppe = [5, 10, 20, 40, 80, 160]
-T_alpha_0 = [1444, 1004, 1127, 1054, 1045, 974]
-T_beta_0 = [145, 101, 113, 106, 105, 96]
-
-for i in range(np_changes):
-    runs = int(max_runs / (math.sqrt(2) ** i))
-    ppe = min_np * 2**i
-
-    main_folder = f"{ppe:d}_ppe"
+total_fails = 0
+for N_p, N_s in zip(ppe, runs):
+    main_folder = f"{N_p:d}_ppe"
     os.makedirs(main_folder, exist_ok=True)
-    print(f"{ppe:d} PPE")
+    print(f"{N_p:d} PPE")
 
-    for j in range(runs):
+    for j in range(N_s):
         print(f"Run:{j:d}")
-
+        general_seed = randint(0, int(1e8))
+        alpha_seed = randint(0, int(1e8))
+        beta_seed = randint(0, int(1e8))
         a = [
             "-i",
             input_file,
             "--allow-test-objects",
-            f"particles_per_element={ppe:d}",
-            f"seed={randint(0, int(1e8))}",
+            f"particles_per_element={N_p:d}",
+            f"seed={general_seed:d}",
+            f"alpha_seed={alpha_seed:d}",
+            f"beta_seed={beta_seed:d}",
             f"Outputs/file_base={main_folder}/run_{j:d}",
-            f"T_alpha={T_alpha_0[i]:d}",
-            f"T_beta={T_beta_0[i]:d}",
         ]
-        mooseutils.run_executable(
+        exit_code = mooseutils.run_executable(
             executeable, *a, mpi=mpi, suppress_output=supress_output
         )
+
+        if exit_code != 0:
+            total_fails += 1
+            print("Simulation Failure")
+            print(f"Current fail count: {total_fails:d}")
+
+
+print("All Simulations Complete")
+print(f"Simulations Failed {total_fails:d}")
