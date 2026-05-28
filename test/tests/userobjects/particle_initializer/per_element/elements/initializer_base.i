@@ -5,6 +5,13 @@ particles_per_element = 10
 # tests but changes based on the dimension of the problem
 charge_density = 0
 
+[Mesh]
+  [gmg]
+    type = GeneratedMeshGenerator
+  []
+  allow_renumbering = false
+[]
+
 [GlobalParams]
   particles_per_element = ${particles_per_element}
 []
@@ -72,6 +79,7 @@ charge_density = 0
     stepper = stepper
     always_cache_traces = true
     data_on_cache_traces = true
+    use_custom_rayids = true
     execute_on=TIMESTEP_BEGIN
   []
 

@@ -120,6 +120,7 @@ num_samples = ${fparse num_elem + 1}
     always_cache_traces = true
     data_on_cache_traces = true
     particles_per_element = 1
+    use_custom_rayids = true
     execute_on = 'TIMESTEP_BEGIN'
   []
 

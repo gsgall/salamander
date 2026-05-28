@@ -2,16 +2,14 @@
 
 [Mesh]
   [gmg]
-  type = GeneratedMeshGenerator
-  dim = 3
-  nx = 2
-  ny = 2
-  nz = 2
-  xmax = 1
-  ymax=1
-  zmax=1
+    dim = 3
+    nx = 2
+    ny = 2
+    nz = 2
+    xmax = 1
+    ymax = 1
+    zmax = 1
   []
-  allow_renumbering = false
 []
 
 [BCs]

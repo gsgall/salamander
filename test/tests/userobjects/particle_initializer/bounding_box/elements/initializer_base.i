@@ -49,6 +49,7 @@ charge_density = 2
     stepper = stepper
     always_cache_traces = true
     data_on_cache_traces = true
+    use_custom_rayids = true
     execute_on=TIMESTEP_BEGIN
   []
 []
