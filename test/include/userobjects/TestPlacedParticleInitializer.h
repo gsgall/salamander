@@ -34,10 +34,6 @@ public:
 protected:
   /// The starting points
   const std::vector<Point> & _start_points;
-  /// The mass of the particles being placed
-  const Real _mass;
-  /// The charge of the particles being placed
-  const Real _charge;
   /// The weight of the particles being placed
   const Real _weight;
 };

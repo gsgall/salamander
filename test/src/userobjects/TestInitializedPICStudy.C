@@ -19,6 +19,7 @@
 #include "ClaimRays.h"
 #include "ParticleInitializerBase.h"
 #include "ParticleStepperBase.h"
+#include <string>
 
 registerMooseObject("SalamanderTestApp", TestInitializedPICStudy);
 

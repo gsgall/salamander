@@ -53,7 +53,7 @@ public:
    * This method allows the PIC study to retrieve the name of the species that this initializer is
    * responsible for.
    */
-  const std::string & speciesName() const;
+  const std::string & speciesName() const { return _species; }
 
   /**
    * Unused methods
