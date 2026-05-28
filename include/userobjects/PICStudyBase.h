@@ -47,6 +47,12 @@ public:
   const std::vector<RayDataIndex> getVelocityIndicies(const bool all_components) const;
 
 protected:
+  /// the name of the particle initializers that will be used to place the initial particle distribution
+  std::vector<const ParticleInitializerBase *> _initializers;
+  /// the set of all thre unique names of particles that are initialized
+  std::vector<std::string> _species_names;
+  /// the list of all of the species ids that map to the species names
+  std::vector<unsigned int> _species_ids;
   /// The banked rays to be used on the next timestep (restartable)
   std::vector<std::shared_ptr<Ray>> & _banked_rays;
 
@@ -77,7 +83,7 @@ protected:
    * Each component is retrieved from ray data and given
    * back to user as a vector to make calculations easier
    * @param ray the ray
-   * @param v the point where the rays velocity will be stored
+   * @para<m v the point where the rays velocity will be stored
    */
   void getVelocity(const Ray & ray, Point & v) const;
 
@@ -92,7 +98,7 @@ protected:
    *  Method that users should override for their custom particle initialization
    *  This is only called when the study first starts up
    */
-  virtual void initializeParticles() = 0;
+  virtual void initializeParticles();
   /**
    * Method that defines how to reuse particles this will be called on
    * every step after the initialization has been called
@@ -105,6 +111,8 @@ protected:
    * @param data the initial particle data that will be given to the day
    */
   virtual void setInitialParticleData(std::shared_ptr<Ray> & ray, const InitialParticleData & data);
+
+  virtual std::shared_ptr<Ray> createParticle(const InitialParticleData & data);
 
 private:
   /// Whether or not we've generated rays yet (restartable)

@@ -16,7 +16,7 @@
 
 #include "PICStudyBase.h"
 #include "ParticleStepperBase.h"
-#include "libmesh/int_range.h"
+#include "ParticleInitializerBase.h"
 
 InputParameters
 PICStudyBase::validParams()
@@ -30,6 +30,8 @@ PICStudyBase::validParams()
       "stepper",
       "The ParticleStepper UserObject that has the rules for how particle"
       "velocities should be updated");
+  params.addRequiredParam<std::vector<UserObjectName>>("particle_initializers",
+                                                       "The initializer that will place particles");
   // We're not going to use registration because we don't care to name our rays because
   // we will have a lot of them
   params.set<bool>("_use_ray_registration") = false;
@@ -51,6 +53,24 @@ PICStudyBase::PICStudyBase(const InputParameters & parameters)
     _stepper(getUserObject<ParticleStepperBase>("stepper")),
     _has_generated(declareRestartableData<bool>("has_generated", false))
 {
+  const auto & initializer_names = getParam<std::vector<UserObjectName>>("particle_initializers");
+  if (initializer_names.empty())
+    paramError("intializers", "At least one initializer must be provided");
+  std::set<std::string> temporary_name_set;
+  for (const auto name : initializer_names)
+  {
+    _initializers.push_back(&getUserObjectByName<ParticleInitializerBase>(name));
+    temporary_name_set.insert(_initializers.back()->speciesName());
+  }
+
+  unsigned int species_id = 0;
+  _species_names.reserve(temporary_name_set.size());
+  _species_ids.reserve(temporary_name_set.size());
+  for (const auto & name : temporary_name_set)
+  {
+    _species_names.push_back(name);
+    _species_ids.push_back(species_id++);
+  }
 }
 
 void
@@ -60,7 +80,7 @@ PICStudyBase::generateRays()
   // pull from the bank and update velocities/max distances
   if (!_has_generated)
   {
-    this->initializeParticles();
+    initializeParticles();
     _has_generated = true;
   }
   else
@@ -70,6 +90,28 @@ PICStudyBase::generateRays()
     moveRaysToBuffer(_banked_rays);
     _banked_rays.clear();
   }
+}
+
+void
+PICStudyBase::initializeParticles()
+{
+  std::unordered_map<std::string, unsigned int> species_name_map;
+  for (size_t i = 0; i < _species_ids.size(); ++i)
+  {
+    species_name_map.try_emplace(_species_names[i], _species_ids[i]);
+  }
+
+  // collect all of the data for all the various types of particles that will exist
+  for (const auto & initializer : _initializers)
+  {
+    const auto current_species_name = initializer->speciesName();
+    for (const auto & initial_data : initializer->getParticleData())
+    {
+      _banked_rays.push_back(createParticle(initial_data));
+      _banked_rays.back()->data(_species_index) = species_name_map.at(current_species_name);
+    }
+  }
+  moveRaysToBuffer(_banked_rays);
 }
 
 void
@@ -150,6 +192,17 @@ PICStudyBase::setInitialParticleData(std::shared_ptr<Ray> & ray, const InitialPa
   ray->data(_mass_index) = data.mass;
   ray->data(_weight_index) = data.weight;
   ray->data(_charge_index) = data.charge;
+}
+
+std::shared_ptr<Ray>
+PICStudyBase::createParticle(const InitialParticleData & data)
+{
+  auto ray = acquireRay();
+  setInitialParticleData(ray, data);
+  getVelocity(*ray, _temporary_velocity);
+  _stepper.setupStep(*ray, _temporary_velocity, ray->data(_charge_index) / ray->data(_mass_index));
+  setVelocity(*ray, _temporary_velocity);
+  return ray;
 }
 
 const std::vector<RayDataIndex>

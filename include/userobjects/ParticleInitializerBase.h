@@ -26,8 +26,6 @@ struct InitialParticleData
   Point position;
   /// the velocity that the particle will be given
   Point velocity;
-  /// the type of physical particle this particle represents
-  std::string species;
   /// the number of physical particles that this particle represents
   Real weight;
   /// the charge of the physical particle this computational particle represents
@@ -50,6 +48,12 @@ public:
    * place particles on the finite element mesh
    * */
   virtual std::vector<InitialParticleData> getParticleData() const = 0;
+
+  /**
+   * This method allows the PIC study to retrieve the name of the species that this initializer is
+   * responsible for.
+   */
+  const std::string & speciesName() const;
 
   /**
    * Unused methods

@@ -54,7 +54,6 @@ TestPlacedParticleInitializer::getParticleData() const
     data[i].charge = _charge;
     data[i].weight = _weight;
     data[i].elem = nullptr;
-    data[i].species = "";
   }
 
   return data;
