@@ -65,6 +65,11 @@ RayID
 TestInitializedPICStudy::generateUniqueRayID(const THREAD_ID tid)
 {
   if (_use_custom_id_scheme)
-    return _curr_elem_id * _particles_per_element + _curr_elem_ray_count++;
+  {
+    std::cerr << "New ID" << std::endl;
+    const RayID temp_id = _curr_elem_id * _particles_per_element + _curr_elem_ray_count++;
+    std::cerr << temp_id << std::endl;
+    return temp_id;
+  }
   return RayTracingStudy::generateUniqueRayID(tid);
 }

@@ -106,7 +106,6 @@ PICStudyBase::initializeParticles()
     const auto current_species_name = initializer->speciesName();
     for (const auto & initial_data : initializer->getParticleData())
     {
-      std::cerr << initial_data.elem->id() << std::endl;
       _banked_rays.push_back(createParticle(initial_data));
       _banked_rays.back()->data(_species_index) = species_name_map.at(current_species_name);
     }

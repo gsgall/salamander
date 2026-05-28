@@ -66,18 +66,19 @@ PerElementParticleInitializer::getParticleData() const
   MooseRandom generator;
   SALAMANDER::ElementSampler sampler = SALAMANDER::ElementSampler(_fe_problem, _seed, generator);
   // This will store the uniformly distributed points within the reference elements
-  uint elem_count = 0;
+  unsigned int elem_count = 0;
   for (const auto elem : *_fe_problem.mesh().getActiveLocalElementRange())
   {
 
     // now that all of the particle locations have been placed we need to
     // set up the data they will need to be made into actual rays
     const auto & physical_points = sampler.sampleElement(elem, _particles_per_element);
-    const auto & velocities = _velocity_initializer.getParticleVelocities(_particles_per_element);
+    const auto & velocities =
+        _velocity_initializer.getParticleVelocities(_particles_per_element, elem->id());
     Real weight = _number_density * elem->volume() / (_particles_per_element);
     for (const auto i : make_range(_particles_per_element))
     {
-      uint particle_index = elem_count * _particles_per_element + i;
+      unsigned int particle_index = elem_count * _particles_per_element + i;
       data[particle_index].elem = elem;
       data[particle_index].weight = weight;
       data[particle_index].mass = _mass;

@@ -43,7 +43,9 @@ TestPlacedParticleInitializer::getParticleData() const
 
   std::vector<InitialParticleData> particle_data;
   particle_data.reserve(_start_points.size());
-  const auto & velocities = _velocity_initializer.getParticleVelocities(_start_points.size());
+  // for this one I am just not going to re seed since the velocities should specified explicitly
+  // for each particle with the velocity initializer
+  const auto & velocities = _velocity_initializer.getParticleVelocities(_start_points.size(), 0);
 
   for (unsigned int i = 0; i < _start_points.size(); ++i)
   {

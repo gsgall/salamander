@@ -27,9 +27,13 @@ public:
 
   /**
    * Creates a vector of initial particle velocities for as many samples as were requested.
+   * @param num_samples the number of velocities that need to be sampled by something
+   * @param additional_seed a seed given to a sampler that enables reseeding when needed so that not
+   * every call produces the same values
    * @returns a Point object containing the particle velocity
    */
-  virtual const std::vector<Point> getParticleVelocities(const size_t num_samples) const = 0;
+  virtual const std::vector<Point>
+  getParticleVelocities(const size_t num_samples, const unsigned int additional_seed) const = 0;
 
   /**
    * Unused methods

@@ -111,7 +111,8 @@ UniformGridParticleInitializer::getParticleData() const
   {
     // the particles that are currently in the element
     auto particle_idxs = std::vector<uint>();
-    const auto & velocities = _velocity_initializer.getParticleVelocities(local_particle_count);
+    const auto & velocities =
+        _velocity_initializer.getParticleVelocities(local_particle_count, elem->id());
     while (elem->contains_point(curr_point) && particle_count < local_particle_count)
     {
       particle_idxs.push_back(particle_count);
