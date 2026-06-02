@@ -40,11 +40,8 @@ public:
   /**
    * Getter method for getting the ray data indicies which are needed to access the velocity
    * components stored in ray data
-   * @param all_components if true all three data indicies will be provided if not then only the
-   * indicies consistent with the dimension of the mesh will be provided i.e. if the mesh being used
-   * is 1D then only the index for the x component will be provided if all_components is false
    */
-  const std::vector<RayDataIndex> getVelocityIndicies(const bool all_components) const;
+  const std::array<RayDataIndex, 3> getVelocityIndicies() const;
 
 protected:
   /// the name of the particle initializers that will be used to place the initial particle distribution

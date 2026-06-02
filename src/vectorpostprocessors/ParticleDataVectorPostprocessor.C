@@ -16,6 +16,7 @@
 
 #include "ParticleDataVectorPostprocessor.h"
 #include "PICStudyBase.h"
+#include "ThresholdElementSubdomainModifier.h"
 
 registerMooseObject("SalamanderApp", ParticleDataVectorPostprocessor);
 
@@ -36,7 +37,6 @@ ParticleDataVectorPostprocessor::validParams()
 ParticleDataVectorPostprocessor::ParticleDataVectorPostprocessor(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     _study(getUserObject<PICStudyBase>("study")),
-    _ray_data_indices(_study.getVelocityIndicies(true)),
     _data_values({&declareVector("t_pos"),
                   &declareVector("t_vel"),
                   &declareVector("x"),
@@ -46,6 +46,10 @@ ParticleDataVectorPostprocessor::ParticleDataVectorPostprocessor(const InputPara
                   &declareVector("v_y"),
                   &declareVector("v_z")})
 {
+  const auto velocity_indices = _study.getVelocityIndicies();
+  _ray_data_indices.insert(
+      _ray_data_indices.end(), velocity_indices.begin(), velocity_indices.end());
+
   const auto & additional_ray_data =
       getParam<std::vector<std::string>>("additional_ray_data_outputs");
 

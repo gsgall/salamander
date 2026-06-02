@@ -1,5 +1,5 @@
 //* This file is part of SALAMANDER: Software for Advanced Large-scale Analysis of MAgnetic
-//* confinement for Numerical Design, Engineering & Research,
+// confinement for Numerical Design, Engineering & Research,
 //* A multiphysics application for modeling plasma facing components
 //* https://github.com/idaholab/salamander
 //* https://mooseframework.inl.gov/salamander
@@ -16,20 +16,23 @@
 
 #pragma once
 
-#include "ReflectRayBC.h"
+#include "ParticleBCBase.h"
 
-class ReflectParticleBC : public ReflectRayBC
+class VelocityInitializerBase;
+class DiffusiveReflectionBC : public ParticleBCBase
 {
 public:
-  ReflectParticleBC(const InputParameters & params);
+  DiffusiveReflectionBC(const InputParameters & params);
 
   static InputParameters validParams();
 
   virtual void onBoundary(const unsigned int num_applying) override;
 
 protected:
-  /// the ray data indicies for the velocities stored on the ray
-  const std::array<RayDataIndex, 3> _velocity_indicies;
-  /// point used to store the components of the velocity which are needed during reflection
-  Point _temporary_velocity;
+  /// the random number generator used for sampling distributions
+  const unsigned int _seed;
+  /// the distributions that will be used for set the initial particle velocities
+  const VelocityInitializerBase & _velocity_initializer;
+  /// the direction that is the normal the boundary
+  const unsigned int _reflection_direction;
 };

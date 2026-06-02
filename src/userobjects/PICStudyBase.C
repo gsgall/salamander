@@ -204,14 +204,12 @@ PICStudyBase::createParticle(const InitialParticleData & data)
   return ray;
 }
 
-const std::vector<RayDataIndex>
-PICStudyBase::getVelocityIndicies(const bool all_components) const
+const std::array<RayDataIndex, 3>
+PICStudyBase::getVelocityIndicies() const
 {
-  const unsigned int vel_dim = all_components ? 3 : _mesh.dimension();
-
-  std::vector<RayDataIndex> indicies(vel_dim);
-  for (const auto dim : make_range(vel_dim))
-    indicies[dim] = getRayDataIndex(std::string("v_") + (dim == 0 ? "x" : (dim == 1 ? "y" : "z")));
+  std::array<RayDataIndex, 3> indicies;
+  for (size_t i = 0; i < 3; ++i)
+    indicies[i] = getRayDataIndex(std::string("v_") + (i == 0 ? "x" : (i == 1 ? "y" : "z")));
 
   return indicies;
 }
