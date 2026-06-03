@@ -78,7 +78,7 @@ number_density = '${fparse P_init * N_A / (R_u * T_init)}'
   [temp_accum]
     type = PerElementAverageTemperatureAccumulator
     study = study
-    species = 'A'
+    species = 'B'
     aux_variable = temperature
   []
 []

@@ -84,14 +84,14 @@ protected:
    * @param ray the ray
    * @para<m v the point where the rays velocity will be stored
    */
-  void getVelocity(const Ray & ray, Point & v) const;
+  void getVelocityData(const Ray & ray, Point & v) const;
 
   /**
    * Method for updating the rays velocity data given a new velocity
    * @param ray the ray that will have its velocity updated
    * @param v the new velocity to give the ray
    */
-  void setVelocity(Ray & ray, const Point & v) const;
+  void setVelocityData(Ray & ray, const Point & v) const;
 
   /**
    *  Method that users should override for their custom particle initialization

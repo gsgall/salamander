@@ -123,7 +123,7 @@ PICStudyBase::reinitializeParticles()
     const auto point = ray->currentPoint();
     const auto distance = ray->distance();
 
-    getVelocity(*ray, _temporary_velocity);
+    getVelocityData(*ray, _temporary_velocity);
     // Reset it (this is required to reuse a ray)
     ray->resetCounters();
     ray->clearStartingInfo();
@@ -133,7 +133,7 @@ PICStudyBase::reinitializeParticles()
     _stepper.setupStep(
         *ray, _temporary_velocity, ray->data()[_charge_index] / ray->data()[_mass_index], distance);
 
-    setVelocity(*ray, _temporary_velocity);
+    setVelocityData(*ray, _temporary_velocity);
   }
 }
 
@@ -159,7 +159,7 @@ PICStudyBase::postExecuteStudy()
 }
 
 void
-PICStudyBase::getVelocity(const Ray & ray, Point & v) const
+PICStudyBase::getVelocityData(const Ray & ray, Point & v) const
 {
   for (size_t i = 0; i < 3; ++i)
   {
@@ -168,7 +168,7 @@ PICStudyBase::getVelocity(const Ray & ray, Point & v) const
 }
 
 void
-PICStudyBase::setVelocity(Ray & ray, const Point & v) const
+PICStudyBase::setVelocityData(Ray & ray, const Point & v) const
 {
   for (size_t i = 0; i < 3; ++i)
   {
@@ -200,9 +200,9 @@ PICStudyBase::createParticle(const InitialParticleData & data)
 {
   auto ray = acquireRay();
   setInitialParticleData(ray, data);
-  getVelocity(*ray, _temporary_velocity);
+  getVelocityData(*ray, _temporary_velocity);
   _stepper.setupStep(*ray, _temporary_velocity, ray->data(_charge_index) / ray->data(_mass_index));
-  setVelocity(*ray, _temporary_velocity);
+  setVelocityData(*ray, _temporary_velocity);
   return ray;
 }
 
@@ -237,8 +237,8 @@ unsigned int
 PICStudyBase::speciesId(const std::string & species_name) const
 {
   const auto it = std::find(_species_names.begin(), _species_names.end(), species_name);
-  mooseAssert(it != _species_names.end(),
-              "The requested species " + species_name + " does not exist in the PIC Study.");
+  mooseError(it != _species_names.end(),
+             "The requested species " + species_name + " does not exist in the PIC Study.");
 
   return _species_ids[std::distance(_species_names.begin(), it)];
 }

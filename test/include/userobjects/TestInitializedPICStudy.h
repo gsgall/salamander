@@ -18,7 +18,6 @@
 
 #include "PICStudyBase.h"
 
-class ParticleInitializerBase;
 /**
  * Test study of initializing rays with an initializer that will
  * give all of the data needed for rays and ensure that results are parallel consistent
