@@ -46,7 +46,7 @@ ParticleDataVectorPostprocessor::ParticleDataVectorPostprocessor(const InputPara
                   &declareVector("v_y"),
                   &declareVector("v_z")})
 {
-  const auto velocity_indices = _study.getVelocityIndicies();
+  const auto velocity_indices = _study.velocityIndicies();
   _ray_data_indices.insert(
       _ray_data_indices.end(), velocity_indices.begin(), velocity_indices.end());
 

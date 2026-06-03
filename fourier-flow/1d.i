@@ -11,15 +11,24 @@ m_Ar = '${fparse 39.948 * 1e-3 / N_A}'
 # number density
 number_density = '${fparse P_init * N_A / (R_u * T_init)}'
 
+[GlobalParams]
+  seed = 0
+[]
+
 [Mesh/gmg]
   type = GeneratedMeshGenerator
   dim = 1
-  nx = 1
+  nx = 10
   xmax = 1
 []
 
 [Problem]
   solve = false
+[]
+
+[AuxVariables/temperature]
+  order = CONSTANT
+  family = MONOMIAL
 []
 
 [Distributions]
@@ -33,6 +42,7 @@ number_density = '${fparse P_init * N_A / (R_u * T_init)}'
 [UserObjects]
   [stepper]
     type = TestStationaryStepper
+    # type = TestSimpleStepper
   []
 
   [velocity_initializer]
@@ -47,7 +57,8 @@ number_density = '${fparse P_init * N_A / (R_u * T_init)}'
 
   [particle_initializer]
     type = PerElementParticleInitializer
-    particles_per_element = 10000
+    species = 'A'
+    particles_per_element = 1000
     number_density = ${number_density}
     charge = 0
     mass = ${m_Ar}
@@ -64,6 +75,12 @@ number_density = '${fparse P_init * N_A / (R_u * T_init)}'
     execute_on = 'TIMESTEP_BEGIN'
     ray_kernel_coverage_check = false
   []
+  [temp_accum]
+    type = PerElementAverageTemperatureAccumulator
+    study = study
+    species = 'A'
+    aux_variable = temperature
+  []
 []
 
 [VectorPostprocessors]
@@ -76,21 +93,24 @@ number_density = '${fparse P_init * N_A / (R_u * T_init)}'
 []
 
 [RayBCs/refect]
-  type = DiffusiveReflectionBC
+  type = ReflectParticleBC
   boundary = 'left right'
-  seed = 0
-  velocity_initializer = reset_initializer
-  reflection_direction = 0
+  # type = DiffusiveReflectionBC
+  # boundary = 'left right'
+  # seed = 0
+  # velocity_initializer = reset_initializer
+  # reflection_direction = 0
 []
 
 [Executioner]
   type = Transient
   dt = 1
-  num_steps = 1
+  num_steps = 2
 []
 
 [Outputs]
   csv = true
+  exodus = true
   execute_on = 'TIMESTEP_END'
 []
 

@@ -41,7 +41,13 @@ public:
    * Getter method for getting the ray data indicies which are needed to access the velocity
    * components stored in ray data
    */
-  const std::array<RayDataIndex, 3> getVelocityIndicies() const;
+  const std::array<RayDataIndex, 3> velocityIndicies() const;
+  const RayDataIndex speciesIndex() const;
+  const RayDataIndex massIndex() const;
+  const RayDataIndex chargeIndex() const;
+  const RayDataIndex weightIndex() const;
+
+  unsigned int speciesId(const std::string & species_name) const noexcept(false);
 
 protected:
   /// the name of the particle initializers that will be used to place the initial particle distribution
@@ -55,11 +61,7 @@ protected:
 
   virtual void postExecuteStudy() override;
   /// Ray data for storing velocity components
-  ///@{
-  const RayDataIndex _v_x_index;
-  const RayDataIndex _v_y_index;
-  const RayDataIndex _v_z_index;
-  ///@}
+  const std::array<RayDataIndex, 3> _velocity_indicies;
   /// Ray data for storing the number of real particles each ray represents
   const RayDataIndex _weight_index;
   /// Ray data for storing the charge of the particle

@@ -31,7 +31,7 @@ ParticleBCBase::validParams()
 ParticleBCBase::ParticleBCBase(const InputParameters & params)
   : RayBoundaryConditionBase(params),
     _temporary_update_velocity(Point(0.0, 0.0, 0.0)),
-    _velocity_indicies(getStudy<PICStudyBase>().getVelocityIndicies()),
+    _velocity_indicies(getStudy<PICStudyBase>().velocityIndicies()),
     _mesh_dimension(_fe_problem.mesh().dimension())
 {
 }

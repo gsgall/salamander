@@ -17,6 +17,7 @@
 #include "PICStudyBase.h"
 #include "ParticleStepperBase.h"
 #include "ParticleInitializerBase.h"
+#include <petscksp.h>
 
 InputParameters
 PICStudyBase::validParams()
@@ -43,9 +44,7 @@ PICStudyBase::PICStudyBase(const InputParameters & parameters)
   : RayTracingStudy(parameters),
     _banked_rays(
         declareRestartableDataWithContext<std::vector<std::shared_ptr<Ray>>>("_banked_rays", this)),
-    _v_x_index(registerRayData("v_x")),
-    _v_y_index(registerRayData("v_y")),
-    _v_z_index(registerRayData("v_z")),
+    _velocity_indicies({registerRayData("v_x"), registerRayData("v_y"), registerRayData("v_z")}),
     _weight_index(registerRayData("weight")),
     _charge_index(registerRayData("charge")),
     _mass_index(registerRayData("mass")),
@@ -162,17 +161,19 @@ PICStudyBase::postExecuteStudy()
 void
 PICStudyBase::getVelocity(const Ray & ray, Point & v) const
 {
-  v(0) = ray.data(_v_x_index);
-  v(1) = ray.data(_v_y_index);
-  v(2) = ray.data(_v_z_index);
+  for (size_t i = 0; i < 3; ++i)
+  {
+    v(i) = ray.data(_velocity_indicies[i]);
+  }
 }
 
 void
 PICStudyBase::setVelocity(Ray & ray, const Point & v) const
 {
-  ray.data(_v_x_index) = v(0);
-  ray.data(_v_y_index) = v(1);
-  ray.data(_v_z_index) = v(2);
+  for (size_t i = 0; i < 3; ++i)
+  {
+    ray.data(_velocity_indicies[i]) = v(i);
+  }
 }
 
 const std::vector<std::shared_ptr<Ray>> &
@@ -185,9 +186,10 @@ void
 PICStudyBase::setInitialParticleData(std::shared_ptr<Ray> & ray, const InitialParticleData & data)
 {
   ray->setStart(data.position, data.elem);
-  ray->data(_v_x_index) = data.velocity(0);
-  ray->data(_v_y_index) = data.velocity(1);
-  ray->data(_v_z_index) = data.velocity(2);
+  for (size_t i = 0; i < 3; ++i)
+  {
+    ray->data(_velocity_indicies[i]) = data.velocity(i);
+  }
   ray->data(_mass_index) = data.mass;
   ray->data(_weight_index) = data.weight;
   ray->data(_charge_index) = data.charge;
@@ -205,11 +207,38 @@ PICStudyBase::createParticle(const InitialParticleData & data)
 }
 
 const std::array<RayDataIndex, 3>
-PICStudyBase::getVelocityIndicies() const
+PICStudyBase::velocityIndicies() const
 {
-  std::array<RayDataIndex, 3> indicies;
-  for (size_t i = 0; i < 3; ++i)
-    indicies[i] = getRayDataIndex(std::string("v_") + (i == 0 ? "x" : (i == 1 ? "y" : "z")));
+  return _velocity_indicies;
+}
 
-  return indicies;
+const RayDataIndex
+PICStudyBase::speciesIndex() const
+{
+  return _species_index;
+}
+const RayDataIndex
+PICStudyBase::massIndex() const
+{
+  return _mass_index;
+}
+const RayDataIndex
+PICStudyBase::chargeIndex() const
+{
+  return _charge_index;
+}
+const RayDataIndex
+PICStudyBase::weightIndex() const
+{
+  return _weight_index;
+}
+
+unsigned int
+PICStudyBase::speciesId(const std::string & species_name) const
+{
+  const auto it = std::find(_species_names.begin(), _species_names.end(), species_name);
+  mooseAssert(it != _species_names.end(),
+              "The requested species " + species_name + " does not exist in the PIC Study.");
+
+  return _species_ids[std::distance(_species_names.begin(), it)];
 }
