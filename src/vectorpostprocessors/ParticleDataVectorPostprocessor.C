@@ -27,7 +27,7 @@ ParticleDataVectorPostprocessor::validParams()
   params.addClassDescription(
       "Collects data which is stored in RayData on particles on a per timestep basis.");
   params.addRequiredParam<UserObjectName>("study", "The PICStudy that owns the Ray");
-  params.addParam<std::vector<std::string>>("additional_ray_data_outputs",
+  params.addParam<std::vector<std::string>>("additional_outputs",
                                             {},
                                             "The names of any Ray data in addition to the particle "
                                             "position and velocity that will be output");
@@ -50,8 +50,7 @@ ParticleDataVectorPostprocessor::ParticleDataVectorPostprocessor(const InputPara
   _ray_data_indices.insert(
       _ray_data_indices.end(), velocity_indices.begin(), velocity_indices.end());
 
-  const auto & additional_ray_data =
-      getParam<std::vector<std::string>>("additional_ray_data_outputs");
+  const auto & additional_ray_data = getParam<std::vector<std::string>>("additional_outputs");
 
   if (additional_ray_data.empty())
     return;
@@ -75,7 +74,7 @@ void
 ParticleDataVectorPostprocessor::execute()
 {
 
-  const auto rays = _study.getBankedRays();
+  const auto rays = _study.bankedParticles();
   for (const auto & ray : rays)
   {
     // storing the time at which the particle position is known

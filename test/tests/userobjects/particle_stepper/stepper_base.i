@@ -88,7 +88,7 @@
   type = TestSingleParticleDataVectorPostprocessor
   study = study
   execute_on = 'TIMESTEP_END'
-  additional_ray_data_outputs = 'charge mass'
+  additional_outputs = 'charge mass'
 []
 
 [Executioner]

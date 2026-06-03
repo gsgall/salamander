@@ -35,7 +35,7 @@ public:
    * Method for getting the rays after they have finished tracing
    * useful for looking at the rays data if needed by another object
    */
-  const std::vector<std::shared_ptr<Ray>> & getBankedRays() const;
+  const std::vector<std::shared_ptr<Ray>> & bankedParticles() const;
 
   /**
    * Getter method for getting the ray data indicies which are needed to access the velocity

@@ -86,7 +86,7 @@ number_density = '${fparse P_init * N_A / (R_u * T_init)}'
 [VectorPostprocessors]
   [particle_data]
     type = TestParticleDataVectorPostprocessor
-    additional_ray_data_outputs = 'mass charge'
+    additional_outputs = 'mass charge'
     study = study
     execute_on = TIMESTEP_END
   []

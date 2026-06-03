@@ -75,7 +75,7 @@ PerElementAverageTemperatureAccumulator::execute()
 
   auto accumulator = std::make_unique<SALAMANDER::AuxAccumulator>(
       _fe_problem, getParam<AuxVariableName>("aux_variable"));
-  const auto particles = _study.getBankedRays();
+  const auto particles = _study.bankedParticles();
   size_t i = 0;
   for (const auto & elem : *_fe_problem.mesh().getActiveLocalElementRange())
   {

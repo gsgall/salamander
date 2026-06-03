@@ -43,12 +43,10 @@ ParticleQuantityResidualAccumulatorBase::ParticleQuantityResidualAccumulatorBase
   : GeneralUserObject(params),
     _var_name(getParam<NonlinearVariableName>("variable")),
     _study(getUserObject<PICStudyBase>("study")),
-    _v_x_index(_study.getRayDataIndex("v_x")),
-    _v_y_index(_study.getRayDataIndex("v_y")),
-    _v_z_index(_study.getRayDataIndex("v_z")),
-    _weight_index(_study.getRayDataIndex("weight")),
-    _charge_index(_study.getRayDataIndex("charge")),
-    _mass_index(_study.getRayDataIndex("mass")),
-    _species_index(_study.getRayDataIndex("species"))
+    _velocity_indicies(_study.velocityIndicies()),
+    _weight_index(_study.weightIndex()),
+    _charge_index(_study.chargeIndex()),
+    _mass_index(_study.massIndex()),
+    _species_index(_study.speciesIndex())
 {
 }

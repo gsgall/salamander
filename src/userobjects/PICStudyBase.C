@@ -177,7 +177,7 @@ PICStudyBase::setVelocityData(Ray & ray, const Point & v) const
 }
 
 const std::vector<std::shared_ptr<Ray>> &
-PICStudyBase::getBankedRays() const
+PICStudyBase::bankedParticles() const
 {
   return _banked_rays;
 }
