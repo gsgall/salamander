@@ -16,7 +16,6 @@
 
 #include "ParticleDataVectorPostprocessor.h"
 #include "PICStudyBase.h"
-#include "ThresholdElementSubdomainModifier.h"
 
 registerMooseObject("SalamanderApp", ParticleDataVectorPostprocessor);
 

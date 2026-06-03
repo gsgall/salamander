@@ -46,6 +46,8 @@ public:
   const RayDataIndex massIndex() const;
   const RayDataIndex chargeIndex() const;
   const RayDataIndex weightIndex() const;
+  const std::vector<std::string> & speciesNames() const;
+  const std::vector<unsigned int> & speciesIds() const;
 
   unsigned int speciesId(const std::string & species_name) const noexcept(false);
 

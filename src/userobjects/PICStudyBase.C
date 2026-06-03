@@ -17,7 +17,6 @@
 #include "PICStudyBase.h"
 #include "ParticleStepperBase.h"
 #include "ParticleInitializerBase.h"
-#include <petscksp.h>
 
 InputParameters
 PICStudyBase::validParams()
@@ -241,4 +240,16 @@ PICStudyBase::speciesId(const std::string & species_name) const
              "The requested species " + species_name + " does not exist in the PIC Study.");
 
   return _species_ids[std::distance(_species_names.begin(), it)];
+}
+
+const std::vector<std::string> &
+PICStudyBase::speciesNames() const
+{
+  return _species_names;
+}
+
+const std::vector<unsigned int> &
+PICStudyBase::speciesIds() const
+{
+  return _species_ids;
 }
