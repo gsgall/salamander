@@ -32,7 +32,7 @@ public:
 
 protected:
   virtual void initializeParticles() override;
-  virtual void reinitializeParticles() override;
+  virtual void postExecuteStudy() override;
 
   ParticleColliderBase * _collider;
 };

@@ -51,6 +51,13 @@ public:
 
   unsigned int speciesId(const std::string & species_name) const noexcept(false);
 
+  /**
+   * Method for updating the rays velocity data given a new velocity
+   * @param ray the ray that will have its velocity updated
+   * @param v the new velocity to give the ray
+   */
+  void setVelocityData(Ray & ray, const Point & v) const;
+
 protected:
   /// the name of the particle initializers that will be used to place the initial particle distribution
   std::vector<const ParticleInitializerBase *> _initializers;
@@ -87,13 +94,6 @@ protected:
    * @para<m v the point where the rays velocity will be stored
    */
   void getVelocityData(const Ray & ray, Point & v) const;
-
-  /**
-   * Method for updating the rays velocity data given a new velocity
-   * @param ray the ray that will have its velocity updated
-   * @param v the new velocity to give the ray
-   */
-  void setVelocityData(Ray & ray, const Point & v) const;
 
   /**
    *  Method that users should override for their custom particle initialization

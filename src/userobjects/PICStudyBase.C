@@ -108,7 +108,6 @@ PICStudyBase::initializeParticles()
       _banked_rays.back()->data(_species_index) = species_name_map.at(current_species_name);
     }
   }
-  moveRaysToBuffer(_banked_rays);
 }
 
 void
@@ -236,8 +235,10 @@ unsigned int
 PICStudyBase::speciesId(const std::string & species_name) const
 {
   const auto it = std::find(_species_names.begin(), _species_names.end(), species_name);
-  mooseError(it != _species_names.end(),
-             "The requested species " + species_name + " does not exist in the PIC Study.");
+  if (it == _species_names.end())
+  {
+    mooseError("The requested species " + species_name + " does not exist in the PIC Study.");
+  }
 
   return _species_ids[std::distance(_species_names.begin(), it)];
 }

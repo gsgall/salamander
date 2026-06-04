@@ -25,6 +25,7 @@ public:
 
   static InputParameters validParams();
 
+  virtual void initializeInternalData(const std::vector<std::shared_ptr<Ray>> & particles) override;
   virtual void collideParticles(const std::vector<std::shared_ptr<Ray>> & particles) override;
 
 protected:
@@ -35,5 +36,4 @@ protected:
   std::vector<Real> _elem_volumes;
   std::vector<dof_id_type> _elem_ids;
   std::vector<std::vector<Real>> _elem_wise_max_cr_values;
-  std::vector<std::vector<size_t>> _particle_indicies;
 };

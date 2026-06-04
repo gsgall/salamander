@@ -29,17 +29,24 @@ CollisionBase::validParams()
       "reactants", "The species on the left hand side of the reaction");
   params.addRequiredParam<std::vector<std::string>>(
       "products", "The species on the right hand side of the reaction");
+  params.addParam<unsigned int>("seed", 0, "The seed value for the random number generator");
   return params;
 }
 
-CollisionBase::CollisionBase(const InputParameters & parameters)
-  : GeneralUserObject(parameters),
-    _study(getUserObject<CollisionalPICStudy>("study")),
-    _velocity_indicies(_study.velocityIndicies()),
-    _weight_index(_study.weightIndex()),
-    _mass_index(_study.massIndex()),
-    _species_index(_study.speciesIndex())
+CollisionBase::CollisionBase(const InputParameters & parameters) : GeneralUserObject(parameters)
 {
+  _generator.seed(getParam<unsigned int>("seed"));
+}
+
+void
+CollisionBase::initialSetup()
+{
+  _study = &getUserObject<CollisionalPICStudy>("study");
+  _velocity_indicies = _study->velocityIndicies();
+  _species_index = _study->speciesIndex();
+  _weight_index = _study->weightIndex();
+  _mass_index = _study->massIndex();
+
   const auto reactant_names = getParam<std::vector<std::string>>("reactants");
   const auto product_names = getParam<std::vector<std::string>>("products");
 
@@ -48,12 +55,12 @@ CollisionBase::CollisionBase(const InputParameters & parameters)
   // that a provided species name is not known to the study
   for (const auto & name : reactant_names)
   {
-    _reactant_ids.push_back(_study.speciesId(name));
+    _reactant_ids.push_back(_study->speciesId(name));
   }
 
   for (const auto & name : product_names)
   {
-    _product_ids.push_back(_study.speciesId(name));
+    _product_ids.push_back(_study->speciesId(name));
   }
 }
 
@@ -72,7 +79,6 @@ CollisionBase::relativeSpeed(const Ray & particle_a, const Ray & particle_b) con
   const auto vel_b = particleVelocity(particle_b);
   return (vel_a - vel_b).norm();
 }
-
 const Real
 CollisionBase::centerOfMassEnergy(const Ray & particle_a, const Ray & particle_b) const
 {
@@ -84,4 +90,28 @@ CollisionBase::centerOfMassEnergy(const Ray & particle_a, const Ray & particle_b
   const auto vel_b = particleVelocity(particle_b);
 
   return 0.5 * reduced_mass * (vel_a - vel_b).norm_sq();
+}
+
+const Point
+CollisionBase::centerOfMassVelocity(const Ray & particle_a, const Ray & particle_b) const
+{
+  const auto m_a = particle_a.data(_mass_index);
+  const auto m_b = particle_b.data(_mass_index);
+
+  const auto vel_a = particleVelocity(particle_a);
+  const auto vel_b = particleVelocity(particle_b);
+
+  return (m_a * vel_a + m_b * vel_b) / (m_a + m_b);
+}
+
+const std::vector<unsigned int> &
+CollisionBase::reactantIds() const
+{
+  return _reactant_ids;
+}
+
+const std::vector<unsigned int> &
+CollisionBase::productIds() const
+{
+  return _product_ids;
 }

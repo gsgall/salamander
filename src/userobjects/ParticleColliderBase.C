@@ -27,7 +27,7 @@ ParticleColliderBase::validParams()
                              "And the ability to sample vector fields for use in a particle step");
   params.addRequiredParam<UserObjectName>("study", "The study for the system.");
   params.addRequiredParam<std::vector<UserObjectName>>(
-      "collison_objects",
+      "collision_objects",
       "The objects that contain the actual logic to carry out the collisions required.");
   params.addParam<unsigned int>(
       "seed", 0, "The seed value for the random number generator used for collisions");
@@ -35,14 +35,7 @@ ParticleColliderBase::validParams()
 }
 
 ParticleColliderBase::ParticleColliderBase(const InputParameters & parameters)
-  : GeneralUserObject(parameters),
-    _generator(),
-    _study(getUserObject<CollisionalPICStudy>("study")),
-    _velocity_indicies(_study.velocityIndicies()),
-    _species_index(_study.speciesIndex()),
-    _weight_index(_study.weightIndex()),
-    _mass_index(_study.massIndex()),
-    _species_ids(_study.speciesIds())
+  : GeneralUserObject(parameters), _generator()
 {
   _generator.seed(getParam<unsigned int>("seed"));
 }
@@ -50,8 +43,15 @@ ParticleColliderBase::ParticleColliderBase(const InputParameters & parameters)
 void
 ParticleColliderBase::initialSetup()
 {
+  _study = &getUserObject<CollisionalPICStudy>("study");
+  _velocity_indicies = _study->velocityIndicies();
+  _species_index = _study->speciesIndex();
+  _weight_index = _study->weightIndex();
+  _mass_index = _study->massIndex();
+  _species_ids = _study->speciesIds();
+  _particle_indicies.resize(_species_ids.size());
   const auto & names = getParam<std::vector<UserObjectName>>("collision_objects");
-  const auto total_pairs = pairingFunction(_species_ids.size(), _species_ids.size()) + 1;
+  const auto total_pairs = pairingFunction(_species_ids.size(), _species_ids.size()) - 1;
   _collision_objects.resize(total_pairs);
   _temporary_xsecs.resize(total_pairs);
 

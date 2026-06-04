@@ -21,7 +21,7 @@ registerMooseObject("SalamanderApp", CollisionlessPICStudy);
 InputParameters
 CollisionlessPICStudy::validParams()
 {
-  auto params = RayTracingStudy::validParams();
+  auto params = PICStudyBase::validParams();
   params.addClassDescription("PIC Study Object for Collisionless PIC simulations");
   return params;
 }
@@ -29,4 +29,11 @@ CollisionlessPICStudy::validParams()
 CollisionlessPICStudy::CollisionlessPICStudy(const InputParameters & parameters)
   : PICStudyBase(parameters)
 {
+}
+
+void
+CollisionlessPICStudy::initializeParticles()
+{
+  PICStudyBase::initializeParticles();
+  moveRaysToBuffer(_banked_rays);
 }

@@ -20,9 +20,9 @@
 #include "MooseRandom.h"
 #include "Ray.h"
 
-class Ray;
 class CollisionBase;
 class CollisionalPICStudy;
+
 class ParticleColliderBase : public GeneralUserObject
 {
 public:
@@ -40,16 +40,18 @@ public:
   virtual void execute() override final {}
   ///@}
 
+  virtual void initializeInternalData(const std::vector<std::shared_ptr<Ray>> & particles) = 0;
   virtual void collideParticles(const std::vector<std::shared_ptr<Ray>> & particles) = 0;
 
 protected:
   MooseRandom _generator;
-  const CollisionalPICStudy & _study;
-  const std::array<unsigned int, 3> _velocity_indicies;
-  const RayDataIndex _species_index;
-  const RayDataIndex _weight_index;
-  const RayDataIndex _mass_index;
-  const std::vector<unsigned int> & _species_ids;
+  const CollisionalPICStudy * _study;
+  std::array<unsigned int, 3> _velocity_indicies;
+  RayDataIndex _species_index;
+  RayDataIndex _weight_index;
+  RayDataIndex _mass_index;
+  std::vector<unsigned int> _species_ids;
+  std::vector<std::vector<size_t>> _particle_indicies;
 
   std::vector<std::vector<const CollisionBase *>> _collision_objects;
   std::vector<std::vector<Real>> _temporary_xsecs;

@@ -16,15 +16,14 @@
 
 #pragma once
 
-#include "PICStudyBase.h"
+#include "CollisionBase.h"
 
-class CollisionlessPICStudy : public PICStudyBase
+class ElasticCollisionBase : public CollisionBase
 {
 public:
+  ElasticCollisionBase(const InputParameters & parameters);
+
   static InputParameters validParams();
 
-  CollisionlessPICStudy(const InputParameters & parameters);
-
-protected:
-  virtual void initializeParticles() override;
+  virtual void collideParticles(Ray & particle_a, Ray & particle_b) const override;
 };

@@ -16,15 +16,19 @@
 
 #pragma once
 
-#include "PICStudyBase.h"
+#include "ElasticCollisionBase.h"
 
-class CollisionlessPICStudy : public PICStudyBase
+class MaxwellCollision : public ElasticCollisionBase
 {
 public:
-  static InputParameters validParams();
+  MaxwellCollision(const InputParameters & parameters);
 
-  CollisionlessPICStudy(const InputParameters & parameters);
+  static InputParameters validParams();
+  virtual const Real
+  estimateSigmaCRMax(const std::vector<std::shared_ptr<Ray>> & particles) const override;
+
+  virtual const Real sampleCrossSection(Ray & particle_a, Ray & particle_b) const override;
 
 protected:
-  virtual void initializeParticles() override;
+  const Real _sigma_ref;
 };

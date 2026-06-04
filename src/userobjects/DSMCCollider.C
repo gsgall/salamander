@@ -16,9 +16,9 @@
 
 #include "DSMCCollider.h"
 #include "CollisionBase.h"
-#include "ParticleColliderBase.h"
 #include "Ray.h"
-#include <utility>
+
+registerMooseObject("SalamanderApp", DSMCCollider);
 
 InputParameters
 DSMCCollider::validParams()
@@ -32,9 +32,6 @@ DSMCCollider::validParams()
 
 DSMCCollider::DSMCCollider(const InputParameters & parameters) : ParticleColliderBase(parameters)
 {
-
-  _particle_indicies.resize(_species_ids.size());
-
   for (const auto & elem : *_fe_problem.mesh().getActiveLocalElementRange())
   {
     _elem_volumes.push_back(elem->volume());
@@ -47,6 +44,29 @@ DSMCCollider::DSMCCollider(const InputParameters & parameters) : ParticleCollide
   for (size_t i = 0; i < _elem_ids.size(); ++i)
   {
     _elem_wise_max_cr_values[i].resize(total_pairs);
+  }
+}
+
+void
+DSMCCollider::initializeInternalData(const std::vector<std::shared_ptr<Ray>> & particles)
+{
+  for (auto & elem_max_cr_values : _elem_wise_max_cr_values)
+  {
+    // this iterates over all of the different pair ids for particles
+    for (auto & max_cr_value : elem_max_cr_values)
+    {
+      for (const auto & collisions : _collision_objects)
+      {
+        for (const auto & collision : collisions)
+        {
+          const auto estimate = collision->estimateSigmaCRMax(particles);
+          if (estimate > max_cr_value)
+          {
+            max_cr_value = estimate;
+          }
+        }
+      }
+    }
   }
 }
 
@@ -64,13 +84,19 @@ DSMCCollider::collideParticles(const std::vector<std::shared_ptr<Ray>> & particl
       _particle_indicies[j].clear();
     }
 
-    const auto curr_particle = particles[curr_particle_index];
     /// this does assume that the particles are in sorted order when we get them from the study
     /// the collisional study base should ensure this is true
+    auto curr_particle = particles[curr_particle_index];
     while (curr_particle->currentElem()->id() == _elem_ids[i])
     {
       _particle_indicies[curr_particle->data(_species_index)].push_back(curr_particle_index);
       curr_particle_index++;
+      if (curr_particle_index == particles.size())
+      {
+        break;
+      }
+
+      curr_particle = particles[curr_particle_index];
     }
 
     const auto elem_volume = _elem_volumes[i];
@@ -100,7 +126,11 @@ DSMCCollider::collideParticles(const std::vector<std::shared_ptr<Ray>> & particl
           for (size_t k = 0; k < collision_pairs; ++k)
           {
             const auto index_a = static_cast<size_t>(a_count * _generator.rand());
-            const auto index_b = static_cast<size_t>(b_count * _generator.rand());
+            size_t index_b;
+            do
+            {
+              index_b = static_cast<size_t>(b_count * _generator.rand());
+            } while ((id_a == id_b) && (index_a == index_b));
 
             const auto particle_a = particles[index_a];
             const auto particle_b = particles[index_b];

@@ -17,6 +17,7 @@
 #pragma once
 
 #include "GeneralUserObject.h"
+#include "MooseRandom.h"
 #include "Ray.h"
 
 class CollisionalPICStudy;
@@ -26,6 +27,7 @@ public:
   CollisionBase(const InputParameters & parameters);
 
   static InputParameters validParams();
+  virtual void initialSetup() override;
   /**
    * Unused methods
    */
@@ -34,6 +36,9 @@ public:
   virtual void finalize() override final {}
   virtual void execute() override final {}
   ///@}
+  ///
+  virtual const Real
+  estimateSigmaCRMax(const std::vector<std::shared_ptr<Ray>> & particles) const = 0;
   virtual const Real sampleCrossSection(Ray & particle_a, Ray & particle_b) const = 0;
   virtual void collideParticles(Ray & particle_a, Ray & particle_b) const = 0;
 
@@ -45,12 +50,14 @@ public:
 protected:
   const Point particleVelocity(const Ray & particle) const;
   const Real centerOfMassEnergy(const Ray & particle_a, const Ray & particle_b) const;
+  const Point centerOfMassVelocity(const Ray & particle_a, const Ray & particle_b) const;
 
-  const CollisionalPICStudy & _study;
-  const std::array<RayDataIndex, 3> _velocity_indicies;
-  const RayDataIndex _weight_index;
-  const RayDataIndex _mass_index;
-  const RayDataIndex _species_index;
+  MooseRandom _generator;
+  const CollisionalPICStudy * _study;
+  std::array<RayDataIndex, 3> _velocity_indicies;
+  RayDataIndex _weight_index;
+  RayDataIndex _mass_index;
+  RayDataIndex _species_index;
   std::vector<unsigned int> _reactant_ids;
   std::vector<unsigned int> _product_ids;
 };

@@ -15,13 +15,15 @@
 //*
 
 #include "CollisionalPICStudy.h"
+#include "PICStudyBase.h"
 #include "ParticleColliderBase.h"
-#include "Ray.h"
+
+registerMooseObject("SalamanderApp", CollisionalPICStudy);
 
 InputParameters
 CollisionalPICStudy::validParams()
 {
-  auto params = RayTracingStudy::validParams();
+  auto params = PICStudyBase::validParams();
   params.addClassDescription("PIC Study Class that implements the logic required for performing "
                              "the DSMC collisional algorithm.");
   params.addRequiredParam<UserObjectName>(
@@ -38,13 +40,22 @@ CollisionalPICStudy::CollisionalPICStudy(const InputParameters & parameters)
 void
 CollisionalPICStudy::initialSetup()
 {
+  PICStudyBase::initialSetup();
   _collider = &const_cast<ParticleColliderBase &>(getUserObject<ParticleColliderBase>("collider"));
 }
 
 void
-CollisionalPICStudy::reinitializeParticles()
+CollisionalPICStudy::initializeParticles()
 {
-  PICStudyBase::reinitializeParticles();
+  PICStudyBase::initializeParticles();
+  _collider->initializeInternalData(_banked_rays);
+  moveRaysToBuffer(_banked_rays);
+}
+
+void
+CollisionalPICStudy::postExecuteStudy()
+{
+  PICStudyBase::postExecuteStudy();
 
   /// we are going to sort all of the particles we have by the element
   /// if for the elements that end in for collisions
