@@ -44,7 +44,6 @@ void
 ParticleColliderBase::initialSetup()
 {
   _study = &getUserObject<CollisionalPICStudy>("study");
-  _velocity_indicies = _study->velocityIndicies();
   _species_index = _study->speciesIndex();
   _weight_index = _study->weightIndex();
   _mass_index = _study->massIndex();

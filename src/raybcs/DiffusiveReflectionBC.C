@@ -53,7 +53,7 @@ void
 DiffusiveReflectionBC::onBoundary(const unsigned int num_applying)
 {
   const auto & normal = _study.getSideNormal(_current_elem, _current_intersected_side, _tid);
-  for (const auto i : make_range(3))
+  for (size_t i [[maybe_unused]] = 0; i < 3; ++i)
   {
     mooseAssert(libMesh::absolute_fuzzy_equals(normal(i), 0) ||
                     libMesh::absolute_fuzzy_equals(std::abs(normal(i)), 1.0),

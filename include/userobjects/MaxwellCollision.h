@@ -24,6 +24,7 @@ public:
   MaxwellCollision(const InputParameters & parameters);
 
   static InputParameters validParams();
+
   virtual const Real
   estimateSigmaCRMax(const std::vector<std::shared_ptr<Ray>> & particles) const override;
 

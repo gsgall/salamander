@@ -1,15 +1,15 @@
 # reference pressure in Pa i.e. J / m^3
-# P_init = 266.644
-# # initial temperature in K
-# T_init = 273.15
-# # universal gas constant in J / (mol K)
-# R_u = 8.314472
-# # Avagadros number in 1 / mol
-# N_A = 6.022140e23
-# # Argon Molar Mass kg / kmol
-# m_Ar = '${fparse 39.948 * 1e-3 / N_A}'
-# # number density
-# number_density = '${fparse P_init * N_A / (R_u * T_init)}'
+P_init = 266.644
+# initial temperature in K
+T_init = 273.15
+# universal gas constant in J / (mol K)
+R_u = 8.314472
+# Avagadros number in 1 / mol
+N_A = 6.022140e23
+# Argon Molar Mass kg / kmol
+m_Ar = '${fparse 39.948 * 1e-3 / N_A}'
+# number density
+number_density = '${fparse P_init * N_A / (R_u * T_init)}'
 
 [GlobalParams]
   seed = 0
@@ -18,7 +18,7 @@
 [Mesh/gmg]
   type = GeneratedMeshGenerator
   dim = 1
-  nx = 1
+  nx = 50
   xmax = 1
 []
 
@@ -31,13 +31,13 @@
   family = MONOMIAL
 []
 
-# [Distributions]
-#   # [initial_dist]
-#   #   type = Maxwellian
-#   #   mass = ${m_Ar}
-#   #   temperature = ${T_init}
-#   # []
-# []
+[Distributions]
+  [initial_dist]
+    type = Maxwellian
+    mass = ${m_Ar}
+    temperature = ${T_init}
+  []
+[]
 
 [UserObjects]
   [stepper]
@@ -45,33 +45,34 @@
     # type = TestSimpleStepper
   []
 
-  # [velocity_initializer]
-  #   type = VelocitiesFromDistributionsVelocityInitializer
-  #   distributions = 'initial_dist initial_dist initial_dist'
-  # []
-
-  [constant_initializer]
-    type = ConstantVelocityInitializer
-    velocities = '2 3 4'
+  [velocity_initializer]
+    type = VelocitiesFromDistributionsVelocityInitializer
+    distributions = 'initial_dist initial_dist initial_dist'
   []
+
+  # [constant_initializer]
+  #   type = ConstantVelocityInitializer
+  #   velocities = '2 3 4'
+  # []
 
   [particle_initializer]
     type = PerElementParticleInitializer
     species = 'A'
     particles_per_element = 10
-    number_density = 1
-    # number_density = ${number_density}
+    # number_density = 1
+    number_density = ${number_density}
     charge = 0
-    mass = 1
-    # mass = ${m_Ar}
-    velocity_initializer = constant_initializer
+    # mass = 1
+    mass = ${m_Ar}
+    # velocity_initializer = constant_initializer
+    velocity_initializer = velocity_initializer
   []
   [maxwell]
     type = MaxwellCollision
     reactants = 'A A'
     products = 'A A'
     study = study
-    reference_value = 1
+    reference_value = 1e-20
   []
   [collider]
     type = DSMCCollider
@@ -88,12 +89,12 @@
     execute_on = 'TIMESTEP_BEGIN'
     ray_kernel_coverage_check = false
   []
-  # [temp_accum]
-  #   type = PerElementAverageTemperatureAccumulator
-  #   study = study
-  #   species = 'B'
-  #   aux_variable = temperature
-  # []
+  [temp_accum]
+    type = PerElementAverageTemperatureAccumulator
+    study = study
+    species = 'A'
+    aux_variable = temperature
+  []
 []
 
 # [VectorPostprocessors]
@@ -117,13 +118,13 @@
 
 [Executioner]
   type = Transient
-  dt = 2
+  dt = 1
   num_steps = 1
 []
 
 [Outputs]
-  csv = true
-  # exodus = true
+  # csv = true
+  exodus = true
   execute_on = 'TIMESTEP_END'
 []
 

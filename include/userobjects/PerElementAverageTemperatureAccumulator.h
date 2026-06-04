@@ -40,7 +40,7 @@ protected:
 
   const PICStudyBase & _study;
   const unsigned int _species_id;
-  const std::array<RayDataIndex, 3> _velocity_indicies;
+  const std::vector<RayDataIndex> _velocity_indicies;
   const RayDataIndex _species_index;
   const RayDataIndex _mass_index;
   const RayDataIndex _weight_index;

@@ -42,7 +42,6 @@ void
 CollisionBase::initialSetup()
 {
   _study = &getUserObject<CollisionalPICStudy>("study");
-  _velocity_indicies = _study->velocityIndicies();
   _species_index = _study->speciesIndex();
   _weight_index = _study->weightIndex();
   _mass_index = _study->massIndex();
@@ -64,19 +63,12 @@ CollisionBase::initialSetup()
   }
 }
 
-const Point
-CollisionBase::particleVelocity(const Ray & particle) const
-{
-  const auto data = particle.data();
-  return Point(
-      data[_velocity_indicies[0]], data[_velocity_indicies[1]], data[_velocity_indicies[2]]);
-}
-
 const Real
 CollisionBase::relativeSpeed(const Ray & particle_a, const Ray & particle_b) const
 {
-  const auto vel_a = particleVelocity(particle_a);
-  const auto vel_b = particleVelocity(particle_b);
+  Point vel_a, vel_b;
+  _study->getVelocityData(particle_a, vel_a);
+  _study->getVelocityData(particle_b, vel_b);
   return (vel_a - vel_b).norm();
 }
 const Real
@@ -86,8 +78,9 @@ CollisionBase::centerOfMassEnergy(const Ray & particle_a, const Ray & particle_b
   const auto m_b = particle_b.data(_mass_index);
   const auto reduced_mass = m_a * m_b / (m_a + m_b);
 
-  const auto vel_a = particleVelocity(particle_a);
-  const auto vel_b = particleVelocity(particle_b);
+  Point vel_a, vel_b;
+  _study->getVelocityData(particle_a, vel_a);
+  _study->getVelocityData(particle_b, vel_b);
 
   return 0.5 * reduced_mass * (vel_a - vel_b).norm_sq();
 }
@@ -98,8 +91,9 @@ CollisionBase::centerOfMassVelocity(const Ray & particle_a, const Ray & particle
   const auto m_a = particle_a.data(_mass_index);
   const auto m_b = particle_b.data(_mass_index);
 
-  const auto vel_a = particleVelocity(particle_a);
-  const auto vel_b = particleVelocity(particle_b);
+  Point vel_a, vel_b;
+  _study->getVelocityData(particle_a, vel_a);
+  _study->getVelocityData(particle_b, vel_b);
 
   return (m_a * vel_a + m_b * vel_b) / (m_a + m_b);
 }

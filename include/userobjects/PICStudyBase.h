@@ -41,7 +41,7 @@ public:
    * Getter method for getting the ray data indicies which are needed to access the velocity
    * components stored in ray data
    */
-  const std::array<RayDataIndex, 3> velocityIndicies() const;
+  const std::vector<RayDataIndex> velocityIndicies() const;
   const RayDataIndex speciesIndex() const;
   const RayDataIndex massIndex() const;
   const RayDataIndex chargeIndex() const;
@@ -58,6 +58,15 @@ public:
    */
   void setVelocityData(Ray & ray, const Point & v) const;
 
+  /**
+   * Method for getting a rays velocity as a vector
+   * Each component is retrieved from ray data and given
+   * back to user as a vector to make calculations easier
+   * @param ray the ray
+   * @para<m v the point where the rays velocity will be stored
+   */
+  void getVelocityData(const Ray & ray, Point & v) const;
+
 protected:
   /// the name of the particle initializers that will be used to place the initial particle distribution
   std::vector<const ParticleInitializerBase *> _initializers;
@@ -70,7 +79,7 @@ protected:
 
   virtual void postExecuteStudy() override;
   /// Ray data for storing velocity components
-  const std::array<RayDataIndex, 3> _velocity_indicies;
+  const std::vector<RayDataIndex> _velocity_indicies;
   /// Ray data for storing the number of real particles each ray represents
   const RayDataIndex _weight_index;
   /// Ray data for storing the charge of the particle
@@ -86,14 +95,6 @@ protected:
 
   /// temporary variable used when resetting rays
   Point _temporary_velocity;
-  /**
-   * Method for getting a rays velocity as a vector
-   * Each component is retrieved from ray data and given
-   * back to user as a vector to make calculations easier
-   * @param ray the ray
-   * @para<m v the point where the rays velocity will be stored
-   */
-  void getVelocityData(const Ray & ray, Point & v) const;
 
   /**
    *  Method that users should override for their custom particle initialization

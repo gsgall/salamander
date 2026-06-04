@@ -40,7 +40,7 @@ private:
 
 protected:
   /// Stores all of the indicies for all velocity indicies
-  const std::array<RayDataIndex, 3> _velocity_indicies;
+  const std::vector<RayDataIndex> _velocity_indicies;
   /// this is a scratch instance of point. It allows people to do some
   /// intermediate computations if needed
   Point _temporary_velocity;

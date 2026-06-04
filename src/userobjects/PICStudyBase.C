@@ -204,7 +204,7 @@ PICStudyBase::createParticle(const InitialParticleData & data)
   return ray;
 }
 
-const std::array<RayDataIndex, 3>
+const std::vector<RayDataIndex>
 PICStudyBase::velocityIndicies() const
 {
   return _velocity_indicies;

@@ -145,9 +145,9 @@ DSMCCollider::collideParticles(const std::vector<std::shared_ptr<Ray>> & particl
             const auto selection_rand = _generator.rand();
             size_t collision_index = 0;
 
-            for (size_t l = 0; l < collisions.size(); ++l)
+            for (size_t l = 0; l < collisions.size() - 1; ++l)
             {
-              collision_index += static_cast<size_t>(selection_rand < temp_xsecs[l] / total_xsec);
+              collision_index = static_cast<size_t>(selection_rand > (temp_xsecs[l] / total_xsec));
             }
 
             const auto & collision = collisions[collision_index];

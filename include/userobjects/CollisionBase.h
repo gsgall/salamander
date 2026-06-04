@@ -48,13 +48,11 @@ public:
   const Real relativeSpeed(const Ray & particle_a, const Ray & particle_b) const;
 
 protected:
-  const Point particleVelocity(const Ray & particle) const;
   const Real centerOfMassEnergy(const Ray & particle_a, const Ray & particle_b) const;
   const Point centerOfMassVelocity(const Ray & particle_a, const Ray & particle_b) const;
 
   MooseRandom _generator;
   const CollisionalPICStudy * _study;
-  std::array<RayDataIndex, 3> _velocity_indicies;
   RayDataIndex _weight_index;
   RayDataIndex _mass_index;
   RayDataIndex _species_index;

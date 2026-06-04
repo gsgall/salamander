@@ -33,11 +33,12 @@ ElasticCollisionBase::ElasticCollisionBase(const InputParameters & parameters)
 void
 ElasticCollisionBase::collideParticles(Ray & particle_a, Ray & particle_b) const
 {
-  auto vel_a = particleVelocity(particle_a);
+  Point vel_a, vel_b;
   const auto m_a = particle_a.data(_mass_index);
+  _study->getVelocityData(particle_a, vel_a);
 
-  auto vel_b = particleVelocity(particle_b);
   const auto m_b = particle_b.data(_mass_index);
+  _study->getVelocityData(particle_b, vel_b);
   const auto total_mass = m_a + m_b;
 
   Point relative_velocity = vel_a - vel_b;

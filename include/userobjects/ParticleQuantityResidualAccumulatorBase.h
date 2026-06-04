@@ -42,7 +42,7 @@ protected:
   const PICStudyBase & _study;
   /// the ray data index where each of the velocity components are stored
   ///@{
-  const std::array<RayDataIndex, 3> _velocity_indicies;
+  const std::vector<RayDataIndex> _velocity_indicies;
   ///@}
   /// the ray data index where the weight of the particle is stored
   const RayDataIndex _weight_index;

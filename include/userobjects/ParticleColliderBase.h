@@ -46,7 +46,6 @@ public:
 protected:
   MooseRandom _generator;
   const CollisionalPICStudy * _study;
-  std::array<unsigned int, 3> _velocity_indicies;
   RayDataIndex _species_index;
   RayDataIndex _weight_index;
   RayDataIndex _mass_index;
