@@ -16,24 +16,12 @@
 
 #pragma once
 
-#include "ParticleColliderBase.h"
+#include "PICStudyBase.h"
 
-class DSMCCollider : public ParticleColliderBase
+class CollisionlessPICStudy : public PICStudyBase
 {
 public:
-  DSMCCollider(const InputParameters & parameters);
-
   static InputParameters validParams();
 
-  virtual void collideParticles(const std::vector<std::shared_ptr<Ray>> & particles) override;
-
-protected:
-  /// this will store the maximum value of the produce of
-  /// the cross section and relative speed
-  /// the first index will be the element and
-  /// the second vector will store the value for each species pair
-  std::vector<Real> _elem_volumes;
-  std::vector<dof_id_type> _elem_ids;
-  std::vector<std::vector<Real>> _elem_wise_max_cr_values;
-  std::vector<std::vector<size_t>> _particle_indicies;
+  CollisionlessPICStudy(const InputParameters & parameters);
 };

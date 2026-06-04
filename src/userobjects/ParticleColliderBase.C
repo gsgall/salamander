@@ -14,8 +14,9 @@
 //* ALL RIGHTS RESERVED
 //*
 
-#include "PICStudyBase.h"
 #include "ParticleColliderBase.h"
+#include "CollisionalPICStudy.h"
+#include "CollisionBase.h"
 
 InputParameters
 ParticleColliderBase::validParams()
@@ -24,26 +25,48 @@ ParticleColliderBase::validParams()
   params.addClassDescription("Base class for ParticleStepper. Provides the basic implementation"
                              "for dimensional dependent velocity updating."
                              "And the ability to sample vector fields for use in a particle step");
+  params.addRequiredParam<UserObjectName>("study", "The study for the system.");
+  params.addRequiredParam<std::vector<UserObjectName>>(
+      "collison_objects",
+      "The objects that contain the actual logic to carry out the collisions required.");
   params.addParam<unsigned int>(
       "seed", 0, "The seed value for the random number generator used for collisions");
   return params;
 }
 
 ParticleColliderBase::ParticleColliderBase(const InputParameters & parameters)
-  : GeneralUserObject(parameters), _generator()
+  : GeneralUserObject(parameters),
+    _generator(),
+    _study(getUserObject<CollisionalPICStudy>("study")),
+    _velocity_indicies(_study.velocityIndicies()),
+    _species_index(_study.speciesIndex()),
+    _weight_index(_study.weightIndex()),
+    _mass_index(_study.massIndex()),
+    _species_ids(_study.speciesIds())
 {
   _generator.seed(getParam<unsigned int>("seed"));
 }
 
 void
-ParticleColliderBase::collectParticleData(const PICStudyBase & study)
+ParticleColliderBase::initialSetup()
 {
-  _species_names = study.speciesNames();
-  _species_ids = study.speciesIds();
-  _species_index = study.speciesIndex();
-  _weight_index = study.weightIndex();
+  const auto & names = getParam<std::vector<UserObjectName>>("collision_objects");
+  const auto total_pairs = pairingFunction(_species_ids.size(), _species_ids.size()) + 1;
+  _collision_objects.resize(total_pairs);
+  _temporary_xsecs.resize(total_pairs);
 
-  setupInternalData();
+  for (const auto & name : names)
+  {
+    const auto & collision = getUserObjectByName<CollisionBase>(name);
+    const auto reactant_ids = collision.reactantIds();
+    const auto pair_id = pairingFunction(reactant_ids[0], reactant_ids[1]);
+    _collision_objects[pair_id].push_back(&collision);
+  }
+
+  for (size_t i = 0; i < total_pairs; ++i)
+  {
+    _temporary_xsecs[i].resize(_collision_objects[i].size());
+  }
 }
 
 unsigned int

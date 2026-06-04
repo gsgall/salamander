@@ -14,25 +14,19 @@
 //* ALL RIGHTS RESERVED
 //*
 
-#pragma once
+#include "CollisionlessPICStudy.h"
 
-#include "PICStudyBase.h"
+registerMooseObject("SalamanderApp", CollisionlessPICStudy);
 
-class ParticleColliderBase;
-class CollisionalPICStudy : public PICStudyBase
+InputParameters
+CollisionlessPICStudy::validParams()
 {
-public:
-  CollisionalPICStudy(const InputParameters & parameters);
-  /// in the initial setup we will create the collider.
-  /// Since the collider needs access to all of the data indicies in the study
-  /// it cannot be created during study construction
-  virtual void initialSetup() override;
+  auto params = RayTracingStudy::validParams();
+  params.addClassDescription("PIC Study Object for Collisionless PIC simulations");
+  return params;
+}
 
-  static InputParameters validParams();
-
-protected:
-  virtual void initializeParticles() override;
-  virtual void reinitializeParticles() override;
-
-  ParticleColliderBase * _collider;
-};
+CollisionlessPICStudy::CollisionlessPICStudy(const InputParameters & parameters)
+  : PICStudyBase(parameters)
+{
+}

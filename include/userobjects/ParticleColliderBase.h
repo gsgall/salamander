@@ -21,13 +21,16 @@
 #include "Ray.h"
 
 class Ray;
-class PICStudyBase;
+class CollisionBase;
+class CollisionalPICStudy;
 class ParticleColliderBase : public GeneralUserObject
 {
 public:
   ParticleColliderBase(const InputParameters & parameters);
 
   static InputParameters validParams();
+  virtual void initialSetup() override;
+
   /**
    * Unused methods
    */
@@ -39,17 +42,18 @@ public:
 
   virtual void collideParticles(const std::vector<std::shared_ptr<Ray>> & particles) = 0;
 
-  void collectParticleData(const PICStudyBase & study);
-
 protected:
   MooseRandom _generator;
-  RayDataIndex _species_index;
-  RayDataIndex _weight_index;
-  std::vector<std::string> _species_names;
-  std::vector<unsigned int> _species_ids;
-  std::vector<Real> _random_numbers;
+  const CollisionalPICStudy & _study;
+  const std::array<unsigned int, 3> _velocity_indicies;
+  const RayDataIndex _species_index;
+  const RayDataIndex _weight_index;
+  const RayDataIndex _mass_index;
+  const std::vector<unsigned int> & _species_ids;
 
-  virtual void setupInternalData() = 0;
+  std::vector<std::vector<const CollisionBase *>> _collision_objects;
+  std::vector<std::vector<Real>> _temporary_xsecs;
+
   unsigned int pairingFunction(const unsigned int species_id_1,
                                const unsigned int species_id_2) const;
 };

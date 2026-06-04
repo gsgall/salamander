@@ -25,10 +25,63 @@ CollisionBase::validParams()
   params.addClassDescription(
       "Base class for the actual collision logic for any given type of collision.");
   params.addRequiredParam<UserObjectName>("study", "The PICStudy that owns the Ray");
+  params.addRequiredParam<std::vector<std::string>>(
+      "reactants", "The species on the left hand side of the reaction");
+  params.addRequiredParam<std::vector<std::string>>(
+      "products", "The species on the right hand side of the reaction");
   return params;
 }
 
 CollisionBase::CollisionBase(const InputParameters & parameters)
-  : GeneralUserObject(parameters), _study(getUserObject<PICStudyBase>("study"))
+  : GeneralUserObject(parameters),
+    _study(getUserObject<CollisionalPICStudy>("study")),
+    _velocity_indicies(_study.velocityIndicies()),
+    _weight_index(_study.weightIndex()),
+    _mass_index(_study.massIndex()),
+    _species_index(_study.speciesIndex())
 {
+  const auto reactant_names = getParam<std::vector<std::string>>("reactants");
+  const auto product_names = getParam<std::vector<std::string>>("products");
+
+  // both of these loops might error since the call of
+  // _study.speciesId(name) calls moosError in the case
+  // that a provided species name is not known to the study
+  for (const auto & name : reactant_names)
+  {
+    _reactant_ids.push_back(_study.speciesId(name));
+  }
+
+  for (const auto & name : product_names)
+  {
+    _product_ids.push_back(_study.speciesId(name));
+  }
+}
+
+const Point
+CollisionBase::particleVelocity(const Ray & particle) const
+{
+  const auto data = particle.data();
+  return Point(
+      data[_velocity_indicies[0]], data[_velocity_indicies[1]], data[_velocity_indicies[2]]);
+}
+
+const Real
+CollisionBase::relativeSpeed(const Ray & particle_a, const Ray & particle_b) const
+{
+  const auto vel_a = particleVelocity(particle_a);
+  const auto vel_b = particleVelocity(particle_b);
+  return (vel_a - vel_b).norm();
+}
+
+const Real
+CollisionBase::centerOfMassEnergy(const Ray & particle_a, const Ray & particle_b) const
+{
+  const auto m_a = particle_a.data(_mass_index);
+  const auto m_b = particle_b.data(_mass_index);
+  const auto reduced_mass = m_a * m_b / (m_a + m_b);
+
+  const auto vel_a = particleVelocity(particle_a);
+  const auto vel_b = particleVelocity(particle_b);
+
+  return 0.5 * reduced_mass * (vel_a - vel_b).norm_sq();
 }

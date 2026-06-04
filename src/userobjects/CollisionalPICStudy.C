@@ -31,18 +31,14 @@ CollisionalPICStudy::validParams()
 }
 
 CollisionalPICStudy::CollisionalPICStudy(const InputParameters & parameters)
-  : PICStudyBase(parameters),
-    // removing the const from this because calling collide particles with the collider should
-    // update some internal state of the collider as well.
-    _collider(const_cast<ParticleColliderBase &>(getUserObject<ParticleColliderBase>("collider")))
+  : PICStudyBase(parameters)
 {
 }
 
 void
-CollisionalPICStudy::initializeParticles()
+CollisionalPICStudy::initialSetup()
 {
-  PICStudyBase::initializeParticles();
-  _collider.collectParticleData(_species_names, _species_ids);
+  _collider = &const_cast<ParticleColliderBase &>(getUserObject<ParticleColliderBase>("collider"));
 }
 
 void
@@ -57,5 +53,5 @@ CollisionalPICStudy::reinitializeParticles()
             [](const std::shared_ptr<Ray> & a, const std::shared_ptr<Ray> & b)
             { return a->currentElem()->id() < b->currentElem()->id(); });
 
-  _collider.collideParticles(_banked_rays);
+  _collider->collideParticles(_banked_rays);
 }
