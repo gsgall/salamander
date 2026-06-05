@@ -35,6 +35,7 @@ public:
   virtual const std::vector<Point>
   getParticleVelocities(const size_t num_samples, const unsigned int additional_seed) const = 0;
 
+  virtual const Point getParticleVelocity() const = 0;
   /**
    * Unused methods
    */

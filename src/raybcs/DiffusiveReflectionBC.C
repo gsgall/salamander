@@ -60,7 +60,7 @@ DiffusiveReflectionBC::onBoundary(const unsigned int num_applying)
                 "This boundary condition only properly supports hypercube shaped domains.");
   }
 
-  _temporary_velocity = _velocity_initializer.getParticleVelocities(1, _seed)[0];
+  _temporary_velocity = _velocity_initializer.getParticleVelocity();
 
   if (std::signbit(-_temporary_velocity(_reflection_direction) * normal(_reflection_direction)))
   {

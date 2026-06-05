@@ -66,3 +66,11 @@ VelocitiesFromDistributionsVelocityInitializer::getParticleVelocities(const size
 
   return velocities;
 }
+
+const Point
+VelocitiesFromDistributionsVelocityInitializer::getParticleVelocity() const
+{
+  return Point(_distributions[0]->quantile(_generator.rand()),
+               _distributions[1]->quantile(_generator.rand()),
+               _distributions[2]->quantile(_generator.rand()));
+}

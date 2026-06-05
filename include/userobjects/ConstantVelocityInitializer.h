@@ -29,6 +29,8 @@ public:
   getParticleVelocities(const size_t num_samples,
                         const unsigned int additional_seed) const override;
 
+  virtual const Point getParticleVelocity() const override { return Point(); }
+
 protected:
   const std::vector<Point> _velocities;
 };

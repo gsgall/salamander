@@ -165,6 +165,15 @@ DSMCCollider::collideParticles(const std::vector<std::shared_ptr<Ray>> & particl
             }
 
             collisions[collision_index]->collideParticles(*particle_a, *particle_b);
+            for (const auto d : particle_a->data())
+            {
+              assert(!std::isnan(d));
+            }
+
+            for (const auto d : particle_b->data())
+            {
+              assert(!std::isnan(d));
+            }
           }
         }
       }

@@ -34,9 +34,9 @@ PerElementAverageTemperatureAccumulator::validParams()
 {
   auto params = GeneralUserObject::validParams();
   params.addRequiredParam<UserObjectName>("study", "The PICStudy that owns the particles");
-  params.addParam<AuxVariableName>(
+  params.addRequiredParam<AuxVariableName>(
       "aux_variable", "The name of the aux variable where we want to do store the data");
-  params.addParam<std::string>(
+  params.addRequiredParam<std::string>(
       "species", "The name of the species of which you want to calculate the temperature.");
   return params;
 }

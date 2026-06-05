@@ -30,6 +30,7 @@ public:
   virtual const std::vector<Point> getParticleVelocities(size_t num_samples,
                                                          const unsigned int seed) const override;
 
+  virtual const Point getParticleVelocity() const override;
   /**
    * We use this to get the actual distribution object that we need to use in order to sample the
    * particle speeds
