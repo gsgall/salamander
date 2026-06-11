@@ -17,24 +17,9 @@
 #pragma once
 
 #include "GeneralUserObject.h"
+#include "ParticleData.h"
 
 class VelocityInitializerBase;
-
-struct InitialParticleData
-{
-  /// the location where the particle will be placed
-  Point position;
-  /// the velocity that the particle will be given
-  Point velocity;
-  /// the number of physical particles that this particle represents
-  Real weight;
-  /// the charge of the physical particle this computational particle represents
-  Real charge;
-  /// the mass of the physical particle this computational particle represents
-  Real mass;
-  /// the element that this particle will be placed into
-  const Elem * elem;
-};
 
 class ParticleInitializerBase : public GeneralUserObject
 {
@@ -47,7 +32,7 @@ public:
    * This method will be called by PIC studies to give them all of the data needed to create and
    * place particles on the finite element mesh
    * */
-  virtual std::vector<InitialParticleData> getParticleData() const = 0;
+  virtual std::vector<Salamander::ParticleData> getParticleData() const = 0;
 
   /**
    * This method allows the PIC study to retrieve the name of the species that this initializer is

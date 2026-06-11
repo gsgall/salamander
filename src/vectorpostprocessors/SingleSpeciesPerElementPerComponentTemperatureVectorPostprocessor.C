@@ -14,15 +14,18 @@
 //* ALL RIGHTS RESERVED
 //*
 
-#include "SingleSpeciesPerElementTemperatureVectorPostprocessor.h"
+#include "SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor.h"
 #include "Constants.h"
 #include "PICStudyBase.h"
 #include <unordered_map>
 
-registerMooseObject("SalamanderApp", SingleSpeciesPerElementTemperatureVectorPostprocessor);
+registerMooseObject("SalamanderApp",
+                    SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor);
+
+constexpr Real k_B = 1.380649e-23;
 
 InputParameters
-SingleSpeciesPerElementTemperatureVectorPostprocessor::validParams()
+SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription(
@@ -30,21 +33,20 @@ SingleSpeciesPerElementTemperatureVectorPostprocessor::validParams()
   params.addRequiredParam<UserObjectName>("study", "The PICStudy that owns the Ray");
   params.addRequiredParam<std::string>(
       "species", "The name of the species of which you want to calculate the temperature.");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "component", "component < 3", "The component for which you are taking the temperature");
   return params;
 }
 
-SingleSpeciesPerElementTemperatureVectorPostprocessor::
-    SingleSpeciesPerElementTemperatureVectorPostprocessor(const InputParameters & parameters)
+SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor::
+    SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor(
+        const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     _study(getUserObject<PICStudyBase>("study")),
     _species_id(_study.speciesId(getParam<std::string>("species"))),
     _species_index(_study.speciesIndex()),
     _mass_index(_study.getRayDataIndex("mass")),
-    _velocity_indicies({
-        _study.getRayDataIndex("v_x"),
-        _study.getRayDataIndex("v_y"),
-        _study.getRayDataIndex("v_z"),
-    })
+    _velocity_index(_study.velocityIndicies()[getParam<unsigned int>("component")])
 {
   const auto & elem_range = *_fe_problem.mesh().getActiveLocalElementRange();
   _num_elems = std::distance(elem_range.begin(), elem_range.end());
@@ -60,7 +62,7 @@ SingleSpeciesPerElementTemperatureVectorPostprocessor::
 }
 
 void
-SingleSpeciesPerElementTemperatureVectorPostprocessor::initialize()
+SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor::initialize()
 {
   for (size_t i = 0; i < 2 * _num_elems; i++)
   {
@@ -69,7 +71,7 @@ SingleSpeciesPerElementTemperatureVectorPostprocessor::initialize()
 }
 
 void
-SingleSpeciesPerElementTemperatureVectorPostprocessor::execute()
+SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor::execute()
 {
 
   // key is element id and count is particle in element
@@ -89,13 +91,10 @@ SingleSpeciesPerElementTemperatureVectorPostprocessor::execute()
     unsigned int elem_id = ray->currentElem()->id();
 
     Real local_sum = 0;
-    for (const auto idx : _velocity_indicies)
-    {
-      local_sum += ray->data(_mass_index) * ray->data(idx) * ray->data(idx);
-    }
+    local_sum += ray->data(_mass_index) * ray->data(_velocity_index) * ray->data(_velocity_index);
 
     particle_count[elem_id] += 1;
-    element_temperatures[elem_id] += local_sum / (3.0 * Salamander::constants::k_b);
+    element_temperatures[elem_id] += local_sum / Salamander::constants::k_b;
   }
 
   for (size_t i = 0; i < _num_elems; i++)
@@ -108,7 +107,7 @@ SingleSpeciesPerElementTemperatureVectorPostprocessor::execute()
 }
 
 void
-SingleSpeciesPerElementTemperatureVectorPostprocessor::finalize()
+SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor::finalize()
 {
   for (size_t i = 0; i < _num_elems; i++)
   {

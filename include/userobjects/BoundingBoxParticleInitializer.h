@@ -29,7 +29,7 @@ public:
    * PerElementParticleInitializer
    * if the bounding box encompasses the whole domain then these are the same
    */
-  virtual std::vector<InitialParticleData> getParticleData() const override;
+  virtual std::vector<Salamander::ParticleData> getParticleData() const override;
 
 protected:
   /// The Point object constructed from the x1, y1, z1 components for the bottom left BB corner

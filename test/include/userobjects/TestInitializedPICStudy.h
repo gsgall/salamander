@@ -39,7 +39,7 @@ protected:
    */
   virtual RayID generateUniqueRayID(const THREAD_ID tid) override;
 
-  std::shared_ptr<Ray> createParticle(const InitialParticleData & data) override;
+  std::shared_ptr<Ray> createParticle(const Salamander::ParticleData & data) override;
 
   /// wether or not the id generation scheme from raytracing study will be used or the one in this user object will be
   const bool _use_custom_id_scheme;

@@ -17,6 +17,7 @@
 #pragma once
 
 #include "GeneralUserObject.h"
+#include "ParticleData.h"
 
 class VelocityInitializerBase : public GeneralUserObject
 {
@@ -35,7 +36,12 @@ public:
   virtual const std::vector<Point>
   getParticleVelocities(const size_t num_samples, const unsigned int additional_seed) const = 0;
 
-  virtual const Point getParticleVelocity() const = 0;
+  virtual void setParticleVelocities(std::vector<Salamander::ParticleData> & particle_data,
+                                     const unsigned int additional_seed) const = 0;
+
+  virtual const std::vector<Point>
+  getParticleVelocities(const std::vector<Point> & positions,
+                        const unsigned int additional_seed) const = 0;
   /**
    * Unused methods
    */

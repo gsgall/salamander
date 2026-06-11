@@ -15,17 +15,20 @@
 //*
 
 #pragma once
+
 #include "Ray.h"
 #include "GeneralVectorPostprocessor.h"
 // Forward declarations
 class PICStudyBase;
 
-class SingleSpeciesPerElementTemperatureVectorPostprocessor : public GeneralVectorPostprocessor
+class SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor
+  : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  SingleSpeciesPerElementTemperatureVectorPostprocessor(const InputParameters & parameters);
+  SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor(
+      const InputParameters & parameters);
 
   /**
    * clears the data vector postprocessors before each
@@ -48,7 +51,7 @@ protected:
   const size_t _species_id;
   const RayDataIndex _species_index;
   const RayDataIndex _mass_index;
-  const std::vector<RayDataIndex> _velocity_indicies;
+  const RayDataIndex _velocity_index;
   unsigned int _num_elems;
   std::vector<VectorPostprocessorValue *> _data_values;
   std::vector<Real> _local_values;

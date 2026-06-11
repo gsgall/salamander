@@ -46,7 +46,7 @@ TestInitializedPICStudy::TestInitializedPICStudy(const InputParameters & paramet
 }
 
 std::shared_ptr<Ray>
-TestInitializedPICStudy::createParticle(const InitialParticleData & data)
+TestInitializedPICStudy::createParticle(const Salamander::ParticleData & data)
 {
   if (_curr_elem_id != data.elem->id())
   {

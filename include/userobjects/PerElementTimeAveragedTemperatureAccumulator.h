@@ -17,18 +17,17 @@
 #pragma once
 
 #include "GeneralUserObject.h"
-#include "Ray.h"
 
 class PICStudyBase;
 /**
  * UserObject for testing the AuxAccumulator
  */
-class PerElementAverageTemperatureAccumulator : public GeneralUserObject
+class PerElementTimeAveragedTemperatureAccumulator : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
 
-  PerElementAverageTemperatureAccumulator(const InputParameters & params);
+  PerElementTimeAveragedTemperatureAccumulator(const InputParameters & params);
 
   virtual void initialize() override {}
   virtual void execute() override;
@@ -37,8 +36,7 @@ public:
 protected:
   const PICStudyBase & _study;
   const unsigned int _species_id;
-  const std::vector<RayDataIndex> _velocity_indicies;
-  const RayDataIndex _species_index;
-  const RayDataIndex _mass_index;
-  const RayDataIndex _weight_index;
+  const unsigned int _time_step_start;
+  std::vector<Real> _current_average;
+  std::vector<Real> _total_weight;
 };

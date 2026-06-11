@@ -37,11 +37,11 @@ TestPlacedParticleInitializer::TestPlacedParticleInitializer(const InputParamete
 {
 }
 
-std::vector<InitialParticleData>
+std::vector<Salamander::ParticleData>
 TestPlacedParticleInitializer::getParticleData() const
 {
 
-  std::vector<InitialParticleData> particle_data;
+  std::vector<Salamander::ParticleData> particle_data;
   particle_data.reserve(_start_points.size());
   // for this one I am just not going to re seed since the velocities should specified explicitly
   // for each particle with the velocity initializer

@@ -14,8 +14,10 @@
 //* ALL RIGHTS RESERVED
 //*
 #include "DiffusiveReflectionBC.h"
-#include "VelocityInitializerBase.h"
+#include "MooseUtils.h"
 #include "libmesh/fuzzy_equals.h"
+#include "PICStudyBase.h"
+#include "Constants.h"
 
 registerMooseObject("SalamanderApp", DiffusiveReflectionBC);
 
@@ -26,46 +28,47 @@ DiffusiveReflectionBC::validParams()
   params.addClassDescription(
       "Reflective boundary condition that resamples the particles velocity when it hits the "
       "boundary."
-      "This condition requires that each component of velocity is sampled it's own distribution.");
-  params.addRangeCheckedParam<unsigned int>("reflection_direction",
-                                            "reflection_direction < 3",
-                                            "The direction which the rays are being reflects");
+      "This condition requires that each component of velocity is sampled it's own distribution."
+      "Currently this condition only works for x component.");
   params.addParam<unsigned int>(
       "seed",
       0,
       "The seed for the random number generator used by the velocity sampler on the boundary.");
 
-  params.addRequiredParam<UserObjectName>(
-      "velocity_initializer",
-      "The user object that will generate the initial velocities for all of the particles.");
+  params.addRequiredRangeCheckedParam<Real>(
+      "temperature", "temperature > 0", "The temperature of the wall.");
   return params;
 }
 
 DiffusiveReflectionBC::DiffusiveReflectionBC(const InputParameters & params)
   : ParticleBCBase(params),
-    _seed(getParam<unsigned int>("seed")),
-    _velocity_initializer(getUserObject<VelocityInitializerBase>("velocity_initializer")),
-    _reflection_direction(getParam<unsigned int>("reflection_direction"))
+    _temperature(getParam<Real>("temperature")),
+    _mass_index(getStudy<PICStudyBase>().massIndex())
 {
+  _generator.seed(getParam<unsigned int>("seed"));
 }
 
 void
 DiffusiveReflectionBC::onBoundary(const unsigned int num_applying)
 {
+  // The direction this Ray reflects off this boundary
   const auto & normal = _study.getSideNormal(_current_elem, _current_intersected_side, _tid);
-  for (size_t i [[maybe_unused]] = 0; i < 3; ++i)
+
+  const Real most_probable_speed =
+      std::sqrt(2.0 * Salamander::constants::k_b * _temperature / currentRay()->data(_mass_index));
+  Real perpendicular_speed;
+  do
   {
-    mooseAssert(libMesh::absolute_fuzzy_equals(normal(i), 0) ||
-                    libMesh::absolute_fuzzy_equals(std::abs(normal(i)), 1.0),
-                "This boundary condition only properly supports hypercube shaped domains.");
-  }
+    perpendicular_speed = most_probable_speed * std::sqrt(-std::log(_generator.rand()));
+  } while (MooseUtils::absoluteFuzzyEqual(perpendicular_speed, 0));
 
-  _temporary_velocity = _velocity_initializer.getParticleVelocity();
+  const Real tangential_speed = most_probable_speed * std::sqrt(-std::log(_generator.rand()));
+  const Real theta = 2 * M_PI * _generator.rand();
 
-  if (std::signbit(-_temporary_velocity(_reflection_direction) * normal(_reflection_direction)))
-  {
-    _temporary_velocity(_reflection_direction) = -_temporary_velocity(_reflection_direction);
-  }
+  _temporary_velocity(0) = perpendicular_speed * -normal(0);
+  _temporary_velocity(1) = tangential_speed * std::sin(theta);
+  _temporary_velocity(2) = tangential_speed * std::cos(theta);
 
+  // note that this does not properly reset the rays final distance to be physically consistent
   changeParticleVelocity(_temporary_velocity);
 }

@@ -14,7 +14,7 @@
 //* ALL RIGHTS RESERVED
 //*
 
-#include "PerElementAverageTemperatureAccumulator.h"
+#include "PerElementTimeAveragedTemperatureAccumulator.h"
 #include "PICStudyBase.h"
 #include "AuxAccumulator.h"
 
@@ -27,10 +27,10 @@
 
 #include "Constants.h"
 
-registerMooseObject("SalamanderApp", PerElementAverageTemperatureAccumulator);
+registerMooseObject("SalamanderApp", PerElementTimeAveragedTemperatureAccumulator);
 
 InputParameters
-PerElementAverageTemperatureAccumulator::validParams()
+PerElementTimeAveragedTemperatureAccumulator::validParams()
 {
   auto params = GeneralUserObject::validParams();
   params.addRequiredParam<UserObjectName>("study", "The PICStudy that owns the particles");
@@ -38,18 +38,17 @@ PerElementAverageTemperatureAccumulator::validParams()
       "aux_variable", "The name of the aux variable where we want to do store the data");
   params.addRequiredParam<std::string>(
       "species", "The name of the species of which you want to calculate the temperature.");
+  params.addRequiredParam<unsigned int>(
+      "start_averaging_step", "the time step after which you would like to start averaging.");
   return params;
 }
 
-PerElementAverageTemperatureAccumulator::PerElementAverageTemperatureAccumulator(
+PerElementTimeAveragedTemperatureAccumulator::PerElementTimeAveragedTemperatureAccumulator(
     const InputParameters & params)
   : GeneralUserObject(params),
     _study(getUserObject<PICStudyBase>("study")),
     _species_id(_study.speciesId(getParam<std::string>("species"))),
-    _velocity_indicies(_study.velocityIndicies()),
-    _species_index(_study.speciesIndex()),
-    _mass_index(_study.massIndex()),
-    _weight_index(_study.weightIndex())
+    _time_step_start(getParam<unsigned int>("start_averaging_step"))
 {
 
   auto & aux = _fe_problem.getAuxiliarySystem();
@@ -61,21 +60,30 @@ PerElementAverageTemperatureAccumulator::PerElementAverageTemperatureAccumulator
                "This accumulator currently only supports aux variables of with order = CONSTANT "
                "and family = MONOMIAL");
   }
+
+  const auto & elem_range = *_fe_problem.mesh().getActiveLocalElementRange();
+  const auto elem_count = std::distance(elem_range.begin(), elem_range.end());
+
+  _current_average = std::vector<Real>(elem_count, 0.0);
+  _total_weight = std::vector<Real>(elem_count, 0.0);
 }
 
 void
-PerElementAverageTemperatureAccumulator::execute()
+PerElementTimeAveragedTemperatureAccumulator::execute()
 {
+  if (_t_step < _time_step_start)
+    return;
 
   auto accumulator = std::make_unique<SALAMANDER::AuxAccumulator>(
       _fe_problem, getParam<AuxVariableName>("aux_variable"));
   const auto particles = _study.bankedParticles();
+
+  size_t i = 0;
   for (const auto & elem : *_fe_problem.mesh().getActiveLocalElementRange())
   {
     const auto id = elem->id();
     Point mean_velocity = Point(0, 0, 0);
     Real total_weight = 0.0;
-
     for (const auto particle : particles)
     {
       if (particle->currentElem()->id() != id || _study.species(*particle) != _species_id)
@@ -101,9 +109,14 @@ PerElementAverageTemperatureAccumulator::execute()
       total_difference += weight * mass * difference.norm_sq();
     }
 
-    accumulator->add(*elem,
-                     elem->vertex_average(),
-                     total_difference / (3.0 * Salamander::constants::k_b * total_weight));
+    _current_average[i] = _current_average[i] * _total_weight[i] +
+                          total_difference / (3.0 * Salamander::constants::k_b);
+    _total_weight[i] += total_weight;
+
+    _current_average[i] /= _total_weight[i];
+
+    accumulator->add(*elem, elem->vertex_average(), _current_average[i]);
+    ++i;
   }
 
   accumulator->finalize();

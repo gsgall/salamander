@@ -16,7 +16,9 @@
 
 #pragma once
 
+#include "MooseRandom.h"
 #include "ParticleBCBase.h"
+#include "Ray.h"
 
 class VelocityInitializerBase;
 class DiffusiveReflectionBC : public ParticleBCBase
@@ -29,10 +31,8 @@ public:
   virtual void onBoundary(const unsigned int num_applying) override;
 
 protected:
-  /// the random number generator used for sampling distributions
-  const unsigned int _seed;
-  /// the distributions that will be used for set the initial particle velocities
-  const VelocityInitializerBase & _velocity_initializer;
-  /// the direction that is the normal the boundary
-  const unsigned int _reflection_direction;
+  /// the temperature of the wall
+  const Real _temperature;
+  const RayDataIndex _mass_index;
+  MooseRandom _generator;
 };

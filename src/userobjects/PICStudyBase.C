@@ -181,7 +181,8 @@ PICStudyBase::bankedParticles() const
 }
 
 void
-PICStudyBase::setInitialParticleData(std::shared_ptr<Ray> & ray, const InitialParticleData & data)
+PICStudyBase::setInitialParticleData(std::shared_ptr<Ray> & ray,
+                                     const Salamander::ParticleData & data)
 {
   ray->setStart(data.position, data.elem);
   for (size_t i = 0; i < 3; ++i)
@@ -194,7 +195,7 @@ PICStudyBase::setInitialParticleData(std::shared_ptr<Ray> & ray, const InitialPa
 }
 
 std::shared_ptr<Ray>
-PICStudyBase::createParticle(const InitialParticleData & data)
+PICStudyBase::createParticle(const Salamander::ParticleData & data)
 {
   auto ray = acquireRay();
   setInitialParticleData(ray, data);
@@ -253,4 +254,35 @@ const std::vector<unsigned int> &
 PICStudyBase::speciesIds() const
 {
   return _species_ids;
+}
+const unsigned int
+PICStudyBase::species(const Ray & particle) const
+{
+  return particle.data(_species_index);
+}
+
+const Real
+PICStudyBase::mass(const Ray & particle) const
+{
+  return particle.data(_mass_index);
+}
+
+const Real
+PICStudyBase::charge(const Ray & particle) const
+{
+  return particle.data(_charge_index);
+}
+
+const Real
+PICStudyBase::weight(const Ray & particle) const
+{
+  return particle.data(_weight_index);
+}
+
+const Point
+PICStudyBase::velocity(const Ray & particle) const
+{
+  return Point(particle.data(_velocity_indicies[0]),
+               particle.data(_velocity_indicies[1]),
+               particle.data(_velocity_indicies[2]));
 }

@@ -1,7 +1,7 @@
 //* This file is part of SALAMANDER: Software for Advanced Large-scale Analysis of MAgnetic
 //* confinement for Numerical Design, Engineering & Research,
-//* A multiphysics application for modeling plasma facing components
-//* https://github.com/idaholab/salamander
+//* A multiphysics application for modeling plasma facing components *
+// https://github.com/idaholab/salamander
 //* https://mooseframework.inl.gov/salamander
 //*
 //* SALAMANDER is powered by the MOOSE Framework
@@ -29,7 +29,11 @@ public:
   getParticleVelocities(const size_t num_samples,
                         const unsigned int additional_seed) const override;
 
-  virtual const Point getParticleVelocity() const override { return Point(); }
+  virtual void setParticleVelocities(std::vector<Salamander::ParticleData> & particle_data,
+                                     const unsigned int additional_seed) const override;
+  virtual const std::vector<Point>
+  getParticleVelocities(const std::vector<Point> & positions,
+                        const unsigned int additional_seed) const override;
 
 protected:
   const std::vector<Point> _velocities;

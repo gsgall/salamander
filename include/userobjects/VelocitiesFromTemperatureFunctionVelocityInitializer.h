@@ -20,10 +20,10 @@
 #include "VelocityInitializerBase.h"
 
 class Distribution;
-class VelocitiesFromDistributionsVelocityInitializer : public VelocityInitializerBase
+class VelocitiesFromTemperatureFunctionVelocityInitializer : public VelocityInitializerBase
 {
 public:
-  VelocitiesFromDistributionsVelocityInitializer(const InputParameters & parameters);
+  VelocitiesFromTemperatureFunctionVelocityInitializer(const InputParameters & parameters);
 
   static InputParameters validParams();
 
@@ -35,17 +35,11 @@ public:
   virtual const std::vector<Point>
   getParticleVelocities(const std::vector<Point> & positions,
                         const unsigned int additional_seed) const override;
-  /*
-   * We use this to get the actual distribution object that we need to use in order to sample
-   * the particle speeds
-   */
-  virtual void initialSetup() override;
 
 protected:
   /// the random number generator object that will be used to sample distributions
   MooseRandom _generator;
-  /// the distributions that will be used for set the initial particle velocities
-  std::vector<Distribution const *> _distributions;
-  /// Velocity distribution names
-  const std::vector<DistributionName> & _distribution_names;
+  const Function & _function;
+  const Real _mass;
+  const unsigned int _seed;
 };

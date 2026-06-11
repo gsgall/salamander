@@ -29,7 +29,7 @@ public:
    * The particle weight will be based on a constant charge density and
    * the specified number of particles per element.
    */
-  virtual std::vector<InitialParticleData> getParticleData() const override;
+  virtual std::vector<Salamander::ParticleData> getParticleData() const override;
 
 protected:
   /// The uniform charge density that the particle weights will be based off of

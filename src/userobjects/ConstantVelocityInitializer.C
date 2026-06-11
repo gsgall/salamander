@@ -45,3 +45,26 @@ ConstantVelocityInitializer::getParticleVelocities(const size_t num_samples,
                 [this, i = size_t(0)]() mutable { return _velocities[i++ % _velocities.size()]; });
   return velocities;
 }
+
+void
+ConstantVelocityInitializer::setParticleVelocities(
+    std::vector<Salamander::ParticleData> & particle_data,
+    const unsigned int /*additional_seed*/) const
+{
+  size_t i = 0;
+  for (auto & data : particle_data)
+  {
+    data.velocity = _velocities[i++ % _velocities.size()];
+  }
+}
+const std::vector<Point>
+ConstantVelocityInitializer::getParticleVelocities(const std::vector<Point> & positions,
+                                                   const unsigned int additional_seed) const
+{
+  auto velocities = std::vector<Point>(positions.size());
+  for (size_t i = 0; i < velocities.size(); ++i)
+  {
+    velocities[i] = _velocities[i++ % _velocities.size()];
+  }
+  return velocities;
+}

@@ -40,10 +40,16 @@ void
 ParticleBCBase::changeParticleVelocity(const Point & velocity)
 {
   for (size_t i = 0; i < 3; ++i)
+  {
     currentRay()->data(_velocity_indicies[i]) = velocity(i);
+  }
 
   for (size_t i = 0; i < _mesh_dimension; ++i)
+  {
     _temporary_update_velocity(i) = velocity(i);
+  }
 
+  const Real remaining_time = _dt * (1 - currentRay()->distance() / currentRay()->maxDistance());
   changeRayDirection(_temporary_update_velocity);
+  changeRayMaxDistance(_temporary_velocity.norm() * remaining_time);
 }

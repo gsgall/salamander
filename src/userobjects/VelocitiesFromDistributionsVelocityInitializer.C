@@ -67,10 +67,34 @@ VelocitiesFromDistributionsVelocityInitializer::getParticleVelocities(const size
   return velocities;
 }
 
-const Point
-VelocitiesFromDistributionsVelocityInitializer::getParticleVelocity() const
+void
+VelocitiesFromDistributionsVelocityInitializer::setParticleVelocities(
+    std::vector<Salamander::ParticleData> & particle_data, const unsigned int additional_seed) const
 {
-  return Point(_distributions[0]->quantile(_generator.rand()),
-               _distributions[1]->quantile(_generator.rand()),
-               _distributions[2]->quantile(_generator.rand()));
+  _generator.seed(additional_seed + _seed);
+  for (auto & data : particle_data)
+  {
+    for (size_t i = 0; i < 3; ++i)
+    {
+      data.velocity(i) = _distributions[i]->quantile(_generator.rand());
+    }
+  }
+}
+
+const std::vector<Point>
+VelocitiesFromDistributionsVelocityInitializer::getParticleVelocities(
+    const std::vector<Point> & positions, const unsigned int additional_seed) const
+{
+  _generator.seed(_seed + additional_seed);
+
+  auto velocities = std::vector<Point>(positions.size());
+  for (size_t i = 0; i < velocities.size(); ++i)
+  {
+    auto & vel = velocities[i];
+    for (size_t j = 0; j < 3; ++j)
+    {
+      vel(j) = _distributions[j]->quantile(_generator.rand());
+    }
+  }
+  return velocities;
 }

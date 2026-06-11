@@ -37,14 +37,14 @@ MaxwellCollision::MaxwellCollision(const InputParameters & parameters)
 }
 
 const Real
-MaxwellCollision::estimateSigmaCRMax(const std::vector<std::shared_ptr<Ray>> & /*particles*/) const
+MaxwellCollision::estimateSigmaCrMax(const std::vector<std::shared_ptr<Ray>> & /*particles*/) const
 {
   return _sigma_ref;
 }
 
 const Real
 
-MaxwellCollision::sampleCrossSection(Ray & particle_a, Ray & particle_b) const
+MaxwellCollision::sigmaCr(const Ray & particle_a, const Ray & particle_b) const
 {
-  return _sigma_ref / relativeSpeed(particle_a, particle_b);
+  return _sigma_ref;
 }

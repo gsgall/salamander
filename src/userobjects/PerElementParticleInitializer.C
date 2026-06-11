@@ -47,7 +47,7 @@ PerElementParticleInitializer::PerElementParticleInitializer(const InputParamete
 {
 }
 
-std::vector<InitialParticleData>
+std::vector<Salamander::ParticleData>
 PerElementParticleInitializer::getParticleData() const
 {
 
@@ -59,8 +59,8 @@ PerElementParticleInitializer::getParticleData() const
   if (num_local_elements == 0)
     return {};
 
-  std::vector<InitialParticleData> data =
-      std::vector<InitialParticleData>(num_local_elements * _particles_per_element);
+  std::vector<Salamander::ParticleData> data =
+      std::vector<Salamander::ParticleData>(num_local_elements * _particles_per_element);
 
   // random number generator to be used for sampling the elements
   MooseRandom generator;
@@ -74,7 +74,7 @@ PerElementParticleInitializer::getParticleData() const
     // set up the data they will need to be made into actual rays
     const auto & physical_points = sampler.sampleElement(elem, _particles_per_element);
     const auto & velocities =
-        _velocity_initializer.getParticleVelocities(_particles_per_element, elem->id());
+        _velocity_initializer.getParticleVelocities(physical_points, elem->id());
     Real weight = _number_density * elem->volume() / (_particles_per_element);
     for (const auto i : make_range(_particles_per_element))
     {

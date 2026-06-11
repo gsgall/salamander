@@ -53,10 +53,8 @@ ElasticCollisionBase::collideParticles(Ray & particle_a, Ray & particle_b) const
   relative_velocity(1) = relative_speed * sin_chi * std::cos(eps);
   relative_velocity(2) = relative_speed * sin_chi * std::sin(eps);
 
-  vel_a = center_of_mass_velocity + m_b / (total_mass)*relative_velocity;
-  assert(!std::isnan(vel_a(0)) && !std::isnan(vel_a(1)) && !std::isnan(vel_a(2)));
-  vel_b = center_of_mass_velocity + m_a / (total_mass)*relative_velocity;
-  assert(!std::isnan(vel_b(0)) && !std::isnan(vel_b(1)) && !std::isnan(vel_b(2)));
+  vel_a = center_of_mass_velocity + m_b / total_mass * relative_velocity;
+  vel_b = center_of_mass_velocity - m_a / total_mass * relative_velocity;
 
   _study->setVelocityData(particle_a, vel_a);
   _study->setVelocityData(particle_b, vel_b);

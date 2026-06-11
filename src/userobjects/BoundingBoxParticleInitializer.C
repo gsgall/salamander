@@ -62,7 +62,7 @@ BoundingBoxParticleInitializer::BoundingBoxParticleInitializer(const InputParame
                  " of the libMesh::Point input will be ignored.\n");
 }
 
-std::vector<InitialParticleData>
+std::vector<Salamander::ParticleData>
 BoundingBoxParticleInitializer::getParticleData() const
 {
 
@@ -128,7 +128,7 @@ BoundingBoxParticleInitializer::getParticleData() const
   if (valid_elems.size() == 0)
     return {};
 
-  std::vector<InitialParticleData> data;
+  std::vector<Salamander::ParticleData> data;
   MooseRandom generator;
   // this objects allows us to uniformly sample space in elements
   SALAMANDER::ElementSampler sampler = SALAMANDER::ElementSampler(_fe_problem, _seed, generator);

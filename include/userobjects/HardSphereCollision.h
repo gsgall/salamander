@@ -18,10 +18,10 @@
 
 #include "ElasticCollisionBase.h"
 
-class MaxwellCollision : public ElasticCollisionBase
+class HardSphereCollision : public ElasticCollisionBase
 {
 public:
-  MaxwellCollision(const InputParameters & parameters);
+  HardSphereCollision(const InputParameters & parameters);
 
   static InputParameters validParams();
 
@@ -30,5 +30,5 @@ public:
   virtual const Real sigmaCr(const Ray & particle_a, const Ray & particle_b) const override;
 
 protected:
-  const Real _sigma_ref;
+  const Real _sigma_total;
 };

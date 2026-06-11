@@ -59,7 +59,7 @@ DSMCCollider::initializeInternalData(const std::vector<std::shared_ptr<Ray>> & p
       {
         for (const auto & collision : collisions)
         {
-          const auto estimate = collision->estimateSigmaCRMax(particles);
+          const auto estimate = collision->estimateSigmaCrMax(particles);
           if (estimate > max_cr_value)
           {
             max_cr_value = estimate;
@@ -73,11 +73,11 @@ DSMCCollider::initializeInternalData(const std::vector<std::shared_ptr<Ray>> & p
 void
 DSMCCollider::collideParticles(const std::vector<std::shared_ptr<Ray>> & particles)
 {
-  size_t curr_particle_index = 0;
   const auto particle_weight = particles.front()->data(_weight_index);
 
   for (size_t i = 0; i < _elem_ids.size(); ++i)
   {
+    const auto elem_volume = _elem_volumes[i];
 
     for (size_t j = 0; j < _species_ids.size(); ++j)
     {
@@ -86,6 +86,7 @@ DSMCCollider::collideParticles(const std::vector<std::shared_ptr<Ray>> & particl
 
     /// this does assume that the particles are in sorted order when we get them from the study
     /// the collisional study base should ensure this is true
+    size_t curr_particle_index = 0;
     auto curr_particle = particles[curr_particle_index];
     while (curr_particle->currentElem()->id() == _elem_ids[i])
     {
@@ -99,7 +100,6 @@ DSMCCollider::collideParticles(const std::vector<std::shared_ptr<Ray>> & particl
       curr_particle = particles[curr_particle_index];
     }
 
-    const auto elem_volume = _elem_volumes[i];
     auto & elem_max_rates = _elem_wise_max_cr_values[i];
     /// iterator over all of the different types of pairs
     for (size_t j = 0; j < elem_max_rates.size(); ++j)
@@ -111,17 +111,16 @@ DSMCCollider::collideParticles(const std::vector<std::shared_ptr<Ray>> & particl
           const auto pair_index = pairingFunction(id_a, id_b);
           auto & sigma_cr_max = elem_max_rates[pair_index];
 
-          const Real a_count = _particle_indicies[id_a].size();
-          const Real b_count = _particle_indicies[id_b].size();
-
-          const Real unique_pairs = 0.5 * (a_count * (id_a == id_b ? a_count - 1 : b_count));
-
-          unsigned int collision_pairs = static_cast<unsigned int>(
-              unique_pairs * sigma_cr_max * particle_weight * _dt / elem_volume +
-              _generator.rand());
-
           const auto & collisions = _collision_objects[pair_index];
           auto & temp_xsecs = _temporary_xsecs[pair_index];
+
+          const Real a_count = _particle_indicies[id_a].size();
+          const Real b_count = _particle_indicies[id_b].size();
+          const Real unique_pairs = 0.5 * (a_count * (id_a == id_b ? a_count - 1 : b_count));
+
+          const unsigned int collision_pairs = static_cast<unsigned int>(
+              unique_pairs * sigma_cr_max * particle_weight * _dt / elem_volume +
+              _generator.rand());
 
           for (size_t k = 0; k < collision_pairs; ++k)
           {
@@ -138,7 +137,7 @@ DSMCCollider::collideParticles(const std::vector<std::shared_ptr<Ray>> & particl
             Real total_xsec = 0;
             for (size_t l = 0; l < collisions.size(); ++l)
             {
-              const auto xsec_val = collisions[l]->sampleCrossSection(*particle_a, *particle_b);
+              const auto xsec_val = collisions[l]->sigmaCr(*particle_a, *particle_b);
               temp_xsecs[l] = xsec_val;
               total_xsec += xsec_val;
             }
@@ -150,9 +149,7 @@ DSMCCollider::collideParticles(const std::vector<std::shared_ptr<Ray>> & particl
               collision_index = static_cast<size_t>(selection_rand > (temp_xsecs[l] / total_xsec));
             }
 
-            const auto & collision = collisions[collision_index];
-            const auto sigma_cr =
-                temp_xsecs[collision_index] * collision->relativeSpeed(*particle_a, *particle_b);
+            const auto sigma_cr = temp_xsecs[collision_index];
 
             if (sigma_cr > sigma_cr_max)
             {
@@ -165,15 +162,6 @@ DSMCCollider::collideParticles(const std::vector<std::shared_ptr<Ray>> & particl
             }
 
             collisions[collision_index]->collideParticles(*particle_a, *particle_b);
-            for (const auto d : particle_a->data())
-            {
-              assert(!std::isnan(d));
-            }
-
-            for (const auto d : particle_b->data())
-            {
-              assert(!std::isnan(d));
-            }
           }
         }
       }

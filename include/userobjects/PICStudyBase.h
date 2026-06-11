@@ -18,7 +18,6 @@
 
 #include "Ray.h"
 #include "RayTracingStudy.h"
-
 #include "ParticleInitializerBase.h"
 class ParticleStepperBase;
 
@@ -46,6 +45,13 @@ public:
   const RayDataIndex massIndex() const;
   const RayDataIndex chargeIndex() const;
   const RayDataIndex weightIndex() const;
+
+  const unsigned int species(const Ray & particle) const;
+  const Real mass(const Ray & particle) const;
+  const Real charge(const Ray & particle) const;
+  const Real weight(const Ray & particle) const;
+  const Point velocity(const Ray & particle) const;
+
   const std::vector<std::string> & speciesNames() const;
   const std::vector<unsigned int> & speciesIds() const;
 
@@ -112,9 +118,10 @@ protected:
    * @param ray the aquired ray to which the data will be assigned
    * @param data the initial particle data that will be given to the day
    */
-  virtual void setInitialParticleData(std::shared_ptr<Ray> & ray, const InitialParticleData & data);
+  virtual void setInitialParticleData(std::shared_ptr<Ray> & ray,
+                                      const Salamander::ParticleData & data);
 
-  virtual std::shared_ptr<Ray> createParticle(const InitialParticleData & data);
+  virtual std::shared_ptr<Ray> createParticle(const Salamander::ParticleData & data);
 
 private:
   /// Whether or not we've generated rays yet (restartable)

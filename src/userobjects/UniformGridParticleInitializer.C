@@ -47,7 +47,7 @@ UniformGridParticleInitializer::UniformGridParticleInitializer(const InputParame
     mooseError("The simulation must be in 1D in order to use the UniformGridParticleInitializer");
 }
 
-std::vector<InitialParticleData>
+std::vector<Salamander::ParticleData>
 UniformGridParticleInitializer::getParticleData() const
 {
   Real local_xmin = std::numeric_limits<float>::max();
@@ -98,7 +98,7 @@ UniformGridParticleInitializer::getParticleData() const
     mooseWarning(oss.str());
   }
 
-  std::vector<InitialParticleData> data = std::vector<InitialParticleData>(local_particle_count);
+  auto data = std::vector<Salamander::ParticleData>(local_particle_count);
 
   Real dx = (global_xmax - global_xmin) / (_total_particles);
 

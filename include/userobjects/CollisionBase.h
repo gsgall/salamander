@@ -38,8 +38,8 @@ public:
   ///@}
   ///
   virtual const Real
-  estimateSigmaCRMax(const std::vector<std::shared_ptr<Ray>> & particles) const = 0;
-  virtual const Real sampleCrossSection(Ray & particle_a, Ray & particle_b) const = 0;
+  estimateSigmaCrMax(const std::vector<std::shared_ptr<Ray>> & particles) const = 0;
+  virtual const Real sigmaCr(const Ray & particle_a, const Ray & particle_b) const = 0;
   virtual void collideParticles(Ray & particle_a, Ray & particle_b) const = 0;
 
   const std::vector<unsigned int> & reactantIds() const;
