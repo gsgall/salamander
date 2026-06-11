@@ -49,13 +49,21 @@ d_ref = '${fparse sqrt(numerator / denominator)}'
 []
 
 [AuxVariables]
-  [temperature]
+  [true_temp]
     order = CONSTANT
     family = MONOMIAL
   []
   [time_averaged_temperature]
     order = CONSTANT
     family = MONOMIAL
+  []
+[]
+
+[AuxKernels]
+  [true_temp]
+    type = FunctionAux
+    variable = true_temp
+    function = temperature_profile
   []
 []
 
@@ -81,7 +89,7 @@ d_ref = '${fparse sqrt(numerator / denominator)}'
   [particle_initializer]
     type = PerElementParticleInitializer
     species = 'A'
-    particles_per_element = 60
+    particles_per_element = 400
     number_density = ${number_density}
     charge = 0
     mass = ${m}
@@ -91,37 +99,28 @@ d_ref = '${fparse sqrt(numerator / denominator)}'
       type = HardSphereCollision
       reactants = 'A A'
       products = 'A A'
-      study = study
       diameter = ${d_ref}
       initial_temperature = ${T_init}
     []
     [collider]
       type = DSMCCollider
-      study = study
       collision_objects = 'hard_sphere'
     []
   [study]
     type = CollisionalPICStudy
-    #type = CollisionlessPICStudy
+#    type = CollisionlessPICStudy
+    collider = collider
     stepper = stepper
     particle_initializers = particle_initializer
-    collider = collider
     always_cache_traces = true
     data_on_cache_traces = true
     execute_on = 'TIMESTEP_BEGIN'
     ray_kernel_coverage_check = false
   []
-  [temp_accum]
-    type = PerElementAverageTemperatureAccumulator
-    study = study
-    species = 'A'
-    aux_variable = temperature
-  []
   [time_avg_temp_accum]
     type = PerElementTimeAveragedTemperatureAccumulator
-    study = study
     species = 'A'
-    start_averaging_step = 1000
+    start_averaging_step = 0
     aux_variable = time_averaged_temperature
   []
 []
@@ -139,16 +138,24 @@ d_ref = '${fparse sqrt(numerator / denominator)}'
   []
 []
 
+[Postprocessors]
+  [total_energy]
+    type = SingleSpeciesTotalEnergy
+    species = 'A'
+  []
+[]
+
 [Executioner]
   type = Transient
   dt = 3.5e-9
   num_steps = 10000
-  #num_steps = 1
-  #dt = 1
+#  num_steps = 2
+#  dt = 1
 []
 
 [Outputs]
   exodus = true
+  csv = true
   execute_on = 'TIMESTEP_END'
 []
 

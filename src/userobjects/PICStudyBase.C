@@ -14,6 +14,7 @@
 //* ALL RIGHTS RESERVED
 //*
 
+#include "MooseUtils.h"
 #include "PICStudyBase.h"
 #include "ParticleStepperBase.h"
 #include "ParticleInitializerBase.h"
@@ -54,6 +55,7 @@ PICStudyBase::PICStudyBase(const InputParameters & parameters)
   const auto & initializer_names = getParam<std::vector<UserObjectName>>("particle_initializers");
   if (initializer_names.empty())
     paramError("intializers", "At least one initializer must be provided");
+
   std::set<std::string> temporary_name_set;
   for (const auto name : initializer_names)
   {
@@ -64,10 +66,60 @@ PICStudyBase::PICStudyBase(const InputParameters & parameters)
   unsigned int species_id = 0;
   _species_names.reserve(temporary_name_set.size());
   _species_ids.reserve(temporary_name_set.size());
+  _species_masses.reserve(temporary_name_set.size());
+  _species_charges.reserve(temporary_name_set.size());
   for (const auto & name : temporary_name_set)
   {
     _species_names.push_back(name);
     _species_ids.push_back(species_id++);
+  }
+
+  for (size_t i = 0; i < _species_names.size(); ++i)
+  {
+    const auto & name = _species_names[i];
+    Real first_mass;
+    Real first_charge;
+    std::string init_name;
+    size_t j = 0;
+    for (; j < _initializers.size(); ++j)
+    {
+      const auto & init = _initializers[j];
+      init_name = init->name();
+      if (init->speciesName() != name)
+      {
+        continue;
+      }
+      first_mass = init->mass();
+      first_charge = init->charge();
+      _species_masses[i] = init->mass();
+      _species_charges[i] = init->charge();
+      break;
+    }
+
+    for (; j < _initializers.size(); ++j)
+    {
+      const auto & init = _initializers[j];
+      if (init->speciesName() != name)
+      {
+        continue;
+      }
+      if (!MooseUtils::absoluteFuzzyEqual(first_mass, init->mass()))
+      {
+        paramError("particle_initializers",
+                   "Initializer " + init_name + " and, initializer " + init->name() +
+                       "provided different masses for species " + name,
+                   "If there are multiple initializers for a single species they must provide the "
+                   "physical properties must be consistent.");
+      }
+      if (!MooseUtils::absoluteFuzzyEqual(first_charge, init->charge()))
+      {
+        paramError("particle_initializers",
+                   "Initializer " + init_name + " and, initializer " + init->name() +
+                       " provided different charges for species " + name,
+                   "If there are multiple initializers for a single species they must provide the "
+                   "physical properties must be consistent.");
+      }
+    }
   }
 }
 
@@ -285,4 +337,28 @@ PICStudyBase::velocity(const Ray & particle) const
   return Point(particle.data(_velocity_indicies[0]),
                particle.data(_velocity_indicies[1]),
                particle.data(_velocity_indicies[2]));
+}
+
+const Real
+PICStudyBase::mass(const std::string & species) const
+{
+  return _species_masses[speciesId(species)];
+}
+
+const Real
+PICStudyBase::mass(const unsigned int species_id) const
+{
+  return _species_masses[species_id];
+}
+
+const Real
+PICStudyBase::charge(const std::string & species) const
+{
+  return _species_charges[speciesId(species)];
+}
+
+const Real
+PICStudyBase::charge(const unsigned int species_id) const
+{
+  return _species_charges[species_id];
 }

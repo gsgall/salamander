@@ -66,45 +66,48 @@ PerElementAverageTemperatureAccumulator::PerElementAverageTemperatureAccumulator
 void
 PerElementAverageTemperatureAccumulator::execute()
 {
-
-  auto accumulator = std::make_unique<SALAMANDER::AuxAccumulator>(
-      _fe_problem, getParam<AuxVariableName>("aux_variable"));
-  const auto particles = _study.bankedParticles();
-  for (const auto & elem : *_fe_problem.mesh().getActiveLocalElementRange())
-  {
-    const auto id = elem->id();
-    Point mean_velocity = Point(0, 0, 0);
-    Real total_weight = 0.0;
-
-    for (const auto particle : particles)
-    {
-      if (particle->currentElem()->id() != id || _study.species(*particle) != _species_id)
-        continue;
-
-      const auto weight = _study.weight(*particle);
-
-      mean_velocity += weight * _study.velocity(*particle);
-      total_weight += weight;
-    }
-
-    mean_velocity /= total_weight;
-    Real total_difference = 0.0;
-
-    for (const auto particle : particles)
-    {
-      if (particle->currentElem()->id() != id || _study.species(*particle) != _species_id)
-        continue;
-
-      const auto weight = _study.weight(*particle);
-      const auto mass = _study.mass(*particle);
-      const auto difference = (_study.velocity(*particle) - mean_velocity);
-      total_difference += weight * mass * difference.norm_sq();
-    }
-
-    accumulator->add(*elem,
-                     elem->vertex_average(),
-                     total_difference / (3.0 * Salamander::constants::k_b * total_weight));
-  }
-
-  accumulator->finalize();
+  //
+  //  auto accumulator = std::make_unique<SALAMANDER::AuxAccumulator>(
+  //      _fe_problem, getParam<AuxVariableName>("aux_variable"));
+  //  const auto particles = _study.bankedParticles();
+  //  for (const auto & elem : *_fe_problem.mesh().getActiveLocalElementRange())
+  //  {
+  //    const auto id = elem->id();
+  //    Point mean_velocity = Point(0, 0, 0);
+  //    Real total_weight = 0.0;
+  //
+  //    for (const auto particle : particles)
+  //    {
+  //      if (particle->currentElem()->id() != id || _study.species(*particle) != _species_id)
+  //        continue;
+  //
+  //      const auto weight = _study.weight(*particle);
+  //
+  //      mean_velocity += weight * _study.velocity(*particle);
+  //      total_weight += weight;
+  //    }
+  //
+  //    mean_velocity /= total_weight;
+  //    Real total_difference = 0.0;
+  //
+  //    for (const auto particle : particles)
+  //    {
+  //      if (particle->currentElem()->id() != id || _study.species(*particle) != _species_id)
+  //        continue;
+  //
+  //      const auto weight = _study.weight(*particle);
+  //      const auto difference = (_study.velocity(*particle) - mean_velocity);
+  //      total_difference += difference;
+  //    }
+  //  }
+  //
+  //  for (const auto & elem : *_fe_problem.mesh().getActiveLocalElementRange())
+  //  {
+  //    accumulator->add(*elem,
+  //                     elem->vertex_average(),
+  //                     _total_energy_per_cell[i] /
+  //                         (3.0 * Salamander::constants::k_b * _total_weights_per_cell[i]));
+  //    ++i;
+  //  }
+  //  accumulator->finalize();
 }

@@ -47,8 +47,15 @@ public:
   const RayDataIndex weightIndex() const;
 
   const unsigned int species(const Ray & particle) const;
+
   const Real mass(const Ray & particle) const;
+  const Real mass(const std::string & species) const;
+  const Real mass(const unsigned int species_id) const;
+
   const Real charge(const Ray & particle) const;
+  const Real charge(const std::string & species) const;
+  const Real charge(const unsigned int species_id) const;
+
   const Real weight(const Ray & particle) const;
   const Point velocity(const Ray & particle) const;
 
@@ -78,6 +85,8 @@ protected:
   std::vector<const ParticleInitializerBase *> _initializers;
   /// the set of all thre unique names of particles that are initialized
   std::vector<std::string> _species_names;
+  std::vector<Real> _species_masses;
+  std::vector<Real> _species_charges;
   /// the list of all of the species ids that map to the species names
   std::vector<unsigned int> _species_ids;
   /// The banked rays to be used on the next timestep (restartable)

@@ -37,6 +37,7 @@ protected:
   const PICStudyBase & _study;
   const unsigned int _species_id;
   const unsigned int _time_step_start;
-  std::vector<Real> _current_average;
   std::vector<Real> _total_weight;
+  std::vector<Point> _total_velocity;
+  std::vector<Real> _total_speed;
 };

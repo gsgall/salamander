@@ -40,6 +40,9 @@ public:
    */
   const std::string & speciesName() const { return _species; }
 
+  const Real charge() const { return _charge; }
+  const Real mass() const { return _mass; }
+
   /**
    * Unused methods
    */
