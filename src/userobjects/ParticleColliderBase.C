@@ -51,6 +51,7 @@ ParticleColliderBase::initialSetup()
   _particle_indicies.resize(_species_ids.size());
   const auto & names = getParam<std::vector<UserObjectName>>("collision_objects");
   const auto total_pairs = pairingFunction(_species_ids.size(), _species_ids.size()) - 1;
+
   _collision_objects.resize(total_pairs);
   _temporary_xsecs.resize(total_pairs);
 
@@ -66,6 +67,20 @@ ParticleColliderBase::initialSetup()
   {
     _temporary_xsecs[i].resize(_collision_objects[i].size());
   }
+
+  const auto & elem_range = *_fe_problem.mesh().getActiveLocalElementRange();
+  const auto num_elems = std::distance(elem_range.begin(), elem_range.end());
+
+  _reaction_rates.resize(num_elems);
+
+  for (auto & elem_rates : _reaction_rates)
+  {
+    elem_rates.resize(total_pairs);
+    for (size_t i = 0; i < total_pairs; ++i)
+    {
+      elem_rates[i].resize(_collision_objects[i].size());
+    }
+  }
 }
 
 unsigned int
@@ -74,4 +89,10 @@ ParticleColliderBase::pairingFunction(const unsigned int species_id_1,
 {
   const auto helper = [](const unsigned int n) -> unsigned int { return n * (n + 1) / 2; };
   return helper(std::max(species_id_1, species_id_2)) + std::min(species_id_1, species_id_2);
+}
+
+unsigned int
+ParticleColliderBase::totalUniquePairs(const unsigned int num_species) const
+{
+  return pairingFunction(num_species, num_species) + 1;
 }

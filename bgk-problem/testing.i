@@ -55,7 +55,6 @@ L = '${fparse elems_per_dim * dx}'
 [UserObjects]
   [stepper]
     type = TestSimpleStepper
-    #type = TestStationaryStepper
   []
   [velocity_initializer]
     type = VelocitiesFromDistributionsVelocityInitializer
@@ -82,13 +81,13 @@ L = '${fparse elems_per_dim * dx}'
     diameter = 0.46065886596178063
     initial_temperature = ${T_eq}
   []
-#  [maxwell]
-#    type = MaxwellCollision
-#    reactants = 'A A'
-#    products = 'A A'
-#    study = study
-#    reference_value = ${sigma_0}
-#  []
+  #  [maxwell]
+  #    type = MaxwellCollision
+  #    reactants = 'A A'
+  #    products = 'A A'
+  #    study = study
+  #    reference_value = ${sigma_0}
+  #  []
   [collider]
     type = DSMCCollider
     study = study
@@ -155,12 +154,30 @@ L = '${fparse elems_per_dim * dx}'
   []
 []
 
+# [Postprocessors]
+#   [T_x]
+#     type = SingleSpeciesTemperature
+#     species = 'A'
+#     component = 0
+#   []
+#   [T_y]
+#     type = SingleSpeciesTemperature
+#     species = 'A'
+#     component = 1
+#   []
+#   [T_y]
+#     type = SingleSpeciesTemperature
+#     species = 'A'
+#     component = 2
+#   []
+# []
+
 [Executioner]
   type = Transient
   dt = ${dt}
   # dt = 1e-10
   # num_steps = 2
-  num_steps = 500
+  num_steps = 1000
 []
 
 [Outputs]

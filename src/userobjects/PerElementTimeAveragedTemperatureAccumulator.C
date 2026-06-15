@@ -72,6 +72,9 @@ PerElementTimeAveragedTemperatureAccumulator::PerElementTimeAveragedTemperatureA
 void
 PerElementTimeAveragedTemperatureAccumulator::execute()
 {
+  if (_t_step < _time_step_start)
+    return;
+
   const auto mass = _study.mass(_species_id);
   auto accumulator = std::make_unique<SALAMANDER::AuxAccumulator>(
       _fe_problem, getParam<AuxVariableName>("aux_variable"));

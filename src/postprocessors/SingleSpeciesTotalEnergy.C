@@ -41,7 +41,7 @@ SingleSpeciesTotalEnergy::execute()
   _total_energy = 0.0;
   for (const auto & particle : particles)
   {
-    _total_energy = 0.5 * _mass * _study.weight(*particle) * _study.velocity(*particle).norm_sq();
+    _total_energy += 0.5 * _mass * _study.weight(*particle) * _study.velocity(*particle).norm_sq();
   }
 }
 

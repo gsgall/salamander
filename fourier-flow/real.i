@@ -15,6 +15,7 @@ number_density = '${fparse P_init * N_A / (R_u * T_init)}'
 delta_T = 40
 # total gap distance in m
 L = 1e-3
+# L = 0.5e-3
 
 # parameters for hard sphere interactions
 omega = 0.5
@@ -42,7 +43,7 @@ d_ref = '${fparse sqrt(numerator / denominator)}'
   [gmg]
     type = GeneratedMeshGenerator
     dim = 1
-    nx = 400
+    nx = 200
     xmax = ${L}
   []
   allow_renumbering = false
@@ -76,39 +77,51 @@ d_ref = '${fparse sqrt(numerator / denominator)}'
   []
 []
 
+[Distributions]
+  [v_0]
+    type = Maxwellian
+    mass = ${m}
+    temperature = ${T_init}
+  []
+  # [v_12]
+  #   type = Maxwellian
+  #   mass = ${m}
+  #   temperature = ${T_12}
+  # []
+[]
+
 [UserObjects]
   [stepper]
     #type = TestStationaryStepper
     type = TestSimpleStepper
   []
   [velocity_initializer]
-    type = VelocitiesFromTemperatureFunctionVelocityInitializer
-    mass = ${m}
-    function = temperature_profile
+    type = VelocitiesFromDistributionsVelocityInitializer
+    distributions = 'v_0 v_0 v_0'
   []
   [particle_initializer]
     type = PerElementParticleInitializer
     species = 'A'
-    particles_per_element = 400
+    particles_per_element = 30
     number_density = ${number_density}
     charge = 0
     mass = ${m}
     velocity_initializer = velocity_initializer
   []
-    [hard_sphere]
-      type = HardSphereCollision
-      reactants = 'A A'
-      products = 'A A'
-      diameter = ${d_ref}
-      initial_temperature = ${T_init}
-    []
-    [collider]
-      type = DSMCCollider
-      collision_objects = 'hard_sphere'
-    []
+  [hard_sphere]
+    type = HardSphereCollision
+    reactants = 'A A'
+    products = 'A A'
+    diameter = ${d_ref}
+    initial_temperature = ${T_init}
+  []
+  [collider]
+    type = DSMCCollider
+    collision_objects = 'hard_sphere'
+  []
   [study]
     type = CollisionalPICStudy
-#    type = CollisionlessPICStudy
+    #type = CollisionlessPICStudy
     collider = collider
     stepper = stepper
     particle_initializers = particle_initializer
@@ -116,11 +129,12 @@ d_ref = '${fparse sqrt(numerator / denominator)}'
     data_on_cache_traces = true
     execute_on = 'TIMESTEP_BEGIN'
     ray_kernel_coverage_check = false
+    tolerate_failure = true
   []
   [time_avg_temp_accum]
     type = PerElementTimeAveragedTemperatureAccumulator
     species = 'A'
-    start_averaging_step = 0
+    start_averaging_step = 25000
     aux_variable = time_averaged_temperature
   []
 []
@@ -138,24 +152,27 @@ d_ref = '${fparse sqrt(numerator / denominator)}'
   []
 []
 
-[Postprocessors]
-  [total_energy]
-    type = SingleSpeciesTotalEnergy
-    species = 'A'
-  []
-[]
+# [Postprocessors]
+#   [total_energy]
+#     type = SingleSpeciesTotalEnergy
+#     species = 'A'
+#   []
+# []
 
 [Executioner]
   type = Transient
-  dt = 3.5e-9
-  num_steps = 10000
-#  num_steps = 2
-#  dt = 1
+  dt = 5e-8
+  num_steps = 50000
+  # end_time = 3e-3
+  #  num_steps = 2
+  #  dt = 1
 []
 
 [Outputs]
-  exodus = true
-  csv = true
+  [out]
+    type = Exodus
+    start_step = 25000
+  []
   execute_on = 'TIMESTEP_END'
 []
 

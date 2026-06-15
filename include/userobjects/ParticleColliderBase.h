@@ -54,7 +54,9 @@ protected:
 
   std::vector<std::vector<const CollisionBase *>> _collision_objects;
   std::vector<std::vector<Real>> _temporary_xsecs;
+  std::vector<std::vector<std::vector<Real>>> _reaction_rates;
 
   unsigned int pairingFunction(const unsigned int species_id_1,
                                const unsigned int species_id_2) const;
+  unsigned int totalUniquePairs(const unsigned int num_species) const;
 };
