@@ -9,9 +9,6 @@ k_B = 1.380649e-23
 # T_alpha = 1020
 T_alpha = 600
 T_beta = 500
-sigma_alpha = '${fparse sqrt(k_B * T_alpha / m)}'
-sigma_beta = '${fparse sqrt(k_B * T_beta / m)}'
-# sigma_0 = 0
 sigma_0 = 1e-20
 sigma_intra = '${fparse sigma_0 * 100}'
 
@@ -27,8 +24,8 @@ beta_seed = 10
   [gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 4
-    ny = 4
+    nx = 2
+    ny = 2
     xmin = -1e-2
     xmax = 1e-2
     ymin = -1e-2
@@ -43,21 +40,20 @@ beta_seed = 10
 
 [Distributions]
   [v_alpha]
-    type = Normal
-    mean = 0
-    standard_deviation = '${sigma_alpha}'
+    type = Maxwellian
+    mass = ${m}
+    temperature = ${T_alpha}
   []
   [v_beta]
-    type = Normal
-    mean = 0
-    standard_deviation = '${sigma_beta}'
+    type = Maxwellian
+    mass = ${m}
+    temperature = ${T_beta}
   []
 []
 
 [UserObjects]
   [stepper]
     type = TestSimpleStepper
-    # type = TestStationaryStepper
   []
 
   [alpha_vel_initializer]
@@ -115,7 +111,6 @@ beta_seed = 10
     type = DSMCCollider
     collision_objects = 'maxwell_alpha maxwell_beta maxwell_inter'
     seed = ${seed}
-    # collision_objects = 'hard_sphere'
   []
   [study]
     type = CollisionalPICStudy
@@ -138,50 +133,35 @@ beta_seed = 10
   []
 []
 
-# [Postprocessors]
-#   [particle_count]
-#     type = RayTracingStudyResult
-#     result = 'total_rays_started'
-#     study = study
-#   []
-#   [T_alpha]
-#     type = SingleSpeciesTemperature
-#     study = study
-#     species_id = 0
-#   []
-#   [T_beta]
-#     type = SingleSpeciesTemperature
-#     study = study
-#     species_id = 1
-#   []
-# []
-
-[VectorPostprocessors]
-  [T_alpha_elem]
-    type = SingleSpeciesPerElementTemperatureVectorPostprocessor
+[Postprocessors]
+  [particle_count]
+    type = RayTracingStudyResult
+    result = 'total_rays_started'
+    study = study
+  []
+  [T_alpha]
+    type = SingleSpeciesTemperature
     study = study
     species = 'alpha'
-    # num_elems = 16
   []
-  [T_beta_elem]
-    type = SingleSpeciesPerElementTemperatureVectorPostprocessor
+  [T_beta]
+    type = SingleSpeciesTemperature
     study = study
     species = 'beta'
-    # num_elems = 16
   []
 []
 
 [Executioner]
   type = Transient
   dt = 1e-6
-  num_steps = 3000
-  # num_steps = 1
+  #num_steps = 3000
+  num_steps = 1
 []
 
 [Outputs]
   exodus = false
   # csv = true
-  time_step_interval = 5
+  #time_step_interval = 5
   [csv]
     type = CSV
     execute_on = 'FINAL'

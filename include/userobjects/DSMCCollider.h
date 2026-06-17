@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "CollisionBase.h"
 #include "ParticleColliderBase.h"
 
 class DSMCCollider : public ParticleColliderBase
@@ -33,7 +34,15 @@ protected:
   /// the cross section and relative speed
   /// the first index will be the element and
   /// the second vector will store the value for each species pair
-  std::vector<Real> _elem_volumes;
-  std::vector<dof_id_type> _elem_ids;
   std::vector<std::vector<Real>> _elem_wise_max_cr_values;
+  std::vector<Real> _temporary_sigma_cr_values;
+
+  void collideSpeciesPair(const std::vector<std::shared_ptr<Ray>> & particles,
+                          const std::vector<size_t> & a_indicies,
+                          const std::vector<size_t> & b_indicies,
+                          const std::vector<const CollisionBase *> & colliders,
+                          const Real elem_volume,
+                          const bool same_species,
+                          std::vector<Real> & reaction_rates,
+                          Real & sigma_cr_t_max);
 };

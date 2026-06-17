@@ -14,10 +14,10 @@
 //* ALL RIGHTS RESERVED
 //*
 
+#include "CollisionalPICStudy.h"
 #include "DSMCCollider.h"
 #include "CollisionBase.h"
 #include "Ray.h"
-#include <limits>
 
 registerMooseObject("SalamanderApp", DSMCCollider);
 
@@ -31,41 +31,38 @@ DSMCCollider::validParams()
   return params;
 }
 
-DSMCCollider::DSMCCollider(const InputParameters & parameters) : ParticleColliderBase(parameters)
+DSMCCollider::DSMCCollider(const InputParameters & parameters) : ParticleColliderBase(parameters) {}
+
+void
+DSMCCollider::initializeInternalData(const std::vector<std::shared_ptr<Ray>> & particles)
 {
-  for (const auto & elem : *_fe_problem.mesh().getActiveLocalElementRange())
+  unsigned int max_collisions = 0;
+  for (const auto & collisions : _collision_objects)
   {
-    _elem_volumes.push_back(elem->volume());
-    _elem_ids.push_back(elem->id());
+    if (collisions.size() > max_collisions)
+    {
+      max_collisions = collisions.size();
+    }
   }
+  _temporary_sigma_cr_values.resize(max_collisions);
+
   _elem_wise_max_cr_values.resize(_elem_ids.size());
 
-  const auto total_pairs = pairingFunction(_species_ids.size(), _species_ids.size()) + 1;
+  const auto total_pairs = totalSpeciesPairs(_species_ids.size());
 
   for (size_t i = 0; i < _elem_ids.size(); ++i)
   {
     _elem_wise_max_cr_values[i].resize(total_pairs);
   }
-}
 
-void
-DSMCCollider::initializeInternalData(const std::vector<std::shared_ptr<Ray>> & particles)
-{
-  for (auto & elem_max_cr_values : _elem_wise_max_cr_values)
+  for (auto & elem_sigma_cr_t_maxes : _elem_wise_max_cr_values)
   {
-    // this iterates over all of the different pair ids for particles
-    for (auto & max_cr_value : elem_max_cr_values)
+    for (size_t pair_index = 0; pair_index < total_pairs; ++pair_index)
     {
-      for (const auto & collisions : _collision_objects)
+      auto & sigma_cr_t_max = elem_sigma_cr_t_maxes[pair_index];
+      for (const auto & collision : _collision_objects[pair_index])
       {
-        for (const auto & collision : collisions)
-        {
-          const auto estimate = collision->estimateSigmaCrMax(particles);
-          if (estimate > max_cr_value)
-          {
-            max_cr_value = estimate;
-          }
-        }
+        sigma_cr_t_max += collision->estimateSigmaCrMax(particles);
       }
     }
   }
@@ -74,98 +71,118 @@ DSMCCollider::initializeInternalData(const std::vector<std::shared_ptr<Ray>> & p
 void
 DSMCCollider::collideParticles(const std::vector<std::shared_ptr<Ray>> & particles)
 {
-  // currently assumes a fixed particle weight
-  const auto particle_weight = particles.front()->data(_weight_index);
 
   for (size_t element_index = 0; element_index < _elem_ids.size(); ++element_index)
   {
+    const auto elem_id = _elem_ids[element_index];
+    auto & elem_reaction_rates = _reaction_rates[element_index];
+
+    setParticleIndicies(elem_id, particles, _particle_indicies);
+
     const auto elem_volume = _elem_volumes[element_index];
+    auto & elem_sigma_cr_t_max = _elem_wise_max_cr_values[element_index];
 
-    for (size_t j = 0; j < _species_ids.size(); ++j)
-    {
-      _particle_indicies[j].clear();
-    }
-
-    /// this does assume that the particles are in sorted order when we get them from the study
-    /// the collisional study base should ensure this is true
-    size_t curr_particle_index = 0;
-    auto curr_particle = particles[curr_particle_index];
-    while (curr_particle->currentElem()->id() == _elem_ids[element_index])
-    {
-      _particle_indicies[curr_particle->data(_species_index)].push_back(curr_particle_index);
-
-      curr_particle_index++;
-      if (curr_particle_index == particles.size())
-      {
-        break;
-      }
-
-      curr_particle = particles[curr_particle_index];
-    }
-
-    auto & elem_max_rates = _elem_wise_max_cr_values[element_index];
-
-    /// iterator over all of the different types of pairs
+    std::cout << "Starting Element" << std::endl;
     for (const auto id_a : _species_ids)
     {
       for (size_t id_b = id_a; id_b < _species_ids.size(); ++id_b)
       {
+        const auto & a_indicies = _particle_indicies[id_a];
+        const auto & b_indicies = _particle_indicies[id_b];
+
         const auto pair_index = pairingFunction(id_a, id_b);
-        Real curr_sigma_cr_max = -1.0;
-        auto & sigma_cr_max = elem_max_rates[pair_index];
 
         const auto & collisions = _collision_objects[pair_index];
-        auto & temp_xsecs = _temporary_xsecs[pair_index];
 
-        const Real a_count = _particle_indicies[id_a].size();
-        const Real b_count = _particle_indicies[id_b].size();
-        const Real unique_pairs = 0.5 * (a_count * (id_a == id_b ? a_count - 1 : b_count));
+        auto & reaction_rates = elem_reaction_rates[pair_index];
+        auto & sigma_cr_t_max = elem_sigma_cr_t_max[pair_index];
 
-        const unsigned int collision_pairs = static_cast<unsigned int>(
-            unique_pairs * sigma_cr_max * particle_weight * _dt / elem_volume + _generator.rand());
+        const bool same_species = id_a == id_b;
 
-        for (size_t k = 0; k < collision_pairs; ++k)
-        {
-          const auto index_a = static_cast<size_t>(a_count * _generator.rand());
-          size_t index_b;
-          do
-          {
-            index_b = static_cast<size_t>(b_count * _generator.rand());
-          } while ((id_a == id_b) && (index_a == index_b));
-
-          const auto particle_a = particles[_particle_indicies[id_a][index_a]];
-          const auto particle_b = particles[_particle_indicies[id_b][index_b]];
-
-          Real total_xsec = 0;
-          for (size_t l = 0; l < collisions.size(); ++l)
-          {
-            const auto xsec_val = collisions[l]->sigmaCr(*particle_a, *particle_b);
-            temp_xsecs[l] = xsec_val;
-            total_xsec += xsec_val;
-          }
-          const auto selection_rand = _generator.rand();
-          size_t collision_index = 0;
-
-          for (size_t l = 0; l < collisions.size() - 1; ++l)
-          {
-            collision_index += static_cast<size_t>(selection_rand > (temp_xsecs[l] / total_xsec));
-          }
-
-          const auto sigma_cr = temp_xsecs[collision_index];
-
-          if (sigma_cr > curr_sigma_cr_max)
-          {
-            curr_sigma_cr_max = sigma_cr;
-          }
-          if (sigma_cr / sigma_cr_max < _generator.rand())
-          {
-            continue;
-          }
-          collisions[collision_index]->collideParticles(*particle_a, *particle_b);
-        }
-        // updating so that the next step uses the maximum value found in this step.
-        sigma_cr_max = curr_sigma_cr_max;
+        collideSpeciesPair(particles,
+                           a_indicies,
+                           b_indicies,
+                           collisions,
+                           elem_volume,
+                           same_species,
+                           reaction_rates,
+                           sigma_cr_t_max);
       }
     }
+  }
+}
+void
+DSMCCollider::collideSpeciesPair(const std::vector<std::shared_ptr<Ray>> & particles,
+                                 const std::vector<size_t> & a_indicies,
+                                 const std::vector<size_t> & b_indicies,
+                                 const std::vector<const CollisionBase *> & collisions,
+                                 const Real elem_volume,
+                                 const bool same_species,
+                                 std::vector<Real> & reaction_rates,
+                                 Real & sigma_cr_t_max)
+{
+  for (auto & rate : reaction_rates)
+  {
+    rate = 0;
+  }
+
+  // This currently assumes a fixed weight scheme.
+  const Real weight = _study->weight(*particles.front());
+
+  const Real a_count = a_indicies.size();
+  const Real b_count = b_indicies.size();
+
+  const Real unique_pairs = (a_count * (same_species ? (a_count - 1) / 2.0 : b_count));
+
+  const unsigned int num_trials = static_cast<unsigned int>(
+      unique_pairs * sigma_cr_t_max * weight * _dt / elem_volume + _generator.rand());
+
+  for (size_t i = 0; i < num_trials; ++i)
+  {
+    const auto index_a = static_cast<size_t>(a_count * _generator.rand());
+    size_t index_b;
+    do
+    {
+      index_b = static_cast<size_t>(b_count * _generator.rand());
+    } while ((same_species) && (index_a == index_b));
+
+    const auto particle_a = particles[a_indicies[index_a]];
+    const auto particle_b = particles[b_indicies[index_b]];
+
+    mooseAssert(_study->weight(*particle_a) == _study->weight(*particle_b),
+                "Mixed weight particle collision schemes are currently not supported");
+
+    Real sigma_cr_t = 0.0;
+
+    for (const auto & collision : collisions)
+    {
+      sigma_cr_t += collision->sigmaCr(*particle_a, *particle_b);
+    }
+
+    if (sigma_cr_t > sigma_cr_t_max)
+    {
+      sigma_cr_t_max = sigma_cr_t;
+    }
+
+    if (sigma_cr_t / sigma_cr_t_max < _generator.rand())
+    {
+      continue;
+    }
+
+    const auto selection_rand = _generator.rand();
+
+    size_t collision_index = 0;
+    for (size_t j = 0; j < collisions.size(); ++j)
+    {
+      collision_index += static_cast<size_t>(selection_rand > selection_rand);
+    }
+
+    collisions[collision_index]->collideParticles(*particle_a, *particle_b);
+    reaction_rates[collision_index] += weight;
+  }
+
+  for (auto & rate : reaction_rates)
+  {
+    rate /= (elem_volume * _dt);
   }
 }

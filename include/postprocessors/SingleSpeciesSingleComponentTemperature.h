@@ -12,12 +12,12 @@
 #include "GeneralPostprocessor.h"
 
 class PICStudyBase;
-class SingleSpeciesTemperature : public GeneralPostprocessor
+class SingleSpeciesSingleComponentTemperature : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  SingleSpeciesTemperature(const InputParameters & parameters);
+  SingleSpeciesSingleComponentTemperature(const InputParameters & parameters);
 
   virtual void initialSetup() override;
   virtual void initialize() override {}
@@ -27,6 +27,7 @@ public:
 
 protected:
   const PICStudyBase & _study;
+  const unsigned int _component;
   Real _mass;
   Real _total_energy;
   Real _total_weight;

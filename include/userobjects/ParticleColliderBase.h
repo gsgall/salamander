@@ -19,6 +19,7 @@
 #include "GeneralUserObject.h"
 #include "MooseRandom.h"
 #include "Ray.h"
+#include <libmesh/id_types.h>
 
 class CollisionBase;
 class CollisionalPICStudy;
@@ -55,8 +56,14 @@ protected:
   std::vector<std::vector<const CollisionBase *>> _collision_objects;
   std::vector<std::vector<Real>> _temporary_xsecs;
   std::vector<std::vector<std::vector<Real>>> _reaction_rates;
+  std::vector<Real> _elem_volumes;
+  std::vector<dof_id_type> _elem_ids;
 
   unsigned int pairingFunction(const unsigned int species_id_1,
                                const unsigned int species_id_2) const;
-  unsigned int totalUniquePairs(const unsigned int num_species) const;
+  unsigned int totalSpeciesPairs(const unsigned int num_species) const;
+
+  void setParticleIndicies(const dof_id_type elem_id,
+                           const std::vector<std::shared_ptr<Ray>> & particles,
+                           std::vector<std::vector<size_t>> & indicies) const;
 };

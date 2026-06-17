@@ -17,6 +17,7 @@
 #include "ParticleColliderBase.h"
 #include "CollisionalPICStudy.h"
 #include "CollisionBase.h"
+#include <petsc/private/petscimpl.h>
 
 InputParameters
 ParticleColliderBase::validParams()
@@ -38,6 +39,11 @@ ParticleColliderBase::ParticleColliderBase(const InputParameters & parameters)
   : GeneralUserObject(parameters), _generator()
 {
   _generator.seed(getParam<unsigned int>("seed"));
+  for (const auto & elem : *_fe_problem.mesh().getActiveLocalElementRange())
+  {
+    _elem_volumes.push_back(elem->volume());
+    _elem_ids.push_back(elem->id());
+  }
 }
 
 void
@@ -50,7 +56,9 @@ ParticleColliderBase::initialSetup()
   _species_ids = _study->speciesIds();
   _particle_indicies.resize(_species_ids.size());
   const auto & names = getParam<std::vector<UserObjectName>>("collision_objects");
-  const auto total_pairs = pairingFunction(_species_ids.size(), _species_ids.size()) - 1;
+
+  const auto num_species = _species_ids.size();
+  const auto total_pairs = totalSpeciesPairs(num_species);
 
   _collision_objects.resize(total_pairs);
   _temporary_xsecs.resize(total_pairs);
@@ -68,10 +76,7 @@ ParticleColliderBase::initialSetup()
     _temporary_xsecs[i].resize(_collision_objects[i].size());
   }
 
-  const auto & elem_range = *_fe_problem.mesh().getActiveLocalElementRange();
-  const auto num_elems = std::distance(elem_range.begin(), elem_range.end());
-
-  _reaction_rates.resize(num_elems);
+  _reaction_rates.resize(_elem_volumes.size());
 
   for (auto & elem_rates : _reaction_rates)
   {
@@ -92,7 +97,31 @@ ParticleColliderBase::pairingFunction(const unsigned int species_id_1,
 }
 
 unsigned int
-ParticleColliderBase::totalUniquePairs(const unsigned int num_species) const
+ParticleColliderBase::totalSpeciesPairs(const unsigned int num_species) const
 {
-  return pairingFunction(num_species, num_species) + 1;
+  return pairingFunction(num_species - 1, num_species - 1) + 1;
+}
+
+void
+ParticleColliderBase::setParticleIndicies(const dof_id_type elem_id,
+                                          const std::vector<std::shared_ptr<Ray>> & particles,
+                                          std::vector<std::vector<size_t>> & indicies) const
+{
+  /// make sure that all of the values are cleared so we do not accumulate over time
+  for (auto & species_indicies : indicies)
+  {
+    species_indicies.clear();
+  }
+
+  mooseAssert(indicies.size() == _species_ids.size(),
+              "The particle indicies vector size was not properly set");
+
+  for (size_t i = 0; i < particles.size(); ++i)
+  {
+    const auto & particle = particles[i];
+    if (particle->currentElem()->id() != elem_id)
+      continue;
+
+    indicies[_study->species(*particle)].push_back(i);
+  }
 }

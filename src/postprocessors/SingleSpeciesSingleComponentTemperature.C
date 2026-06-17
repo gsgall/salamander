@@ -8,35 +8,40 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "Constants.h"
-#include "SingleSpeciesTemperature.h"
+#include "SingleSpeciesSingleComponentTemperature.h"
 
 #include "PICStudyBase.h"
 
-registerMooseObject("SalamanderApp", SingleSpeciesTemperature);
+registerMooseObject("SalamanderApp", SingleSpeciesSingleComponentTemperature);
 
 InputParameters
-SingleSpeciesTemperature::validParams()
+SingleSpeciesSingleComponentTemperature::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<UserObjectName>("study", "The PICStudy that owns the particles");
   params.addRequiredParam<std::string>(
       "species", "The name of the species of which you want to calculate the temperature.");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "component", "component < 3", "The component for the temperautre");
   return params;
 }
 
-SingleSpeciesTemperature::SingleSpeciesTemperature(const InputParameters & params)
-  : GeneralPostprocessor(params), _study(getUserObject<PICStudyBase>("study"))
+SingleSpeciesSingleComponentTemperature::SingleSpeciesSingleComponentTemperature(
+    const InputParameters & params)
+  : GeneralPostprocessor(params),
+    _study(getUserObject<PICStudyBase>("study")),
+    _component(getParam<unsigned int>("component"))
 {
 }
 
 void
-SingleSpeciesTemperature::initialSetup()
+SingleSpeciesSingleComponentTemperature::initialSetup()
 {
   _mass = _study.mass(getParam<std::string>("species"));
 }
 
 void
-SingleSpeciesTemperature::execute()
+SingleSpeciesSingleComponentTemperature::execute()
 {
   const auto & particles = _study.bankedParticles();
   _total_energy = 0.0;
@@ -44,19 +49,20 @@ SingleSpeciesTemperature::execute()
   for (const auto & particle : particles)
   {
     _total_weight += _study.weight(*particle);
-    _total_energy += _mass * _study.weight(*particle) * _study.velocity(*particle).norm_sq();
+    _total_energy += _mass * _study.weight(*particle) * _study.velocity(*particle)(_component) *
+                     _study.velocity(*particle)(_component);
   }
 }
 
 void
-SingleSpeciesTemperature::finalize()
+SingleSpeciesSingleComponentTemperature::finalize()
 {
   comm().sum(_total_weight);
   comm().sum(_total_energy);
 }
 
 Real
-SingleSpeciesTemperature::getValue() const
+SingleSpeciesSingleComponentTemperature::getValue() const
 {
   return _total_energy / (_total_weight * Salamander::constants::k_b);
 }

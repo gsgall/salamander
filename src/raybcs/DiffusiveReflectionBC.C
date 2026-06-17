@@ -68,7 +68,7 @@ DiffusiveReflectionBC::onBoundary(const unsigned int num_applying)
   _temporary_velocity(0) = perpendicular_speed * -normal(0);
   _temporary_velocity(1) = tangential_speed * std::sin(theta);
   _temporary_velocity(2) = tangential_speed * std::cos(theta);
+  _new_velocities.push_back(_temporary_velocity);
 
-  // note that this does not properly reset the rays final distance to be physically consistent
   changeParticleVelocity(_temporary_velocity);
 }

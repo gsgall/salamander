@@ -1,4 +1,4 @@
-particles_per_element = 100
+particles_per_element = 1000
 T_0 = 273.15
 T_12 = 373.15
 T_eq = '${fparse (T_0 + 2.0 * T_12) / 3.0 }'
@@ -16,7 +16,7 @@ mean_collision_time = '${fparse 1 / collision_frequency}'
 
 dt = '${fparse 1 / 4 * mean_collision_time}'
 dx = '${fparse 1 / 3 * mean_free_path}'
-elems_per_dim = 10
+elems_per_dim = 1
 L = '${fparse elems_per_dim * dx}'
 
 [Problem]
@@ -25,6 +25,7 @@ L = '${fparse elems_per_dim * dx}'
 
 [GlobalParams]
   seed = 9812435
+  study = study
 []
 
 [Mesh]
@@ -73,26 +74,26 @@ L = '${fparse elems_per_dim * dx}'
     mass = ${m}
     velocity_initializer = velocity_initializer
   []
-  [hard_sphere]
-    type = HardSphereCollision
-    reactants = 'A A'
-    products = 'A A'
-    study = study
-    diameter = 0.46065886596178063
-    initial_temperature = ${T_eq}
-  []
-  #  [maxwell]
-  #    type = MaxwellCollision
+  #  [hard_sphere]
+  #    type = HardSphereCollision
   #    reactants = 'A A'
   #    products = 'A A'
   #    study = study
-  #    reference_value = ${sigma_0}
+  #    diameter = 0.46065886596178063
+  #    initial_temperature = ${T_eq}
   #  []
+  [maxwell]
+    type = MaxwellCollision
+    reactants = 'A A'
+    products = 'A A'
+    study = study
+    reference_value = ${sigma_0}
+  []
   [collider]
     type = DSMCCollider
     study = study
-    #collision_objects = 'maxwell'
-    collision_objects = 'hard_sphere'
+    collision_objects = 'maxwell'
+    #collision_objects = 'hard_sphere'
   []
   [study]
     type = CollisionalPICStudy
@@ -134,24 +135,24 @@ L = '${fparse elems_per_dim * dx}'
     type = ParticleDataVectorPostprocessor
     study = study
   []
-  [T_x]
-    type = SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor
-    study = study
-    species = 'A'
-    component = 0
-  []
-  [T_y]
-    type = SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor
-    study = study
-    species = 'A'
-    component = 1
-  []
-  [T_z]
-    type = SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor
-    study = study
-    species = 'A'
-    component = 2
-  []
+  # [T_x]
+  #   type = SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor
+  #   study = study
+  #   species = 'A'
+  #   component = 0
+  # []
+  # [T_y]
+  #   type = SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor
+  #   study = study
+  #   species = 'A'
+  #   component = 1
+  # []
+  # [T_z]
+  #   type = SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor
+  #   study = study
+  #   species = 'A'
+  #   component = 2
+  # []
 []
 
 # [Postprocessors]
@@ -165,7 +166,7 @@ L = '${fparse elems_per_dim * dx}'
 #     species = 'A'
 #     component = 1
 #   []
-#   [T_y]
+#   [T_z]
 #     type = SingleSpeciesTemperature
 #     species = 'A'
 #     component = 2
@@ -177,7 +178,7 @@ L = '${fparse elems_per_dim * dx}'
   dt = ${dt}
   # dt = 1e-10
   # num_steps = 2
-  num_steps = 1000
+  num_steps = 1
 []
 
 [Outputs]

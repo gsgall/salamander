@@ -134,7 +134,7 @@ d_ref = '${fparse sqrt(numerator / denominator)}'
   [time_avg_temp_accum]
     type = PerElementTimeAveragedTemperatureAccumulator
     species = 'A'
-    start_averaging_step = 25000
+    start_averaging_step = 10000
     aux_variable = time_averaged_temperature
   []
 []
@@ -162,7 +162,7 @@ d_ref = '${fparse sqrt(numerator / denominator)}'
 [Executioner]
   type = Transient
   dt = 5e-8
-  num_steps = 50000
+  #num_steps = 1
   # end_time = 3e-3
   #  num_steps = 2
   #  dt = 1
@@ -171,7 +171,7 @@ d_ref = '${fparse sqrt(numerator / denominator)}'
 [Outputs]
   [out]
     type = Exodus
-    start_step = 25000
+    start_step = 10000
   []
   execute_on = 'TIMESTEP_END'
 []

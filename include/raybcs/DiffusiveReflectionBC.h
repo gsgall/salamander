@@ -35,4 +35,5 @@ protected:
   const Real _temperature;
   const RayDataIndex _mass_index;
   MooseRandom _generator;
+  std::vector<Point> _new_velocities;
 };

@@ -16,7 +16,7 @@ runs = 10
 particles_per_element = [40]
 
 for ppe in particles_per_element:
-  file_path = f"data/{elems_per_dim}x{elems_per_dim}/{ppe:d}_ppe"
+  file_path = f"maxwell_data/{elems_per_dim}x{elems_per_dim}/{ppe:d}_ppe"
   if not os.path.exists(file_path):
       os.makedirs(file_path)
 
