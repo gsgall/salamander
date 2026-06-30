@@ -223,7 +223,6 @@ PICStudyBase::particles() const
   return _banked_rays;
 }
 
-void
 PICStudyBase::setInitialParticleData(std::shared_ptr<Ray> & particle,
                                      const AssignedParticleData & assigned_data,
                                      const InitialParticleData & data)
