@@ -4,12 +4,12 @@
 
 ## Overview
 
-This velocity initializer provides particles with velocities from the provided list.
-When more velocities are requested from this initializer than are provided as input, the list of velocities will be repeated until the total number of velocities requested have been provided.
+This initializer will sample each component of a particles velocity independently from the list of three provided distributions.
+One of the main use cases for this object may to initialize particles at a specific temperature, sampling velocities from Maxwellian distributions.
 
 ## Example Input File Syntax
 
-!listing test/tests/userobjects/particle_initializer/per_element/elements/initializer_base.i block=UserObjects/velocity_initializer
+!listing test/tests/userobjects/velocity_initialization/maxwellian.i block=UserObjects/velocity_initializer
 
 !syntax parameters /UserObjects/VelocitiesFromDistributionsVelocityInitializer
 
