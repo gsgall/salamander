@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "PICStudyBase.h"
+#include "PICStudy.h"
 
 class ParticleInitializerBase;
 /**
@@ -25,7 +25,7 @@ class ParticleInitializerBase;
  * assuming that element ids do not change as a function of the number processes being
  * used to solve this
  */
-class TestInitializedPICStudy : public PICStudyBase
+class TestInitializedPICStudy : public PICStudy
 {
 public:
   TestInitializedPICStudy(const InputParameters & parameters);

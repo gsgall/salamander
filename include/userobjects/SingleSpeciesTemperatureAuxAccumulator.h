@@ -1,5 +1,5 @@
 //* This file is part of SALAMANDER: Software for Advanced Large-scale Analysis of MAgnetic
-//confinement for Numerical Design, Engineering & Research,
+// confinement for Numerical Design, Engineering & Research,
 //* A multiphysics application for modeling plasma facing components
 //* https://github.com/idaholab/salamander
 //* https://mooseframework.inl.gov/salamander
@@ -16,21 +16,24 @@
 
 #pragma once
 
-#include "ParticleStepperBase.h"
+#include "GeneralUserObject.h"
+#include "MooseTypes.h"
 
-class TestSimpleStepper : public ParticleStepperBase
+class PICStudy;
+
+class SingleSpeciesTemperatureAuxAccumulator : public GeneralUserObject
 {
 public:
-  TestSimpleStepper(const InputParameters & parameters);
-
   static InputParameters validParams();
 
-  /**
-   * A simple particle stepper which will not modify the velocity of the particle
-   * it will simply update the velocity with the rule v^2 * dt
-   */
-  virtual void setupStep(Ray & particle,
-                         Point & v,
-                         const Real q_m_ratio,
-                         const Real distance = 0) const override;
+  SingleSpeciesTemperatureAuxAccumulator(const InputParameters & params);
+
+  virtual void initialize() override {}
+  virtual void execute() override;
+  virtual void finalize() override {}
+
+protected:
+  const PICStudy & _study;
+  const AuxVariableName & _aux_variable;
+  const unsigned int _species_id;
 };

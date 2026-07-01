@@ -14,13 +14,14 @@
 //* ALL RIGHTS RESERVED
 //*
 
-#include "PICStudyBase.h"
+#include "PICStudy.h"
 #include "ParticleInitializerBase.h"
 #include "ParticleStepperBase.h"
-#include <libmesh/fuzzy_equals.h>
+
+registerMooseObject("SalamanderApp", PICStudy);
 
 InputParameters
-PICStudyBase::validParams()
+PICStudy::validParams()
 {
   auto params = RayTracingStudy::validParams();
   params.addClassDescription("Base class for PIC studies. Provides some of the basic ray data "
@@ -40,7 +41,7 @@ PICStudyBase::validParams()
   return params;
 }
 
-PICStudyBase::PICStudyBase(const InputParameters & parameters)
+PICStudy::PICStudy(const InputParameters & parameters)
   : RayTracingStudy(parameters),
     _banked_rays(
         declareRestartableDataWithContext<std::vector<std::shared_ptr<Ray>>>("_banked_rays", this)),
@@ -107,7 +108,7 @@ PICStudyBase::PICStudyBase(const InputParameters & parameters)
 }
 
 void
-PICStudyBase::generateRays()
+PICStudy::generateRays()
 {
   // We generate rays the first time only, after that we will
   // pull from the bank and update velocities/max distances
@@ -126,7 +127,7 @@ PICStudyBase::generateRays()
 }
 
 void
-PICStudyBase::initializeParticles()
+PICStudy::initializeParticles()
 {
   std::vector<const ParticleInitializerBase *> initializers;
   for (const auto & name : getParam<std::vector<UserObjectName>>("particle_initializers"))
@@ -145,7 +146,7 @@ PICStudyBase::initializeParticles()
 }
 
 void
-PICStudyBase::reinitializeParticles()
+PICStudy::reinitializeParticles()
 {
   // Reset each ray
   for (auto & particle : _banked_rays)
@@ -172,7 +173,7 @@ PICStudyBase::reinitializeParticles()
 }
 
 void
-PICStudyBase::postExecuteStudy()
+PICStudy::postExecuteStudy()
 {
   // we are going to be re using the same rays which just took a step so
   // we store them here to reset them in the generateRays method
@@ -193,7 +194,7 @@ PICStudyBase::postExecuteStudy()
 }
 
 void
-PICStudyBase::setVelocity(Ray & particle, const Point & v) const
+PICStudy::setVelocity(Ray & particle, const Point & v) const
 {
   for (size_t i = 0; i < _velocity_indicies.size(); ++i)
   {
@@ -202,37 +203,49 @@ PICStudyBase::setVelocity(Ray & particle, const Point & v) const
 }
 
 const std::vector<std::shared_ptr<Ray>> &
-PICStudyBase::particles() const
+PICStudy::particles() const
 {
   return _banked_rays;
 }
 
 const Real
-PICStudyBase::weight(const Ray & particle) const
+PICStudy::weight(const Ray & particle) const
 {
   return particle.data(_weight_index);
 }
 
 const Real
-PICStudyBase::charge(const Ray & particle) const
+PICStudy::charge(const Ray & particle) const
 {
   return particle.data(_charge_index);
 }
 
 const Real
-PICStudyBase::mass(const Ray & particle) const
+PICStudy::mass(const Ray & particle) const
 {
   return particle.data(_mass_index);
 }
 
 const unsigned int
-PICStudyBase::species(const Ray & particle) const
+PICStudy::species(const Ray & particle) const
 {
   return particle.data(_species_index);
 }
 
+unsigned int
+PICStudy::speciesId(const std::string & species_name) const
+{
+  const auto it = std::find(_species_names.begin(), _species_names.end(), species_name);
+  if (it == _species_names.end())
+  {
+    mooseError("The requested species " + species_name + " does not exist in the PIC Study.");
+  }
+
+  return std::distance(_species_names.begin(), it);
+}
+
 void
-PICStudyBase::velocity(const Ray & particle, Point & velocity) const
+PICStudy::velocity(const Ray & particle, Point & velocity) const
 {
   for (size_t i = 0; i < 3; ++i)
   {
@@ -241,14 +254,23 @@ PICStudyBase::velocity(const Ray & particle, Point & velocity) const
 }
 
 const Real
-PICStudyBase::velocityComponent(const Ray & particle, const unsigned int component) const
+PICStudy::energy(const Ray & particle) const
+{
+  Real local_sum = 0;
+  for (const auto index : _velocity_indicies)
+    local_sum += particle.data(index) * particle.data(index);
+
+  return 0.5 * particle.data(_mass_index) * local_sum;
+}
+
+const Real
+PICStudy::velocityComponent(const Ray & particle, const unsigned int component) const
 {
   mooseAssert(component < 3, "The maximum value of component allowed is 2.");
   return particle.data(_velocity_indicies[component]);
 }
 void
-PICStudyBase::setInitialParticleData(std::shared_ptr<Ray> & particle,
-                                     const InitialParticleData & data)
+PICStudy::setInitialParticleData(std::shared_ptr<Ray> & particle, const InitialParticleData & data)
 {
   particle->setStart(data.position, data.elem);
   setVelocity(*particle, data.velocity);
@@ -258,7 +280,7 @@ PICStudyBase::setInitialParticleData(std::shared_ptr<Ray> & particle,
 }
 
 std::shared_ptr<Ray>
-PICStudyBase::createParticle(const InitialParticleData & data)
+PICStudy::createParticle(const InitialParticleData & data)
 {
   auto particle = acquireRay();
   setInitialParticleData(particle, data);

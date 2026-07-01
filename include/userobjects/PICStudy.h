@@ -22,10 +22,10 @@
 #include "ParticleInitializerBase.h"
 class ParticleStepperBase;
 
-class PICStudyBase : public RayTracingStudy
+class PICStudy : public RayTracingStudy
 {
 public:
-  PICStudyBase(const InputParameters & parameters);
+  PICStudy(const InputParameters & parameters);
 
   static InputParameters validParams();
 
@@ -43,6 +43,7 @@ public:
   const Real charge(const Ray & particle) const;
   const Real mass(const Ray & particle) const;
   const unsigned int species(const Ray & particle) const;
+  unsigned int speciesId(const std::string & species_name) const noexcept(false);
   ///@}
 
   /**
@@ -53,6 +54,13 @@ public:
    * @param velocity the point where the particles velocity will be stored
    */
   void velocity(const Ray & particle, Point & velocity) const;
+
+  /**
+   * Computes the energy of a single particle
+   * @param particle the particle of which you are computing the energy
+   * @returns the kinetic energy of a particle 0.5 m v^2
+   */
+  const Real energy(const Ray & particle) const;
   /**
    * Method for getting a single velocity component for a particle
    * Each component is retrieved from ray data and given
@@ -119,7 +127,8 @@ protected:
    * @param ray the aquired ray to which the data will be assigned
    * @param data the initial particle data that will be given to the day
    */
-  virtual void setInitialParticleData(std::shared_ptr<Ray> & ray, const InitialParticleData & data);
+  virtual void setInitialParticleData(std::shared_ptr<Ray> & particle,
+                                      const InitialParticleData & data);
 
   /**
    * Takes in the data required to initialize a particle and then returns the shared pointer

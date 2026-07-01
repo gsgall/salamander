@@ -15,7 +15,7 @@
 //*
 
 #include "ReflectParticleBC.h"
-#include "PICStudyBase.h"
+#include "PICStudy.h"
 #include <libmesh/int_range.h>
 registerMooseObject("SalamanderApp", ReflectParticleBC);
 
@@ -31,7 +31,7 @@ ReflectParticleBC::validParams()
 
 ReflectParticleBC::ReflectParticleBC(const InputParameters & params)
   : ReflectRayBC(params),
-    _pic_study(getStudy<PICStudyBase>()),
+    _pic_study(getStudy<PICStudy>()),
     _mesh_dimension(_fe_problem.mesh().dimension())
 {
 }

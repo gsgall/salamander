@@ -133,7 +133,7 @@ The `UserObjects` block is where particles are created and the rules for how the
 The `particle_initializer` defines the rules for how particles are placed in the mesh and the `velocity_initializer` defines how their velocities are initialized.
 The [UniformGridParticleInitializer.md] places particles evenly throughout the mesh.
 In this case, 100 particles are placed on the mesh with uniform spacing between them, and they are weighted so that this particle distribution will approximate the specified argon ion number density, `n`.
-The final object is the `TestInitializedPICStudy`. This object and any other objects which inherit from [PICStudyBase.md] are responsible for managing the particles themselves.
+The final object is the `TestInitializedPICStudy`. This object and any other objects which inherit from [PICStudy.md] are responsible for managing the particles themselves.
 
 !listing test/tests/benchmarking/lieberman.i block=UserObjects
                                                  remove=UserObjects/charge_accumulator UserObjects/density_accumulator

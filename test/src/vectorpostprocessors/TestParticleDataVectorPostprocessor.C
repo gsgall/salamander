@@ -15,7 +15,7 @@
 //*
 
 #include "TestParticleDataVectorPostprocessor.h"
-#include "PICStudyBase.h"
+#include "PICStudy.h"
 
 registerMooseObject("SalamanderTestApp", TestParticleDataVectorPostprocessor);
 
@@ -41,9 +41,9 @@ TestParticleDataVectorPostprocessor::execute()
   // It helps to test the behaviour of the object people will actually
   // use without requiring it to store meta data that is not important for them.
   ParticleDataVectorPostprocessor::execute();
-  const auto rays = _study.particles();
-  for (const auto & ray : rays)
-    _data_values.back()->push_back(ray->id());
+  const auto particles = _study.particles();
+  for (const auto & particle : particles)
+    _data_values.back()->push_back(particle->id());
 }
 
 void

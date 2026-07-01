@@ -15,6 +15,7 @@
 //*
 
 #include "ParticleStepperBase.h"
+#include "Ray.h"
 
 InputParameters
 ParticleStepperBase::validParams()
@@ -32,15 +33,17 @@ ParticleStepperBase::ParticleStepperBase(const InputParameters & parameters)
 }
 
 void
-ParticleStepperBase::setMaxDistanceAndDirection(Ray & ray, const Point & v, const Real dt) const
+ParticleStepperBase::setMaxDistanceAndDirection(Ray & particle,
+                                                const Point & v,
+                                                const Real dt) const
 {
 
-  // if the particle velocity is the zero vector the ray needs to be explicitly
+  // if the particle velocity is the zero vector the particle needs to be explicitly
   // made stationary otherwise a zero velocity will create a divide by zero
   // when trying to compute the unit direction vector
   if (v.absolute_fuzzy_equals(Point(0, 0, 0)))
   {
-    ray.setStationary();
+    particle.setStationary();
     return;
   }
   // temporary point to store the new velocity as we work on it
@@ -58,16 +61,16 @@ ParticleStepperBase::setMaxDistanceAndDirection(Ray & ray, const Point & v, cons
   // max distance is v^2 dt
   const auto max_distance = std::sqrt(velocity * velocity) * dt;
 
-  ray.setStartingMaxDistance(max_distance);
-  ray.setStartingDirection(velocity);
+  particle.setStartingMaxDistance(max_distance);
+  particle.setStartingDirection(velocity);
 }
 
 Point
 ParticleStepperBase::sampleField(const std::vector<SALAMANDER::VariableSampler> & field_samplers,
-                                 const Ray & ray) const
+                                 const Ray & particle) const
 {
-  const auto p = ray.currentPoint();
-  const auto e = ray.currentElem();
+  const auto p = particle.currentPoint();
+  const auto e = particle.currentElem();
   return Point(field_samplers[0].sampleVariable(p, e),
                field_samplers[1].sampleVariable(p, e),
                field_samplers[2].sampleVariable(p, e));

@@ -1,0 +1,31 @@
+[Tests]
+  issues = ""
+  design = "VelocityInitializerBase.md ParticleInitializerBase.md VelocitiesFromDistributionsVelocityInitializer.md"
+  [maxwellian]
+    type = CSVDiff
+    input = 'maxwellian.i'
+    csvdiff = 'maxwellian_csv.csv
+               maxwellian_csv_element_temperatures_0001.csv'
+    allow_test_objects = true
+    requirement = 'The system shall be capable of initializing particles with velocities sampled from a maxwellian distribution at a given temperature'
+  []
+  [errors]
+    requirement = 'The system shall return a useful error when the user attempts to provide'
+    [too_few_distributions]
+      type = 'RunException'
+      input = 'maxwellian.i'
+      cli_args = "UserObjects/velocity_initializer/distributions='v_0 v_0'"
+      allow_test_objects = true
+      expect_err = 'You must provide three distributions'
+      detail = 'fewer than three distributions'
+    []
+    [too_many_distributions]
+      type = 'RunException'
+      input = 'maxwellian.i'
+      cli_args = "UserObjects/velocity_initializer/distributions='v_0 v_0 v_0 v_0'"
+      allow_test_objects = true
+      expect_err = 'You must provide three distributions'
+      detail = 'more than three distributions'
+    []
+  []
+[]

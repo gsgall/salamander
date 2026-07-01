@@ -25,8 +25,10 @@ public:
 
   static InputParameters validParams();
 
-  virtual const std::vector<Point> getParticleVelocities(size_t num_samples) const override;
+  virtual const std::vector<Point> getParticleVelocities(size_t num_samples,
+                                                         const unsigned int seed) const override;
 
 protected:
+  /// The velocites that will be cycled through when providing initial velocity data for the particles
   const std::vector<Point> _velocities;
 };
