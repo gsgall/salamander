@@ -15,7 +15,7 @@
 //*
 
 #include "ParticleQuantityResidualAccumulatorBase.h"
-#include "PICStudyBase.h"
+#include "PICStudy.h"
 
 InputParameters
 ParticleQuantityResidualAccumulatorBase::validParams()
@@ -42,6 +42,6 @@ ParticleQuantityResidualAccumulatorBase::ParticleQuantityResidualAccumulatorBase
     const InputParameters & params)
   : GeneralUserObject(params),
     _var_name(getParam<NonlinearVariableName>("variable")),
-    _study(getUserObject<PICStudyBase>("study"))
+    _study(getUserObject<PICStudy>("study"))
 {
 }

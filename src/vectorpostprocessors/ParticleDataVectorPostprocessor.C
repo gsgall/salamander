@@ -15,7 +15,7 @@
 //*
 
 #include "ParticleDataVectorPostprocessor.h"
-#include "PICStudyBase.h"
+#include "PICStudy.h"
 
 registerMooseObject("SalamanderApp", ParticleDataVectorPostprocessor);
 
@@ -35,7 +35,7 @@ ParticleDataVectorPostprocessor::validParams()
 
 ParticleDataVectorPostprocessor::ParticleDataVectorPostprocessor(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
-    _study(getUserObject<PICStudyBase>("study")),
+    _study(getUserObject<PICStudy>("study")),
     _data_values({&declareVector("t_pos"),
                   &declareVector("t_vel"),
                   &declareVector("x"),
@@ -68,22 +68,22 @@ void
 ParticleDataVectorPostprocessor::execute()
 {
 
-  const auto rays = _study.particles();
-  for (const auto & ray : rays)
+  const auto particles = _study.particles();
+  for (const auto & particle : particles)
   {
     // storing the time at which the particle position is known
     _data_values[0]->push_back(_t);
     // storing the time at which the particle velocity is known
     _data_values[1]->push_back(_t - _dt / 2);
-    const auto & point = ray->currentPoint();
+    const auto & point = particle->currentPoint();
     for (const auto i : make_range(2, 5))
       _data_values[i]->push_back(point(i - 2));
 
     for (const auto i : make_range(0, 3))
-      _data_values[5 + i]->push_back(_study.velocityComponent(*ray, i));
+      _data_values[5 + i]->push_back(_study.velocityComponent(*particle, i));
 
     for (const auto i : make_range(0, int(_ray_data_indices.size())))
-      _data_values[8 + i]->push_back(ray->data(_ray_data_indices[i]));
+      _data_values[8 + i]->push_back(particle->data(_ray_data_indices[i]));
   }
 }
 

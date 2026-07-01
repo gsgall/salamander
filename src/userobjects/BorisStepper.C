@@ -54,7 +54,7 @@ BorisStepper::BorisStepper(const InputParameters & parameters)
 }
 
 void
-BorisStepper::setupStep(Ray & ray, Point & v, const Real q_m_ratio, const Real distance) const
+BorisStepper::setupStep(Ray & particle, Point & v, const Real q_m_ratio, const Real distance) const
 {
 
   Real dt = _dt;
@@ -63,15 +63,15 @@ BorisStepper::setupStep(Ray & ray, Point & v, const Real q_m_ratio, const Real d
   if (distance == 0)
     dt /= 2;
   // let's sample the fields at the ray location so we can update the velocity properly
-  Point E = sampleField(_efield_samplers, ray);
-  Point B = sampleField(_bfield_samplers, ray);
+  Point E = sampleField(_efield_samplers, particle);
+  Point B = sampleField(_bfield_samplers, particle);
   // calculate v^-
   v = linearImpulse(v, E, q_m_ratio, dt / 2);
   // calculate v^+
   v = magneticImpulse(v, B, q_m_ratio, dt);
   // calculate the final velocity and setup the particle for the step
   v = linearImpulse(v, E, q_m_ratio, dt / 2);
-  setMaxDistanceAndDirection(ray, v, _dt);
+  setMaxDistanceAndDirection(particle, v, _dt);
 }
 
 Point

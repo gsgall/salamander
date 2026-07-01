@@ -29,7 +29,7 @@ public:
   /**
    * Stepper using a leap frog scheme for stepping
    */
-  virtual void setupStep(Ray & ray,
+  virtual void setupStep(Ray & particle,
                          Point & v,
                          const Real q_m_ratio = 0,
                          const Real distance = 0) const override final;

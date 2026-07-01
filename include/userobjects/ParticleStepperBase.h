@@ -45,30 +45,31 @@ public:
    * @param distance the distance the ray traveled before using this method
    */
   virtual void
-  setupStep(Ray & ray, Point & v, const Real q_m_ratio, const Real distance = 0) const = 0;
+  setupStep(Ray & particle, Point & v, const Real q_m_ratio, const Real distance = 0) const = 0;
 
 protected:
   /**
-   * Method for a simple dimension-dependent update of the rays max distance and
+   * Method for a simple dimension-dependent update of the particles max distance and
    * direction based on the dimension of the problem
-   * for a 1D problem only the x value of the velocity stored ray data will be used
-   * for a 2D problem only the x and y values of the velocity store in ray data will be used
+   * for a 1D problem only the x value of the velocity stored particle data will be used
+   * for a 2D problem only the x and y values of the velocity store in particle data will be used
    * for a 3D problem all components of the velocity will be used
-   * @param ray the ray whose velocity is being set
-   * @param v the new ray velocity
+   * @param particle the ray whose velocity is being set
+   * @param v the new particle velocity
    * @param dt the time step used to set the maximum distance
    */
-  virtual void setMaxDistanceAndDirection(Ray & ray, const Point & v, const Real dt) const final;
+  virtual void
+  setMaxDistanceAndDirection(Ray & particle, const Point & v, const Real dt) const final;
 
   /**
    * Used for sampling each component of a finite element field variable
-   * The field will be sampled at the point of the ray passed to the method
+   * The field will be sampled at the point of the particle passed to the method
    * @param field_samplers the sampler utilities set up to sample each component of the force field
-   * @param ray the current ray
-   * @return the value of the force field at the location of the ray
+   * @param particle the current ray
+   * @return the value of the force field at the location of the particle
    */
   Point sampleField(const std::vector<SALAMANDER::VariableSampler> & field_samplers,
-                    const Ray & ray) const;
+                    const Ray & particle) const;
 
   /**
    * Calculates the updated velocity of a particle subject to force F that applies acceleration

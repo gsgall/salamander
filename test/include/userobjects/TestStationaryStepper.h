@@ -1,5 +1,5 @@
 //* This file is part of SALAMANDER: Software for Advanced Large-scale Analysis of MAgnetic
-//confinement for Numerical Design, Engineering & Research,
+// confinement for Numerical Design, Engineering & Research,
 //* A multiphysics application for modeling plasma facing components
 //* https://github.com/idaholab/salamander
 //* https://mooseframework.inl.gov/salamander
@@ -18,17 +18,13 @@
 
 #include "ParticleStepperBase.h"
 
-class TestSimpleStepper : public ParticleStepperBase
+class TestStationaryStepper : public ParticleStepperBase
 {
 public:
-  TestSimpleStepper(const InputParameters & parameters);
+  TestStationaryStepper(const InputParameters & parameters);
 
   static InputParameters validParams();
 
-  /**
-   * A simple particle stepper which will not modify the velocity of the particle
-   * it will simply update the velocity with the rule v^2 * dt
-   */
   virtual void setupStep(Ray & particle,
                          Point & v,
                          const Real q_m_ratio,

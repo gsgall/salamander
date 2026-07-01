@@ -10,40 +10,39 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 //*
-//* Copyright 2025, Battelle Energy Alliance, LLC and North Carolina State University
+//* Copyright 2025, Battelle Energy Alliance, LLC
 //* ALL RIGHTS RESERVED
 //*
 
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "MooseRandom.h"
+#include "VelocityInitializerBase.h"
 
-class VelocityInitializerBase : public GeneralUserObject
+class Distribution;
+class VelocitiesFromDistributionsVelocityInitializer : public VelocityInitializerBase
 {
 public:
-  VelocityInitializerBase(const InputParameters & parameters);
+  VelocitiesFromDistributionsVelocityInitializer(const InputParameters & parameters);
 
   static InputParameters validParams();
 
   /**
    * Creates a vector of initial particle velocities for as many samples as were requested.
-   * @param num_samples the number of velocities that should be provided
-   * @param seed the additional seed for each call. This should be something like the element id so
-   * that each element gets a different seed.
    * @returns a Point object containing the particle velocity
    */
   virtual const std::vector<Point> getParticleVelocities(const size_t num_samples,
-                                                         const unsigned int seed) const = 0;
-  /**
-   * Unused methods
+                                                         const unsigned int seed) const override;
+
+  /*
+   * We use this to get the actual distribution object that we need to use in order to sample
+   * the particle speeds
    */
-  ///@{
-  virtual void initialize() override final {}
-  virtual void finalize() override final {}
-  virtual void execute() override final {}
-  ///@}
+  virtual void initialSetup() override;
 
 protected:
-  /// a user specified seed for changing random number generator seeds
-  const unsigned int _seed;
+  /// the random number generator object that will be used to sample distributions
+  MooseRandom _generator;
+  /// the distributions that will be used for set the initial particle velocities
+  std::vector<Distribution const *> _distributions;
 };

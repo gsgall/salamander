@@ -73,7 +73,8 @@ PerElementParticleInitializer::getParticleData() const
     // now that all of the particle locations have been placed we need to
     // set up the data they will need to be made into actual rays
     const auto & physical_points = sampler.sampleElement(elem, _particles_per_element);
-    const auto & velocities = _velocity_initializer.getParticleVelocities(_particles_per_element);
+    const auto & velocities =
+        _velocity_initializer.getParticleVelocities(_particles_per_element, elem->id());
     Real weight = _number_density * elem->volume() / (_particles_per_element);
     for (const auto i : make_range(_particles_per_element))
     {

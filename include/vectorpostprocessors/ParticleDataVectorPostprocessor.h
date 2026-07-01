@@ -18,7 +18,7 @@
 #include "Ray.h"
 #include "GeneralVectorPostprocessor.h"
 // Forward declarations
-class PICStudyBase;
+class PICStudy;
 
 class ParticleDataVectorPostprocessor : public GeneralVectorPostprocessor
 {
@@ -44,7 +44,7 @@ public:
 
 protected:
   /// the study that we are collecting data from
-  const PICStudyBase & _study;
+  const PICStudy & _study;
   /// location where the ray data indicies will be stored
   std::vector<RayDataIndex> _ray_data_indices;
   /// vector postprocessor values

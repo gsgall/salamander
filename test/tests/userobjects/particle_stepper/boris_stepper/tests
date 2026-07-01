@@ -1,5 +1,5 @@
 [Tests]
-  design = 'ParticleStepperBase.md PICStudyBase.md'
+  design = 'ParticleStepperBase.md PICStudy.md'
   issues = '#4 #19 #23'
   [e_cross_b]
     requirement = 'The system shall be capable of accurately capturing the path of charged particles in both an electric and a magnetic field,'

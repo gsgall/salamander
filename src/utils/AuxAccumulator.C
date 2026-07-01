@@ -42,6 +42,9 @@ AuxAccumulator::AuxAccumulator(FEProblemBase & problem, const AuxVariableName & 
       _aux.solution().set(i, 0);
   }
   _aux.solution().close();
+  // The update was added here becuase without it the value was not properly set so that it was
+  // accessible to vectorpostprocessors and postprocessors
+  _aux.system().update();
 }
 
 void
@@ -64,6 +67,9 @@ AuxAccumulator::finalize()
 {
   AccumulatorBase::finalize();
   _aux.solution().close();
+  // The update was added here becuase without it the value was not properly set so that it was
+  // accessible to vectorpostprocessors and postprocessors
+  _aux.system().update();
 }
 
 void

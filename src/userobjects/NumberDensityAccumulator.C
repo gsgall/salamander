@@ -16,7 +16,7 @@
 
 #include "NumberDensityAccumulator.h"
 #include "ResidualAccumulator.h"
-#include "PICStudyBase.h"
+#include "PICStudy.h"
 
 registerMooseObject("SalamanderApp", NumberDensityAccumulator);
 

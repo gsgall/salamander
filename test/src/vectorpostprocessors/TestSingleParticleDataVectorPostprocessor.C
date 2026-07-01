@@ -14,8 +14,7 @@
 //* ALL RIGHTS RESERVED
 //*
 
-#include "Moose.h"
-#include "PICStudyBase.h"
+#include "PICStudy.h"
 #include "TestSingleParticleDataVectorPostprocessor.h"
 
 registerMooseObject("SalamanderTestApp", TestSingleParticleDataVectorPostprocessor);

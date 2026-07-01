@@ -14,10 +14,9 @@
 //* ALL RIGHTS RESERVED
 //*
 
-#include "PICStudyBase.h"
+#include "PICStudy.h"
 #include "TestInitializedPICStudy.h"
 
-#include "ClaimRays.h"
 #include "ParticleInitializerBase.h"
 #include "ParticleStepperBase.h"
 #include <memory>
@@ -27,7 +26,7 @@ registerMooseObject("SalamanderTestApp", TestInitializedPICStudy);
 InputParameters
 TestInitializedPICStudy::validParams()
 {
-  auto params = PICStudyBase::validParams();
+  auto params = PICStudy::validParams();
   params.addParam<unsigned int>(
       "particles_per_element", 0, "The number of particles that will be placed in each element");
 
@@ -41,7 +40,7 @@ TestInitializedPICStudy::validParams()
 }
 
 TestInitializedPICStudy::TestInitializedPICStudy(const InputParameters & parameters)
-  : PICStudyBase(parameters),
+  : PICStudy(parameters),
     _single_particle(getParam<bool>("single_particle")),
     _use_custom_id_scheme(getParam<bool>("use_custom_rayids")),
     _particles_per_element(getParam<unsigned int>("particles_per_element")),
@@ -68,8 +67,9 @@ TestInitializedPICStudy::createParticle(const AssignedParticleData & assigned_da
     _curr_elem_ray_count = 0;
   }
 
-  return PICStudyBase::createParticle(assigned_data, data);
+  return PICStudy::createParticle(assigned_data, data);
 }
+
 RayID
 TestInitializedPICStudy::generateUniqueRayID(const THREAD_ID tid)
 {

@@ -17,7 +17,7 @@
 #pragma once
 #include "GeneralUserObject.h"
 
-class PICStudyBase;
+class PICStudy;
 
 class ParticleQuantityResidualAccumulatorBase : public GeneralUserObject
 {
@@ -38,5 +38,5 @@ protected:
   /// the name of the variable which we are contributing to the residual of
   const NonlinearVariableName _var_name;
   /// the PIC study that is tracking all of our particles
-  const PICStudyBase & _study;
+  const PICStudy & _study;
 };

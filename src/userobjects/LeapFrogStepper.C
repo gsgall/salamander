@@ -45,15 +45,18 @@ LeapFrogStepper::LeapFrogStepper(const InputParameters & parameters)
 }
 
 void
-LeapFrogStepper::setupStep(Ray & ray, Point & v, const Real q_m_ratio, const Real distance) const
+LeapFrogStepper::setupStep(Ray & particle,
+                           Point & v,
+                           const Real q_m_ratio,
+                           const Real distance) const
 {
 
   // if it is the particles first step we need to take a half step
   // for the velocity other wise we take a full step
-  Point F = sampleField(_field_samplers, ray);
+  Point F = sampleField(_field_samplers, particle);
 
   const auto dt = distance == 0 ? _dt / 2 : _dt;
 
   v = linearImpulse(v, F, q_m_ratio, dt);
-  setMaxDistanceAndDirection(ray, v, _dt);
+  setMaxDistanceAndDirection(particle, v, _dt);
 }

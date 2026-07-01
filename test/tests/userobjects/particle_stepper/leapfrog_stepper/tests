@@ -1,5 +1,5 @@
 [Tests]
-  design = 'ParticleStepperBase.md PICStudyBase.md'
+  design = 'ParticleStepperBase.md PICStudy.md'
   issues = '#4 #19 #23'
   [circular_e_field]
     requirement = 'The system shall be capable of using the Leapfrog stepper to accurately calculate the path of charged particles in a time-varying electric field,'

@@ -30,7 +30,7 @@ public:
    * Electromagnetic particle stepper
    * uses the Boris algorithm
    */
-  virtual void setupStep(Ray & ray,
+  virtual void setupStep(Ray & particle,
                          Point & v,
                          const Real q_m_ratio = 0,
                          const Real distance = 0) const override final;

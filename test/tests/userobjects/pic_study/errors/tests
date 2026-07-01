@@ -1,5 +1,5 @@
 [Tests]
-  design = 'PICStudyBase.md'
+  design = 'PICStudy.md'
   issues = '#144'
   [errors]
     requirement = "The system shall return a useful error when the user attempts to provide"

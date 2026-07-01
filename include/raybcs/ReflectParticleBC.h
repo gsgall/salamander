@@ -18,7 +18,7 @@
 
 #include "ReflectRayBC.h"
 
-class PICStudyBase;
+class PICStudy;
 
 class ReflectParticleBC : public ReflectRayBC
 {
@@ -31,7 +31,7 @@ public:
 
 protected:
   /// the instance of the pic study to get access the particle data accessor methods
-  const PICStudyBase & _pic_study;
+  const PICStudy & _pic_study;
   /// the dimension of the actual mesh
   const unsigned int _mesh_dimension;
   /// point used to store the components of the velocity which are needed during reflection

@@ -137,7 +137,8 @@ BoundingBoxParticleInitializer::getParticleData() const
     // first sample points in the element like we would if this were a uniform initialization
     // across the whole domain
     const auto & physical_points = sampler.sampleElement(elem, _particles_per_element);
-    const auto & velocities = _velocity_initializer.getParticleVelocities(_particles_per_element);
+    const auto & velocities =
+        _velocity_initializer.getParticleVelocities(_particles_per_element, elem->id());
     Real weight = _number_density * elem->volume() / (_particles_per_element);
     for (const auto i : make_range(_particles_per_element))
     {
