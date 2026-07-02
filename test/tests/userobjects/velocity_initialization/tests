@@ -2,12 +2,29 @@
   issues = ""
   design = "VelocityInitializerBase.md ParticleInitializerBase.md VelocitiesFromDistributionsVelocityInitializer.md"
   [maxwellian]
-    type = CSVDiff
-    input = 'maxwellian.i'
-    csvdiff = 'maxwellian_csv.csv
-               maxwellian_csv_element_temperatures_0001.csv'
-    allow_test_objects = true
     requirement = 'The system shall be capable of initializing particles with velocities sampled from a maxwellian distribution at a given temperature'
+    [single_run]
+      type = CSVDiff
+      input = 'maxwellian.i'
+      csvdiff = 'maxwellian_csv_element_temperatures_0001.csv'
+      allow_test_objects = true
+      detail = 'within each element'
+    []
+    [multiple_runs]
+      type = PythonUnitTest
+      heavy = True
+      input = 'initialization_runs.py'
+      detail = 'and generate different temperatures given different seeds'
+    []
+    [comparison]
+      type = CSVDiff
+      input = 'maxwellian.i'
+      csvdiff = 'maxwellian_temperatures.csv
+                 maxwellian_values_and_errors.csv'
+      should_execute = False
+      prereq = 'maxwellian/multiple_runs'
+      detail = 'and reproduce the expected mean and variance across multiple runs'
+    []
   []
   [errors]
     requirement = 'The system shall return a useful error when the user attempts to provide'

@@ -101,18 +101,6 @@
   []
 []
 
-[Postprocessors]
-  [average_temperature]
-    type = VectorPostprocessorReductionValue
-    vector_name = temperature
-    vectorpostprocessor = element_temperatures
-    value_type = average
-    # this ensures that this will execute after values
-    # have been accumulated by the accumulator userobject
-    execution_order_group = 1
-  []
-[]
-
 [Executioner]
   type = Transient
   num_steps = 1
