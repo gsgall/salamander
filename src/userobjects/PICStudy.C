@@ -299,7 +299,7 @@ PICStudy::mass(const Ray & particle) const
   return particle.data(_mass_index);
 }
 
-const unsigned int
+unsigned int
 PICStudy::species(const Ray & particle) const
 {
   return particle.data(_species_index);

@@ -53,7 +53,7 @@ public:
   const Real weight(const Ray & particle) const;
   const Real charge(const Ray & particle) const;
   const Real mass(const Ray & particle) const;
-  const unsigned int species(const Ray & particle) const;
+  unsigned int species(const Ray & particle) const;
   const std::vector<std::string> & speciesNames() const;
   ///@}
 
@@ -132,6 +132,8 @@ protected:
 
   /// temporary variable used when resetting rays
   Point _temporary_velocity;
+  /// the list of colliders that actually perform the collision
+  /// logic for all particles
   const std::vector<const ParticleColliderBase *> _colliders;
 
   /**

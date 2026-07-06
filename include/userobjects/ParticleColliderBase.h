@@ -61,6 +61,8 @@ protected:
   MooseRandom _generator;
   /// the study that owns the particles
   const PICStudy * _study;
+  /// the number of unique species in the system
+  unsigned int _species_count;
   /**
    * a doubly indexed list to store inidicies into the particle list
    * for particles in a given element
@@ -68,7 +70,7 @@ protected:
    * after being indexed by species there is a list of indicies for particles of the given species
    * in an element
    */
-  std::vector<std::vector<size_t>> _particle_indicies;
+  mutable std::vector<std::vector<size_t>> _particle_indicies;
   /**
    * the list of all collisions that could occur
    * the first index is the speices pairing index for a given
@@ -81,7 +83,7 @@ protected:
    * the second index is the pair index for the species pair
    * the third index is the index of a given reaction for a given species pair
    */
-  std::vector<std::vector<std::vector<Real>>> _reaction_rates;
+  mutable std::vector<std::vector<std::vector<Real>>> _reaction_rates;
   /// The list of the volume of each locally owned element
   std::vector<Real> _elem_volumes;
   /// The list of the element ids for each locally own element

@@ -48,6 +48,14 @@ public:
   virtual const Real sigmaCr(const Ray & particle_a, const Ray & particle_b) const = 0;
 
   /**
+   * Based on the current state of particle in the system an estimation for the
+   * maximum value of the cross section times the relative velocity for the system
+   * will be estimated
+   */
+  virtual const Real
+  estimateSigmaCrMax(const std::vector<std::shared_ptr<Ray>> & particles) const = 0;
+
+  /**
    * Method for modifying the internal particle data post collision
    * @param particle_a the first particle of the colliding pair
    * @param particle_b the second particle of the colliding pair

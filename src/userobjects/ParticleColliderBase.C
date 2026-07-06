@@ -17,8 +17,6 @@
 #include "ParticleColliderBase.h"
 #include "PICStudy.h"
 #include "CollisionBase.h"
-#include <iterator>
-#include <petsc/private/petscimpl.h>
 
 InputParameters
 ParticleColliderBase::validParams()
@@ -50,12 +48,12 @@ void
 ParticleColliderBase::initialSetup()
 {
   _study = &getUserObject<PICStudy>("study");
-  const auto num_species = _study->speciesNames().size();
+  _species_count = _study->speciesNames().size();
 
-  _particle_indicies.resize(num_species);
+  _particle_indicies.resize(_species_count);
   const auto & names = getParam<std::vector<UserObjectName>>("collision_objects");
 
-  const auto total_pairs = totalSpeciesPairs(num_species);
+  const auto total_pairs = totalSpeciesPairs(_species_count);
 
   _collision_objects.resize(total_pairs);
 
