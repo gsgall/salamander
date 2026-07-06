@@ -1,4 +1,5 @@
-//* This file is part of SALAMANDER: Software for Advanced Large-scale Analysis of MAgnetic confinement for Numerical Design, Engineering & Research,
+//* This file is part of SALAMANDER: Software for Advanced Large-scale Analysis of MAgnetic
+// confinement for Numerical Design, Engineering & Research,
 //* A multiphysics application for modeling plasma facing components
 //* https://github.com/idaholab/salamander
 //* https://mooseframework.inl.gov/salamander
@@ -14,7 +15,6 @@
 //*
 
 #include "TestChargeAccumulator.h"
-#include "ParticleStepperBase.h"
 
 registerMooseObject("SalamanderTestApp", TestChargeAccumulator);
 
@@ -38,7 +38,7 @@ TestChargeAccumulator::postExecuteStudy()
   // lets make a new accumulator each time so we can reset the aux variable each time
   TestInitializedPICStudy::postExecuteStudy();
   SALAMANDER::AuxAccumulator accumulator = SALAMANDER::AuxAccumulator(_fe_problem, _var_name);
-  for (auto & ray : _banked_rays)
+  for (auto & ray : _banked_particles)
   {
     accumulator.add(*ray->currentElem(), ray->currentPoint(), 1);
   }

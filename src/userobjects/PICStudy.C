@@ -15,6 +15,7 @@
 //*
 
 #include "PICStudy.h"
+#include "ParticleColliderBase.h"
 #include "ParticleInitializerBase.h"
 #include "ParticleStepperBase.h"
 
@@ -36,6 +37,8 @@ PICStudy::validParams()
   // we will have a lot of them
   params.addRequiredParam<std::vector<UserObjectName>>(
       "particle_initializers", "The initializers that will place particles");
+  params.addParam<std::vector<UserObjectName>>(
+      "colliders", "A list of collider objects that will collide the particles ");
   params.set<bool>("_use_ray_registration") = false;
 
   return params;
@@ -43,7 +46,7 @@ PICStudy::validParams()
 
 PICStudy::PICStudy(const InputParameters & parameters)
   : RayTracingStudy(parameters),
-    _banked_rays(
+    _banked_particles(
         declareRestartableDataWithContext<std::vector<std::shared_ptr<Ray>>>("_banked_rays", this)),
     _velocity_indicies({registerRayData("v_x"), registerRayData("v_y"), registerRayData("v_z")}),
     _weight_index(registerRayData("weight")),
@@ -51,6 +54,19 @@ PICStudy::PICStudy(const InputParameters & parameters)
     _mass_index(registerRayData("mass")),
     _species_index(registerRayData("species")),
     _stepper(getUserObject<ParticleStepperBase>("stepper")),
+    _colliders(
+        [&]()
+        {
+          const auto & names = getParam<std::vector<UserObjectName>>("colliders");
+          std::vector<const ParticleColliderBase *> colliders;
+          for (const auto & name : names)
+          {
+            // const cast here is required
+            colliders.push_back(&getUserObjectByName<ParticleColliderBase>(name));
+          }
+          return colliders;
+        }()),
+
     _has_generated(declareRestartableData<bool>("has_generated", false))
 {
   std::set<std::string_view> name_set;
@@ -121,8 +137,8 @@ PICStudy::generateRays()
   {
     reinitializeParticles();
     // Add the rays to be traced
-    moveRaysToBuffer(_banked_rays);
-    _banked_rays.clear();
+    moveRaysToBuffer(_banked_particles);
+    _banked_particles.clear();
   }
 }
 
@@ -143,17 +159,21 @@ PICStudy::initializeParticles()
     assigned_data.species_id = speciesId(initializer->species());
     for (const auto & initial_data : initializer->getParticleData())
     {
-      _banked_rays.push_back(createParticle(assigned_data, initial_data));
+      _banked_particles.push_back(createParticle(assigned_data, initial_data));
     }
   }
-  moveRaysToBuffer(_banked_rays);
+
+  for (const auto collider : _colliders)
+    collider->initializeInternalData(_banked_particles);
+
+  moveRaysToBuffer(_banked_particles);
 }
 
 void
 PICStudy::reinitializeParticles()
 {
   // Reset each ray
-  for (auto & particle : _banked_rays)
+  for (auto & particle : _banked_particles)
   {
     // Store off the ray's info before we reset it
     const auto elem = particle->currentElem();
@@ -181,20 +201,24 @@ PICStudy::postExecuteStudy()
 {
   // we are going to be re using the same rays which just took a step so
   // we store them here to reset them in the generateRays method
-  _banked_rays = rayBank();
-  // removing all of the rays which were killed during their tracing
-  _banked_rays.erase(std::remove_if(_banked_rays.begin(),
-                                    _banked_rays.end(),
-                                    [](const std::shared_ptr<Ray> & ray)
-                                    {
-                                      if (ray->stationary())
-                                        return false;
+  _banked_particles = rayBank();
 
-                                      return std::abs(ray->distance() - ray->maxDistance()) /
-                                                 ray->maxDistance() >
-                                             1e-6;
-                                    }),
-                     _banked_rays.end());
+  for (const auto collider : _colliders)
+    collider->collideParticles(_banked_particles);
+
+  // removing all of the rays which were killed during their tracing
+  _banked_particles.erase(std::remove_if(_banked_particles.begin(),
+                                         _banked_particles.end(),
+                                         [](const std::shared_ptr<Ray> & ray)
+                                         {
+                                           if (ray->stationary())
+                                             return false;
+
+                                           return std::abs(ray->distance() - ray->maxDistance()) /
+                                                      ray->maxDistance() >
+                                                  1e-6;
+                                         }),
+                          _banked_particles.end());
 }
 
 void
@@ -206,10 +230,41 @@ PICStudy::setVelocity(Ray & particle, const Point & v) const
   }
 }
 
+const Real
+PICStudy::relativeSpeed(const Ray & particle_a, const Ray & particle_b) const
+{
+  Real speed = 0;
+
+  for (const auto i : _velocity_indicies)
+  {
+    const auto difference = particle_a.data(i) - particle_b.data(i);
+    speed += difference * difference;
+  }
+
+  return std::sqrt(speed);
+}
+
+void
+PICStudy::centerOfMassVelocity(const Ray & particle_a,
+                               const Ray & particle_b,
+                               Point & velocity) const
+{
+  const auto m_a = particle_a.data(_mass_index);
+  const auto m_b = particle_b.data(_mass_index);
+  const auto total_mass = m_a + m_b;
+
+  for (size_t i = 0; i < 3; ++i)
+  {
+    velocity(i) = (m_a * particle_a.data(_velocity_indicies[i]) +
+                   m_b * particle_b.data(_velocity_indicies[i])) /
+                  total_mass;
+  }
+}
+
 const std::vector<std::shared_ptr<Ray>> &
 PICStudy::particles() const
 {
-  return _banked_rays;
+  return _banked_particles;
 }
 
 void
@@ -248,6 +303,12 @@ const unsigned int
 PICStudy::species(const Ray & particle) const
 {
   return particle.data(_species_index);
+}
+
+const std::vector<std::string> &
+PICStudy::speciesNames() const
+{
+  return _species_names;
 }
 
 unsigned int

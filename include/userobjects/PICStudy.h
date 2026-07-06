@@ -32,6 +32,7 @@ struct AssignedParticleData
   unsigned int species_id;
 };
 
+class ParticleColliderBase;
 class PICStudy : public RayTracingStudy
 {
 public:
@@ -53,6 +54,7 @@ public:
   const Real charge(const Ray & particle) const;
   const Real mass(const Ray & particle) const;
   const unsigned int species(const Ray & particle) const;
+  const std::vector<std::string> & speciesNames() const;
   ///@}
 
   /**
@@ -93,6 +95,9 @@ public:
    * @throws mooseError if the species_name is unknown to the study
    */
   unsigned int speciesId(const std::string & species_name) const noexcept(false);
+  const Real relativeSpeed(const Ray & particle_a, const Ray & particle_b) const;
+
+  void centerOfMassVelocity(const Ray & particle_a, const Ray & particle_b, Point & velocity) const;
 
 protected:
   /// the list of all of the species ids that map to the species names
@@ -105,7 +110,7 @@ protected:
   std::vector<Real> _species_charges;
 
   /// The banked rays to be used on the next timestep (restartable)
-  std::vector<std::shared_ptr<Ray>> & _banked_rays;
+  std::vector<std::shared_ptr<Ray>> & _banked_particles;
 
   virtual void postExecuteStudy() override;
   /// Ray data for storing velocity components
@@ -127,6 +132,7 @@ protected:
 
   /// temporary variable used when resetting rays
   Point _temporary_velocity;
+  const std::vector<const ParticleColliderBase *> _colliders;
 
   /**
    *  Method that users should override for their custom particle initialization
