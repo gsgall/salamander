@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "AuxAccumulator.h"
 #include "GeneralUserObject.h"
 #include "MooseRandom.h"
 #include <libmesh/id_types.h>
@@ -23,6 +24,12 @@
 class CollisionBase;
 class Ray;
 class PICStudy;
+
+struct CollisionIndices
+{
+  unsigned int pair_index;
+  unsigned int collision_index;
+};
 
 class ParticleColliderBase : public GeneralUserObject
 {
@@ -55,6 +62,11 @@ public:
    * @param the list of particles that will collide
    */
   virtual void collideParticles(const std::vector<std::shared_ptr<Ray>> & particles) const = 0;
+
+  const CollisionIndices collisionIndices(const std::string_view collision_name) const;
+
+  void fillAuxAccumulator(const CollisionIndices indicies,
+                          SALAMANDER::AuxAccumulator & accumulator) const;
 
 protected:
   /// the random number generator that would be used during a collisional method

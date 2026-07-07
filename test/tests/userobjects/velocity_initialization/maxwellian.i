@@ -73,6 +73,7 @@
     type = SingleSpeciesTemperatureAuxAccumulator
     species = 'A'
     aux_variable = temperature
+    execution_order_group = 1
   []
 []
 
@@ -100,6 +101,7 @@
     execution_order_group = 1
   []
 []
+
 
 [Executioner]
   type = Transient

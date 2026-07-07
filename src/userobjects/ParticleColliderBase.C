@@ -14,9 +14,12 @@
 //* ALL RIGHTS RESERVED
 //*
 
+#include "MooseError.h"
 #include "ParticleColliderBase.h"
 #include "PICStudy.h"
 #include "CollisionBase.h"
+#include <unordered_set>
+#include <utility>
 
 InputParameters
 ParticleColliderBase::validParams()
@@ -41,6 +44,16 @@ ParticleColliderBase::ParticleColliderBase(const InputParameters & parameters)
   {
     _elem_volumes.push_back(elem->volume());
     _elem_ids.push_back(elem->id());
+  }
+  std::unordered_set<std::string_view> names;
+  for (const auto & name : getParam<std::vector<UserObjectName>>("collision_objects"))
+  {
+    if (names.count(name) != 0)
+      paramError("collision_objects",
+                 "Each collisional object may only be supplied once. " + name +
+                     " was provided twice");
+
+    names.emplace(name);
   }
 }
 
@@ -112,5 +125,42 @@ ParticleColliderBase::setParticleIndicies(const std::vector<std::shared_ptr<Ray>
       continue;
 
     indicies[_study->species(*particle)].push_back(i);
+  }
+}
+
+const CollisionIndices
+ParticleColliderBase::collisionIndices(const std::string_view collision_name) const
+{
+  for (size_t pair_index = 0; pair_index < _collision_objects.size(); ++pair_index)
+  {
+    const auto & pair_wise_collisions = _collision_objects[pair_index];
+    for (size_t collision_index = 0; collision_index < pair_wise_collisions.size();
+         ++collision_index)
+
+    {
+      if (pair_wise_collisions[collision_index]->name() == collision_name)
+      {
+        auto indicies = CollisionIndices();
+        indicies.pair_index = pair_index;
+        indicies.collision_index = collision_index;
+        return indicies;
+      }
+    }
+  }
+  mooseError("The particle collider '" + name() + "' does not have a collision called '" +
+             std::string(collision_name) + "'");
+}
+
+void
+ParticleColliderBase::fillAuxAccumulator(const CollisionIndices indicies,
+                                         SALAMANDER::AuxAccumulator & accumulator) const
+{
+  size_t i = 0;
+  for (const auto & elem : *_fe_problem.mesh().getActiveLocalElementRange())
+  {
+    accumulator.add(*elem,
+                    elem->vertex_average(),
+                    _reaction_rates[i][indicies.pair_index][indicies.collision_index]);
+    ++i;
   }
 }
