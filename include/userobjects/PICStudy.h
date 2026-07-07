@@ -52,7 +52,9 @@ public:
   ///@{
   const Real weight(const Ray & particle) const;
   const Real charge(const Ray & particle) const;
+  const Real charge(const unsigned int species_id) const;
   const Real mass(const Ray & particle) const;
+  const Real mass(const unsigned int species_id) const;
   unsigned int species(const Ray & particle) const;
   const std::vector<std::string> & speciesNames() const;
   ///@}
@@ -96,6 +98,7 @@ public:
    */
   unsigned int speciesId(const std::string & species_name) const noexcept(false);
   const Real relativeSpeed(const Ray & particle_a, const Ray & particle_b) const;
+  void relativeVelocity(const Ray & particle_a, const Ray & particle_b, Point & velocity) const;
 
   void centerOfMassVelocity(const Ray & particle_a, const Ray & particle_b, Point & velocity) const;
 

@@ -45,7 +45,6 @@ DSMCCollider::initializeInternalData(const std::vector<std::shared_ptr<Ray>> & p
       max_collisions = collisions.size();
     }
   }
-
   _elem_wise_sigma_cr_t_max.resize(_elem_ids.size());
 
   const auto total_pairs = totalSpeciesPairs(num_species);
@@ -83,6 +82,7 @@ DSMCCollider::collideParticles(const std::vector<std::shared_ptr<Ray>> & particl
     const auto elem_volume = _elem_volumes[element_index];
     auto & elem_sigma_cr_t_max = _elem_wise_sigma_cr_t_max[element_index];
 
+    std::cout << "Starting a new Element" << std::endl;
     for (const auto id_a : make_range(_species_count))
     {
       for (size_t id_b = id_a; id_b < _species_count; ++id_b)
@@ -98,7 +98,6 @@ DSMCCollider::collideParticles(const std::vector<std::shared_ptr<Ray>> & particl
         auto & sigma_cr_t_max = elem_sigma_cr_t_max[pair_index];
 
         const bool same_species = id_a == id_b;
-
         sigma_cr_t_max = collideSpeciesPair(particles,
                                             a_indicies,
                                             b_indicies,
@@ -187,6 +186,7 @@ DSMCCollider::collideSpeciesPair(const std::vector<std::shared_ptr<Ray>> & parti
   for (auto & rate : reaction_rates)
   {
     rate /= (elem_volume * _dt);
+    std::cout << "Rate: " << rate << std::endl;
   }
 
   return sigma_cr_t_max_curr;

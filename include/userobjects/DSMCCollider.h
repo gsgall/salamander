@@ -36,7 +36,6 @@ protected:
   /// the first index will be the element and
   /// the second vector will store the value for each species pair
   mutable std::vector<std::vector<Real>> _elem_wise_sigma_cr_t_max;
-  mutable std::vector<Real> _temporary_sigma_cr_values;
 
   /**
    * Performs particle particle collisions for a set of particles in a given element

@@ -68,8 +68,8 @@ public:
    * @returns a list of the species involed on the respective side of the reaction
    */
   ///@{
-  const std::vector<unsigned int> & reactantIds() const;
-  const std::vector<unsigned int> & productIds() const;
+  const std::array<unsigned int, 2> & reactantIds() const;
+  const std::array<unsigned int, 2> & productIds() const;
   ///@}
 
 protected:
@@ -79,7 +79,7 @@ protected:
   const PICStudy * _study;
   /// internal storage for reactants and products for the species in the reaction
   ///@{
-  std::vector<unsigned int> _reactant_ids;
-  std::vector<unsigned int> _product_ids;
+  std::array<unsigned int, 2> _reactant_ids;
+  std::array<unsigned int, 2> _product_ids;
   ///@}
 };

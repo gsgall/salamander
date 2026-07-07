@@ -157,6 +157,7 @@ PICStudy::initializeParticles()
     assigned_data.charge = initializer->charge();
     assigned_data.mass = initializer->mass();
     assigned_data.species_id = speciesId(initializer->species());
+
     for (const auto & initial_data : initializer->getParticleData())
     {
       _banked_particles.push_back(createParticle(assigned_data, initial_data));
@@ -245,6 +246,16 @@ PICStudy::relativeSpeed(const Ray & particle_a, const Ray & particle_b) const
 }
 
 void
+PICStudy::relativeVelocity(const Ray & particle_a, const Ray & particle_b, Point & velocity) const
+{
+  for (size_t i = 0; i < 3; ++i)
+  {
+    const auto velocity_index = _velocity_indicies[i];
+    velocity(i) = particle_a.data(velocity_index) - particle_b.data(velocity_index);
+  }
+}
+
+void
 PICStudy::centerOfMassVelocity(const Ray & particle_a,
                                const Ray & particle_b,
                                Point & velocity) const
@@ -294,9 +305,27 @@ PICStudy::charge(const Ray & particle) const
 }
 
 const Real
+PICStudy::charge(const unsigned int species_id) const
+{
+  mooseAssert(species_id < _species_charges.size(),
+              "You requested the charge of species with id " + std::to_string(species_id) +
+                  " when there are only " + std::to_string(species_id) + " species in the system.");
+  return _species_charges[species_id];
+}
+
+const Real
 PICStudy::mass(const Ray & particle) const
 {
   return particle.data(_mass_index);
+}
+
+const Real
+PICStudy::mass(const unsigned int species_id) const
+{
+  mooseAssert(species_id < _species_masses.size(),
+              "You requested the mass of species with id " + std::to_string(species_id) +
+                  " when there are only " + std::to_string(species_id) + " species in the system.");
+  return _species_masses[species_id];
 }
 
 unsigned int

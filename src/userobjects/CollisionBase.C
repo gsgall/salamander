@@ -35,6 +35,19 @@ CollisionBase::validParams()
 
 CollisionBase::CollisionBase(const InputParameters & parameters) : GeneralUserObject(parameters)
 {
+  const auto & reactants = getParam<std::vector<std::string>>("reactants");
+  const auto & products = getParam<std::vector<std::string>>("products");
+
+  if (reactants.size() != 2)
+  {
+    paramError("reactants", "You must supply two species for the reactants.");
+  }
+
+  if (products.size() != 2)
+  {
+    paramError("products", "You must supply two species for the products.");
+  }
+
   _generator.seed(getParam<unsigned int>("seed"));
 }
 
@@ -49,24 +62,20 @@ CollisionBase::initialSetup()
   // both of these loops might error since the call of
   // _study.speciesId(name) calls moosError in the case
   // that a provided species name is not known to the study
-  for (const auto & name : reactant_names)
+  for (size_t i = 0; i < _reactant_ids.size(); ++i)
   {
-    _reactant_ids.push_back(_study->speciesId(name));
-  }
-
-  for (const auto & name : product_names)
-  {
-    _product_ids.push_back(_study->speciesId(name));
+    _reactant_ids[i] = _study->speciesId(reactant_names[i]);
+    _product_ids[i] = _study->speciesId(product_names[i]);
   }
 }
 
-const std::vector<unsigned int> &
+const std::array<unsigned int, 2> &
 CollisionBase::reactantIds() const
 {
   return _reactant_ids;
 }
 
-const std::vector<unsigned int> &
+const std::array<unsigned int, 2> &
 CollisionBase::productIds() const
 {
   return _product_ids;
