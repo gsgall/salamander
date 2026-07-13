@@ -19,17 +19,11 @@ for ppe in particles_per_element:
     if not os.path.exists(file_path):
         os.makedirs(file_path)
     for i in range(runs):
-        distributions = 'v_0 v_12 v_12'
-        if i > 10:
-            distributions = 'v_12 v_0 v_12'
-        if i > 20:
-            distributions = 'v_12 v_12 v_0'
         print(f"Run: {i}")
         file_base = f"{file_path:s}/run_{i:d}"
         a = ["-i", input_file, "--allow-unused",
              "--allow-test-objects",
              f"GlobalParams/seed={randint(0, int(1e8))}",
-             f"UserObjects/velocity_initializer/distributions={distributions}",
              f"particles_per_element={ppe:d}",
              f"Outputs/file_base={file_base}",
              "Outputs/console=false"]

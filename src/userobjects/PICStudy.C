@@ -57,6 +57,10 @@ PICStudy::PICStudy(const InputParameters & parameters)
     _colliders(
         [&]()
         {
+          if (!isParamSetByUser("colliders"))
+          {
+            return std::vector<const ParticleColliderBase *>();
+          }
           const auto & names = getParam<std::vector<UserObjectName>>("colliders");
           std::vector<const ParticleColliderBase *> colliders;
           for (const auto & name : names)
