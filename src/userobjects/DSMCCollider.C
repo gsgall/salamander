@@ -14,10 +14,12 @@
 //* ALL RIGHTS RESERVED
 //*
 
+#include "MooseUtils.h"
 #include "PICStudy.h"
 #include "DSMCCollider.h"
 #include "CollisionBase.h"
 #include "libMeshReducedNamespace.h"
+#include <libmesh/fuzzy_equals.h>
 
 registerMooseObject("SalamanderApp", DSMCCollider);
 
@@ -151,8 +153,9 @@ DSMCCollider::collideSpeciesPair(const std::vector<std::shared_ptr<Ray>> & parti
     const auto particle_a = particles[a_indicies[index_a]];
     const auto particle_b = particles[b_indicies[index_b]];
 
-    mooseAssert(_study->weight(*particle_a) == _study->weight(*particle_b),
-                "Mixed weight particle collision schemes are currently not supported");
+    mooseAssert(
+        MooseUtils::relativeFuzzyEqual(_study->weight(*particle_a), _study->weight(*particle_b)),
+        "Mixed weight particle collision schemes are currently not supported");
 
     Real sigma_cr_t = 0.0;
 

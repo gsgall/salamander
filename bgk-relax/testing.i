@@ -12,9 +12,9 @@ mean_vel = '${fparse sqrt(8 * k_B * T_eq / (pi * m))}'
 sigma_g_bar = ${sigma_0}
 collision_frequency = '${fparse number_density * sigma_g_bar}'
 mean_free_path = '${fparse mean_vel / collision_frequency}'
-mean_collision_time = '${fparse 1 / collision_frequency}'
+#mean_collision_time = '${fparse 1 / collision_frequency}'
 
-dt = '${fparse 1 / 4 * mean_collision_time}'
+#dt = '${fparse 1 / 4 * mean_collision_time}'
 dx = '${fparse 1 / 3 * mean_free_path}'
 elems_per_dim = 10
 L = '${fparse elems_per_dim * dx}'
@@ -38,6 +38,21 @@ L = '${fparse elems_per_dim * dx}'
     ymax = ${L}
   []
   allow_renumbering = false
+[]
+
+[AuxVariables]
+  [T_x]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [T_y]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [T_z]
+    order = CONSTANT
+    family = MONOMIAL
+  []
 []
 
 [Distributions]
@@ -87,8 +102,8 @@ L = '${fparse elems_per_dim * dx}'
   [collider]
     type = DSMCCollider
     study = study
-    collision_objects = 'maxwell'
-    #collision_objects = 'hard_sphere'
+    #collision_objects = 'maxwell'
+    collision_objects = 'hard_sphere'
   []
   [study]
     type = PICStudy
@@ -99,6 +114,24 @@ L = '${fparse elems_per_dim * dx}'
     data_on_cache_traces = true
     execute_on = 'TIMESTEP_BEGIN'
     ray_kernel_coverage_check = false
+  []
+  [T_x_accum]
+    type = SingleSpeciesSingleComponentTemperature
+    species = 'A'
+    aux_variable = T_x
+    component = 0
+  []
+  [T_y_accum]
+    type = SingleSpeciesSingleComponentTemperature
+    species = 'A'
+    aux_variable = T_y
+    component = 1
+  []
+  [T_z_accum]
+    type = SingleSpeciesSingleComponentTemperature
+    species = 'A'
+    aux_variable = T_z
+    component = 2
   []
 []
 
@@ -128,50 +161,39 @@ L = '${fparse elems_per_dim * dx}'
     lower_bound = -3
     upper_bound = 3
   []
-  # [T_x]
-  #   type = SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor
-  #   study = study
-  #   species = 'A'
-  #   component = 0
-  # []
-  # [T_y]
-  #   type = SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor
-  #   study = study
-  #   species = 'A'
-  #   component = 1
-  # []
-  # [T_z]
-  #   type = SingleSpeciesPerElementPerComponentTemperatureVectorPostprocessor
-  #   study = study
-  #   species = 'A'
-  #   compo2nent = 2
-  # []
 []
 
-# [Postprocessors]
-#   [T_x]
-#     type = SingleSpeciesTemperature
-#     species = 'A'
-#     component = 0
-#   []
-#   [T_y]
-#     type = SingleSpeciesTemperature
-#     species = 'A'
-#     component = 1
-#   []
-#   [T_z]
-#     type = SingleSpeciesTemperature
-#     species = 'A'
-#     component = 2
-#   []
-# []
+[Postprocessors]
+  [T_x]
+    type = ElementAverageValue
+    variable = 'T_x'
+    execute_on = 'TIMESTEP_END'
+    # this ensures that this will execute after values
+    # have been accumulated by the accumulator userobject
+    execution_order_group = 1
+  []
+  [T_y]
+    type = ElementAverageValue
+    variable = 'T_y'
+    execute_on = 'TIMESTEP_END'
+    # this ensures that this will execute after values
+    # have been accumulated by the accumulator userobject
+    execution_order_group = 1
+  []
+  [T_z]
+    type = ElementAverageValue
+    variable = 'T_z'
+    execute_on = 'TIMESTEP_END'
+    # this ensures that this will execute after values
+    # have been accumulated by the accumulator userobject
+    execution_order_group = 1
+  []
+[]
 
 [Executioner]
   type = Transient
-  # dt = ${dt}
   dt = 1e-2
-  # num_steps = 2
-  num_steps = 200
+  num_steps = 50
 []
 
 [Outputs]

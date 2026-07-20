@@ -38,25 +38,20 @@ ParticleStepperBase::setMaxDistanceAndDirection(Ray & particle,
                                                 const Real dt) const
 {
 
+  // temporary point to store the new velocity as we work on it
+  Point velocity = Point(0, 0, 0);
+
+  for (size_t i = 0; i < _mesh_dimension; ++i)
+    velocity(i) = v(i);
+
   // if the particle velocity is the zero vector the particle needs to be explicitly
   // made stationary otherwise a zero velocity will create a divide by zero
   // when trying to compute the unit direction vector
-  if (v.absolute_fuzzy_equals(Point(0, 0, 0)))
+  if (velocity.absolute_fuzzy_equals(Point(0, 0, 0)))
   {
     particle.setStationary();
     return;
   }
-  // temporary point to store the new velocity as we work on it
-  Point velocity = Point(0, 0, 0);
-
-  if (_mesh_dimension >= 1)
-    velocity(0) = v(0);
-
-  if (_mesh_dimension >= 2)
-    velocity(1) = v(1);
-
-  if (_mesh_dimension == 3)
-    velocity(2) = v(2);
 
   // max distance is v^2 dt
   const auto max_distance = std::sqrt(velocity * velocity) * dt;

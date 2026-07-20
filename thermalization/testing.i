@@ -5,16 +5,11 @@ particles_per_element = 1000
 # tests but changes based on the dimension of the problem
 number_density = 3e23
 m = 6.6464764e-27
-k_B = 1.380649e-23
-# T_alpha = 1020
 T_alpha = 600
 T_beta = 500
 sigma_0 = 1e-20
 sigma_intra = '${fparse sigma_0 * 100}'
 
-seed = 50
-alpha_seed = 0
-beta_seed = 10
 
 [Problem]
   solve = false
@@ -34,8 +29,32 @@ beta_seed = 10
   allow_renumbering = false
 []
 
+[AuxVariables]
+  [T_alpha]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [T_beta]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [alpha_rate]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [beta_rate]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [alpha_beta_rate]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+[]
+
 [GlobalParams]
   study = study
+  seed = 0
 []
 
 [Distributions]
@@ -59,7 +78,6 @@ beta_seed = 10
   [alpha_vel_initializer]
     type = VelocitiesFromDistributionsVelocityInitializer
     distributions = 'v_alpha v_alpha v_alpha'
-    seed = ${alpha_seed}
   []
 
   [alpha_initializer]
@@ -70,13 +88,11 @@ beta_seed = 10
     number_density = ${number_density}
     particles_per_element = ${particles_per_element}
     velocity_initializer = alpha_vel_initializer
-    seed = ${alpha_seed}
   []
 
   [beta_vel_initializer]
     type = VelocitiesFromDistributionsVelocityInitializer
     distributions = 'v_beta v_beta v_beta'
-    seed = ${beta_seed}
   []
 
   [beta_initializer]
@@ -87,34 +103,32 @@ beta_seed = 10
     number_density = ${number_density}
     particles_per_element = ${particles_per_element}
     velocity_initializer = beta_vel_initializer
-    seed = ${beta_seed}
   []
   [maxwell_alpha]
-    type = MaxwellCollision
+    type = MaxwellHardSphereCollision
     reactants = 'alpha alpha'
     products = 'alpha alpha'
-    reference_value = ${sigma_intra}
+    sigma_ref = ${sigma_intra}
   []
   [maxwell_beta]
     type = MaxwellHardSphereCollision
     reactants = 'beta beta'
     products = 'beta beta'
-    reference_value = ${sigma_intra}
+    sigma_ref = ${sigma_intra}
   []
   [maxwell_inter]
     type = MaxwellHardSphereCollision
     reactants = 'alpha beta'
     products = 'alpha beta'
-    reference_value = ${sigma_0}
+    sigma_ref = ${sigma_0}
   []
   [collider]
     type = DSMCCollider
     collision_objects = 'maxwell_alpha maxwell_beta maxwell_inter'
-    seed = ${seed}
   []
   [study]
     type = PICStudy
-    collider = collider
+    colliders = collider
     stepper = stepper
     particle_initializers = 'alpha_initializer beta_initializer'
     always_cache_traces = true
@@ -122,6 +136,37 @@ beta_seed = 10
     execute_on = TIMESTEP_BEGIN
     tolerate_failure = false
     ray_kernel_coverage_check = false
+  []
+  [T_alpha_accum]
+    type = SingleSpeciesTemperatureAuxAccumulator
+    aux_variable = 'T_alpha'
+    species = 'alpha'
+  []
+  [T_beta_accum]
+    type = SingleSpeciesTemperatureAuxAccumulator
+    aux_variable = 'T_beta'
+    species = 'beta'
+  []
+  [A_A_accumulator]
+    type = ReactionRateAuxAccumulator
+    aux_variable = alpha_rate
+    collision = maxwell_alpha
+    collider = collider
+    execute_on = 'TIMESTEP_END'
+  []
+  [B_B_accumulator]
+    type = ReactionRateAuxAccumulator
+    aux_variable = beta_rate
+    collision = maxwell_beta
+    collider = collider
+    execute_on = 'TIMESTEP_END'
+  []
+  [A_B_accumulator]
+    type = ReactionRateAuxAccumulator
+    aux_variable = alpha_beta_rate
+    collision = maxwell_inter
+    collider = collider
+    execute_on = 'TIMESTEP_END'
   []
 []
 
@@ -136,33 +181,56 @@ beta_seed = 10
   [particle_count]
     type = RayTracingStudyResult
     result = 'total_rays_started'
-    study = study
   []
   [T_alpha]
-    type = SingleSpeciesTemperature
-    study = study
-    species = 'alpha'
+    type = ElementAverageValue
+    variable = 'T_alpha'
+    execute_on = 'TIMESTEP_END'
+    # this ensures that this will execute after values
+    # have been accumulated by the accumulator userobject
+    execution_order_group = 1
   []
   [T_beta]
-    type = SingleSpeciesTemperature
-    study = study
-    species = 'beta'
+    type = ElementAverageValue
+    variable = 'T_beta'
+    execute_on = 'TIMESTEP_END'
+    # this ensures that this will execute after values
+    # have been accumulated by the accumulator userobject
+    execution_order_group = 1
+  []
+  [alpha_rate]
+    type = ElementAverageValue
+    variable = 'alpha_rate'
+    execute_on = 'TIMESTEP_END'
+    # this ensures that this will execute after values
+    # have been accumulated by the accumulator userobject
+    execution_order_group = 1
+  []
+  [beta_rate]
+    type = ElementAverageValue
+    variable = 'beta_rate'
+    execute_on = 'TIMESTEP_END'
+    # this ensures that this will execute after values
+    # have been accumulated by the accumulator userobject
+    execution_order_group = 1
+  []
+  [alpha_beta_rate]
+    type = ElementAverageValue
+    variable = 'alpha_beta_rate'
+    execute_on = 'TIMESTEP_END'
+    # this ensures that this will execute after values
+    # have been accumulated by the accumulator userobject
+    execution_order_group = 1
   []
 []
 
 [Executioner]
   type = Transient
   dt = 1e-6
-  #num_steps = 3000
-  num_steps = 1
+  num_steps = 2000
 []
 
 [Outputs]
   exodus = false
-  # csv = true
-  #time_step_interval = 5
-  [csv]
-    type = CSV
-    execute_on = 'FINAL'
-  []
+  csv = true
 []

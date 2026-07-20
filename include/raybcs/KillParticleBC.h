@@ -16,17 +16,21 @@
 
 #pragma once
 
-#include "NonZeroedAuxAccumulator.h"
+#include "ReflectRayBC.h"
 
-namespace SALAMANDER
-{
-/**
- * Utility that accumulates values into an aux variable
- */
-class AuxAccumulator : public NonZeroedAuxAccumulator
+class PICStudy;
+
+class KillParticleBC : public ReflectRayBC
 {
 public:
-  AuxAccumulator(FEProblemBase & problem, const AuxVariableName & variable);
-};
+  KillParticleBC(const InputParameters & params);
 
-}
+  static InputParameters validParams();
+
+  virtual void onBoundary(const unsigned int num_applying) override;
+
+protected:
+  /// the instance of the pic study to get access the particle data accessor methods
+  const PICStudy & _pic_study;
+  const Point _zero_velocity;
+};

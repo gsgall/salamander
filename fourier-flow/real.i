@@ -6,13 +6,13 @@ T_init = 273.15
 R_u = 8.314472
 # Avagadros number in 1 / mol
 N_A = 6.022140e23
-# Argon Molar Mass kg / kmol
-m = 66.3e-27
+#kArgon Molar Mass kg / kmol
+m = 6.63e-26
 # number density
 number_density = '${fparse P_init * N_A / (R_u * T_init)}'
 
 # Temperature difference between walls
-delta_T = 40
+delta_T = 100
 # total gap distance in m
 L = 1e-3
 # L = 0.5e-3
@@ -30,6 +30,8 @@ numerator = '${fparse 5 * (alpha + 1) * (alpha + 2) * sqrt(m * k_B * T_init / pi
 denominator = '${fparse 4 * alpha * (5 - 2 * omega) * (7 - 2 * omega) * mu_ref * (mu_1_mu_inf)}'
 d_ref = '${fparse sqrt(numerator / denominator)}'
 
+dt = 5e-8
+
 [Problem]
   solve = false
 []
@@ -37,6 +39,7 @@ d_ref = '${fparse sqrt(numerator / denominator)}'
 [GlobalParams]
   seed = 0
   study = study
+  time_step_start = 3000
 []
 
 [Mesh]
@@ -59,6 +62,10 @@ d_ref = '${fparse sqrt(numerator / denominator)}'
     family = MONOMIAL
   []
   [time_averaged_temperature]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [time_averaged_heat_flux]
     order = CONSTANT
     family = MONOMIAL
   []
@@ -137,10 +144,8 @@ d_ref = '${fparse sqrt(numerator / denominator)}'
     type = TimeAveragedSingleSpeciesPeculiarTemperatureAuxAccumulator
     species = 'A'
     aux_variable = time_averaged_temperature
-    time_step_start = 2000
   []
 []
-
 
 [VectorPostprocessors]
   [average_temperature]
@@ -151,6 +156,23 @@ d_ref = '${fparse sqrt(numerator / denominator)}'
     # this ensures that this will execute after values
     # have been accumulated by the accumulator userobject
     execution_order_group = 1
+  []
+[]
+
+[Postprocessors]
+  [left_heat_flux]
+    type = PointValue
+    variable = 'time_averaged_heat_flux'
+    point = '0 0 0'
+    execution_order_group = 1
+    execute_on = 'TIMESTEP_END'
+  []
+  [right_heat_flux]
+    type = PointValue
+    variable = 'time_averaged_heat_flux'
+    point = '${L} 0 0'
+    execution_order_group = 1
+    execute_on = 'TIMESTEP_END'
   []
 []
 
@@ -165,15 +187,28 @@ d_ref = '${fparse sqrt(numerator / denominator)}'
     boundary = 'right'
     temperature = '${fparse T_init + delta_T / 2.0}'
   []
+  [heat_flux]
+    type = BoundaryHeatFluxAccumulatorRayBC
+    boundary = 'left right'
+    aux_variable = time_averaged_heat_flux
+  []
 []
 
 [Executioner]
   type = Transient
-  dt = 5e-8
-  num_steps = 4000
+  dt = ${dt}
+  num_steps = 6000
+  #num_steps = 1
 []
 
 [Outputs]
   exodus = true
-  csv = true
+  [csv]
+    type = CSV
+    execute_on = 'FINAL'
+  []
 []
+
+#[Debug]
+#  show_execution_order = ALWAYS
+#[]

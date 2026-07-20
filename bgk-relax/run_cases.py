@@ -11,11 +11,12 @@ supress_output = False
 seed(0)
 
 elems_per_dim = 10
-runs = 30
+runs = 10
 particles_per_element = [400]
 
 for ppe in particles_per_element:
-    file_path = f"maxwell/{elems_per_dim}x{elems_per_dim}/{ppe:d}_ppe"
+    file_path = f"hard_sphere/{elems_per_dim}x{
+        elems_per_dim}/temperature/{ppe:d}_ppe"
     if not os.path.exists(file_path):
         os.makedirs(file_path)
     for i in range(runs):
@@ -26,7 +27,8 @@ for ppe in particles_per_element:
              f"GlobalParams/seed={randint(0, int(1e8))}",
              f"particles_per_element={ppe:d}",
              f"Outputs/file_base={file_base}",
-             "Outputs/console=false"]
+             "Outputs/console=false",
+             "Executioner/dt=1e-1"]
 
         mooseutils.run_executable(
             executeable, *a, mpi=mpi, suppress_output=supress_output)
