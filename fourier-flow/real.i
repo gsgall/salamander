@@ -41,7 +41,7 @@ dt = 5e-8
 [GlobalParams]
   seed = 0
   study = study
-  time_step_start = 3000
+  time_step_start = 7500
   #time_step_start =
 []
 
@@ -200,7 +200,7 @@ dt = 5e-8
 [Executioner]
   type = Transient
   dt = ${dt}
-  num_steps = 6000
+  num_steps = 15000
   #num_steps = 1
 []
 
@@ -208,10 +208,5 @@ dt = 5e-8
   exodus = true
   [csv]
     type = CSV
-    execute_on = 'FINAL'
   []
 []
-
-#[Debug]
-#  show_execution_order = ALWAYS
-#[]
