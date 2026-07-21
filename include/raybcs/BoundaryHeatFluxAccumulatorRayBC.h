@@ -36,13 +36,15 @@ public:
   virtual void postOnBoundary(const unsigned int num_applying) override;
   virtual void postExecuteStudy() override;
 
-  const Real heatFlux() const;
-
 protected:
   const PICStudy & _pic_study;
   const AuxVariableName & _aux_variable;
   const unsigned int _time_step_start;
+  const unsigned int _mesh_dimension;
   Real _sum_time;
+  Point _temporary_velocity;
 
   std::unique_ptr<SALAMANDER::NonZeroedAuxAccumulator> accumulator;
+
+  const Real directionalEnergy();
 };

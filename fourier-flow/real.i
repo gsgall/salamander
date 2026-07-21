@@ -1,5 +1,5 @@
 # reference pressure in Pa i.e. J / m^3
-P_init = 266.644
+P_init = 264.96
 # initial temperature in K
 T_init = 273.15
 # universal gas constant in J / (mol K)
@@ -32,6 +32,8 @@ d_ref = '${fparse sqrt(numerator / denominator)}'
 
 dt = 5e-8
 
+# number_density = '${fparse P_init / (k_B * T_init)}'
+
 [Problem]
   solve = false
 []
@@ -40,6 +42,7 @@ dt = 5e-8
   seed = 0
   study = study
   time_step_start = 3000
+  #time_step_start =
 []
 
 [Mesh]

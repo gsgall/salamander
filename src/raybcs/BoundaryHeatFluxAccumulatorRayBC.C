@@ -43,7 +43,8 @@ BoundaryHeatFluxAccumulatorRayBC::BoundaryHeatFluxAccumulatorRayBC(const InputPa
   : RayBoundaryConditionBase(params),
     _pic_study(getStudy<PICStudy>()),
     _aux_variable(getParam<AuxVariableName>("aux_variable")),
-    _time_step_start(getParam<unsigned int>("time_step_start"))
+    _time_step_start(getParam<unsigned int>("time_step_start")),
+    _mesh_dimension(_fe_problem.mesh().dimension())
 {
   auto & aux = _fe_problem.getAuxiliarySystem();
   auto & var = aux.getFieldVariable<Real>(0, getParam<AuxVariableName>("aux_variable"));
@@ -55,6 +56,7 @@ BoundaryHeatFluxAccumulatorRayBC::BoundaryHeatFluxAccumulatorRayBC(const InputPa
                "and family = MONOMIAL");
   }
   _sum_time = 0.0;
+  _temporary_velocity = Point(0.0, 0.0, 0.0);
 }
 
 void
@@ -64,6 +66,7 @@ BoundaryHeatFluxAccumulatorRayBC::timestepSetup()
     return;
 
   accumulator = std::make_unique<SALAMANDER::NonZeroedAuxAccumulator>(_fe_problem, _aux_variable);
+  accumulator->scale(_sum_time);
   _sum_time += _dt;
 }
 
@@ -101,6 +104,6 @@ BoundaryHeatFluxAccumulatorRayBC::postExecuteStudy()
 {
   if (_t_step < _time_step_start)
     return;
-
+  accumulator->scale(1.0 / _sum_time);
   accumulator->finalize();
 }

@@ -75,14 +75,38 @@ m = 1e-20
 []
 
 [RayBCs]
-  [diffusive]
-    type = KillParticleBC
-    boundary = 'left right'
+  [left_change]
+    type = ChangeRayVelocity
+    boundary = 'left'
+    velocity = '10 0 0'
+  []
+  [right_change]
+    type = ChangeRayVelocity
+    boundary = 'right'
+    velocity = '-10 0 0'
   []
   [heat_flux]
     type = BoundaryHeatFluxAccumulatorRayBC
     boundary = 'left right'
     aux_variable = 'heat_flux'
+    time_step_start = 0
+  []
+[]
+
+[Postprocessors]
+  [left_heat_flux]
+    type = PointValue
+    variable = 'heat_flux'
+    point = '0 0 0'
+    execution_order_group = 1
+    execute_on = 'TIMESTEP_END'
+  []
+  [right_heat_flux]
+    type = PointValue
+    variable = 'heat_flux'
+    point = '100 0 0'
+    execution_order_group = 1
+    execute_on = 'TIMESTEP_END'
   []
 []
 
