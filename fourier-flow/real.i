@@ -41,7 +41,7 @@ dt = 5e-8
 [GlobalParams]
   seed = 0
   study = study
-  time_step_start = 7500
+  time_step_start = 20000
   #time_step_start =
 []
 
@@ -200,13 +200,17 @@ dt = 5e-8
 [Executioner]
   type = Transient
   dt = ${dt}
-  num_steps = 15000
-  #num_steps = 1
+  num_steps = 40000
 []
 
 [Outputs]
   exodus = true
   [csv]
     type = CSV
+    hide = average_temperature
+  []
+  [csv_final]
+    type = CSV
+    execute_on = FINAl
   []
 []
