@@ -4,6 +4,7 @@
 
 [GlobalParams]
   study = study
+  particles_per_element = 10
 []
 
 [Mesh]
@@ -42,8 +43,7 @@
   [a_initializer]
     type = PerElementParticleInitializer
     species = 'A'
-    particles_per_element = 10
-    number_density = 1
+    number_density = 3
     charge = 0
     mass = 1
     velocity_initializer = velocity_initializer
@@ -51,8 +51,7 @@
   [b_initializer]
     type = PerElementParticleInitializer
     species = 'B'
-    particles_per_element = 10
-    number_density = 1
+    number_density = 3
     charge = 0
     mass = 1
     velocity_initializer = velocity_initializer
@@ -61,19 +60,19 @@
     type = MaxwellHardSphereCollision
     reactants = 'A A'
     products = 'A A'
-    sigma_ref = 1.0
+    sigma_ref = 2.0
   []
   [maxwell_b]
     type = MaxwellHardSphereCollision
     reactants = 'B B'
     products = 'B B'
-    sigma_ref = 1.0
+    sigma_ref = 3.0
   []
   [maxwell_ab]
     type = MaxwellHardSphereCollision
     reactants = 'A B'
     products = 'A B'
-    sigma_ref = 1.0
+    sigma_ref = 4.0
   []
   [collider]
     type = DSMCCollider
