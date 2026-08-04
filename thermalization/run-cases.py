@@ -10,7 +10,7 @@ supress_output = False
 
 seed(0)
 
-runs = 20
+runs = 33
 
 for i in range(10):
     randint(0, int(1e8))

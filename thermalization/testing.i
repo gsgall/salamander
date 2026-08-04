@@ -38,6 +38,14 @@ sigma_intra = '${fparse sigma_0 * 100}'
     order = CONSTANT
     family = MONOMIAL
   []
+  [T_alpha_pec]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [T_beta_pec]
+    order = CONSTANT
+    family = MONOMIAL
+  []
   [alpha_rate]
     order = CONSTANT
     family = MONOMIAL
@@ -147,6 +155,16 @@ sigma_intra = '${fparse sigma_0 * 100}'
     aux_variable = 'T_beta'
     species = 'beta'
   []
+  [T_alpha_pec_accum]
+    type = SingleSpeciesPeculiarTemperatureAuxAccumulator
+    aux_variable = 'T_alpha_pec'
+    species = 'alpha'
+  []
+  [T_beta_pec_accum]
+    type = SingleSpeciesPeculiarTemperatureAuxAccumulator
+    aux_variable = 'T_beta_pec'
+    species = 'beta'
+  []
   [A_A_accumulator]
     type = ReactionRateAuxAccumulator
     aux_variable = alpha_rate
@@ -198,6 +216,22 @@ sigma_intra = '${fparse sigma_0 * 100}'
     # have been accumulated by the accumulator userobject
     execution_order_group = 1
   []
+  [T_alpha_pec]
+    type = ElementAverageValue
+    variable = 'T_alpha_pec'
+    execute_on = 'TIMESTEP_END'
+    # this ensures that this will execute after values
+    # have been accumulated by the accumulator userobject
+    execution_order_group = 1
+  []
+  [T_beta_pec]
+    type = ElementAverageValue
+    variable = 'T_beta_pec'
+    execute_on = 'TIMESTEP_END'
+    # this ensures that this will execute after values
+    # have been accumulated by the accumulator userobject
+    execution_order_group = 1
+  []
   [alpha_rate]
     type = ElementAverageValue
     variable = 'alpha_rate'
@@ -226,7 +260,7 @@ sigma_intra = '${fparse sigma_0 * 100}'
 
 [Executioner]
   type = Transient
-  dt = 1e-6
+  dt = 1e-5
   num_steps = 2000
 []
 

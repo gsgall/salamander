@@ -30,7 +30,9 @@ numerator = '${fparse 5 * (alpha + 1) * (alpha + 2) * sqrt(m * k_B * T_init / pi
 denominator = '${fparse 4 * alpha * (5 - 2 * omega) * (7 - 2 * omega) * mu_ref * (mu_1_mu_inf)}'
 d_ref = '${fparse sqrt(numerator / denominator)}'
 
-dt = 5e-8
+#dt = 2.5e-8
+dt = 1.25e-8
+#dt = 5e-8
 
 # number_density = '${fparse P_init / (k_B * T_init)}'
 
@@ -41,7 +43,7 @@ dt = 5e-8
 [GlobalParams]
   seed = 0
   study = study
-  time_step_start = 20000
+  time_step_start = 120000
   #time_step_start =
 []
 
@@ -200,7 +202,7 @@ dt = 5e-8
 [Executioner]
   type = Transient
   dt = ${dt}
-  num_steps = 40000
+  num_steps = 200000
 []
 
 [Outputs]

@@ -138,8 +138,8 @@ DSMCCollider::collideSpeciesPair(const std::vector<std::shared_ptr<Ray>> & parti
 
   const Real unique_pairs = (a_count * (same_species ? (a_count - 1) / 2.0 : b_count));
 
-  const unsigned int num_trials = static_cast<unsigned int>(
-      unique_pairs * sigma_cr_t_max_prev * weight * _dt / elem_volume + _generator.rand());
+  const unsigned int num_trials = static_cast<unsigned int>(std::roundf(
+      unique_pairs * sigma_cr_t_max_prev * weight * _dt / elem_volume + _generator.rand()));
 
   for (size_t i = 0; i < num_trials; ++i)
   {

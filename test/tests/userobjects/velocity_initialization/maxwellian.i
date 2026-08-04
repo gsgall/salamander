@@ -100,6 +100,10 @@
     # have been accumulated by the accumulator userobject
     execution_order_group = 1
   []
+  [particles]
+    type = ParticleDataVectorPostprocessor
+    study = study
+  []
 []
 
 

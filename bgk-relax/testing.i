@@ -24,7 +24,7 @@ L = '${fparse elems_per_dim * dx}'
 []
 
 [GlobalParams]
-  seed = 9812435
+  seed = 0
   study = study
 []
 
@@ -92,17 +92,9 @@ L = '${fparse elems_per_dim * dx}'
     study = study
     diameter = 0.46065886596178063
   []
-  [maxwell]
-    type = MaxwellHardSphereCollision
-    reactants = 'A A'
-    products = 'A A'
-    study = study
-    sigma_ref = ${sigma_0}
-  []
   [collider]
     type = DSMCCollider
     study = study
-    #collision_objects = 'maxwell'
     collision_objects = 'hard_sphere'
   []
   [study]
@@ -114,24 +106,6 @@ L = '${fparse elems_per_dim * dx}'
     data_on_cache_traces = true
     execute_on = 'TIMESTEP_BEGIN'
     ray_kernel_coverage_check = false
-  []
-  [T_x_accum]
-    type = SingleSpeciesSingleComponentTemperature
-    species = 'A'
-    aux_variable = T_x
-    component = 0
-  []
-  [T_y_accum]
-    type = SingleSpeciesSingleComponentTemperature
-    species = 'A'
-    aux_variable = T_y
-    component = 1
-  []
-  [T_z_accum]
-    type = SingleSpeciesSingleComponentTemperature
-    species = 'A'
-    aux_variable = T_z
-    component = 2
   []
 []
 
@@ -155,7 +129,7 @@ L = '${fparse elems_per_dim * dx}'
   []
   [distribution]
     type = CustomHistogramVectorPostprocessor
-    num_bins = 75
+    num_bins = 100
     vpp = particles
     column_names = 'v_x v_y v_z'
     lower_bound = -3
@@ -163,36 +137,9 @@ L = '${fparse elems_per_dim * dx}'
   []
 []
 
-[Postprocessors]
-  [T_x]
-    type = ElementAverageValue
-    variable = 'T_x'
-    execute_on = 'TIMESTEP_END'
-    # this ensures that this will execute after values
-    # have been accumulated by the accumulator userobject
-    execution_order_group = 1
-  []
-  [T_y]
-    type = ElementAverageValue
-    variable = 'T_y'
-    execute_on = 'TIMESTEP_END'
-    # this ensures that this will execute after values
-    # have been accumulated by the accumulator userobject
-    execution_order_group = 1
-  []
-  [T_z]
-    type = ElementAverageValue
-    variable = 'T_z'
-    execute_on = 'TIMESTEP_END'
-    # this ensures that this will execute after values
-    # have been accumulated by the accumulator userobject
-    execution_order_group = 1
-  []
-[]
-
 [Executioner]
   type = Transient
-  dt = 1e-2
+  dt = 5e-2
   num_steps = 50
 []
 
