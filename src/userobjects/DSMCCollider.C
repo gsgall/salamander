@@ -169,17 +169,19 @@ DSMCCollider::collideSpeciesPair(const std::vector<std::shared_ptr<Ray>> & parti
       sigma_cr_t_max_curr = sigma_cr_t;
     }
 
-    if (sigma_cr_t / sigma_cr_t_max_prev < _generator.rand())
+    const auto collision_rand = _generator.rand();
+
+    if (sigma_cr_t / sigma_cr_t_max_prev < collision_rand)
     {
       continue;
     }
 
-    const auto selection_rand = _generator.rand();
-
     size_t collision_index = 0;
-    for (size_t j = 0; j < collisions.size(); ++j)
+    Real running_sum = 0.0;
+    for (const auto & collision : collisions)
     {
-      collision_index += static_cast<size_t>(selection_rand > selection_rand);
+      running_sum += collision->sigmaCr(*particle_a, *particle_b);
+      collision_index += static_cast<size_t>((running_sum / sigma_cr_t) < collision_rand);
     }
 
     collisions[collision_index]->collideParticles(*particle_a, *particle_b);

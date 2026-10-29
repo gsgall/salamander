@@ -18,15 +18,15 @@
 []
 
 [AuxVariables]
-  [A_A_reaction]
+  [A_A_reaction_1]
     order = CONSTANT
     family = MONOMIAL
   []
-  [B_B_reaction]
+  [B_B_reaction_1]
     order = CONSTANT
     family = MONOMIAL
   []
-  [A_B_reaction]
+  [A_B_reaction_1]
     order = CONSTANT
     family = MONOMIAL
   []
@@ -56,27 +56,27 @@
     mass = 1
     velocity_initializer = velocity_initializer
   []
-  [maxwell_a]
+  [maxwell_a_1]
     type = MaxwellHardSphereCollision
     reactants = 'A A'
     products = 'A A'
-    sigma_ref = 2.0
+    sigma_ref = 1.0
   []
-  [maxwell_b]
+  [maxwell_b_1]
     type = MaxwellHardSphereCollision
     reactants = 'B B'
     products = 'B B'
     sigma_ref = 3.0
   []
-  [maxwell_ab]
+  [maxwell_ab_1]
     type = MaxwellHardSphereCollision
     reactants = 'A B'
     products = 'A B'
-    sigma_ref = 4.0
+    sigma_ref = 5.0
   []
   [collider]
     type = DSMCCollider
-    collision_objects = 'maxwell_a maxwell_b maxwell_ab'
+    collision_objects = 'maxwell_a_1 maxwell_b_1 maxwell_ab_1'
   []
   [study]
     type = PICStudy
@@ -88,24 +88,24 @@
     execute_on = 'TIMESTEP_BEGIN'
     ray_kernel_coverage_check = false
   []
-  [A_A_accumulator]
+  [A_A_accumulator_1]
     type = ReactionRateAuxAccumulator
-    aux_variable = A_A_reaction
-    collision = maxwell_a
+    aux_variable = A_A_reaction_1
+    collision = maxwell_a_1
     collider = collider
     execute_on = 'TIMESTEP_END'
   []
-  [B_B_accumulator]
+  [B_B_accumulator_1]
     type = ReactionRateAuxAccumulator
-    aux_variable = B_B_reaction
-    collision = maxwell_b
+    aux_variable = B_B_reaction_1
+    collision = maxwell_b_1
     collider = collider
     execute_on = 'TIMESTEP_END'
   []
-  [A_B_accumulator]
+  [A_B_accumulator_1]
     type = ReactionRateAuxAccumulator
-    aux_variable = A_B_reaction
-    collision = maxwell_ab
+    aux_variable = A_B_reaction_1
+    collision = maxwell_ab_1
     collider = collider
     execute_on = 'TIMESTEP_END'
   []
@@ -117,33 +117,26 @@
   []
 []
 
-[RayBCs]
-  [walls]
-    type = ReflectParticleBC
-    boundary = 'left right'
-  []
-[]
-
 [Postprocessors]
-  [A_A_reaction_rate]
+  [A_A_reaction_rate_1]
     type = ElementAverageValue
-    variable = 'A_A_reaction'
+    variable = 'A_A_reaction_1'
     execute_on = 'TIMESTEP_END'
     # this ensures that this will execute after values
     # have been accumulated by the accumulator userobject
     execution_order_group = 1
   []
-  [B_B_reaction_rate]
+  [B_B_reaction_rate_1]
     type = ElementAverageValue
-    variable = 'B_B_reaction'
+    variable = 'B_B_reaction_1'
     execute_on = 'TIMESTEP_END'
     # this ensures that this will execute after values
     # have been accumulated by the accumulator userobject
     execution_order_group = 1
   []
-  [A_B_reaction_rate]
+  [A_B_reaction_rate_1]
     type = ElementAverageValue
-    variable = 'A_B_reaction'
+    variable = 'A_B_reaction_1'
     execute_on = 'TIMESTEP_END'
     # this ensures that this will execute after values
     # have been accumulated by the accumulator userobject
@@ -154,7 +147,7 @@
 [Executioner]
   type = Transient
   dt = 1
-  num_steps = 10
+  num_steps = 100
 []
 
 [Outputs]
