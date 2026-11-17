@@ -1,0 +1,12 @@
+[Tests]
+  issues = ""
+  design = ""
+  requirement = 'The system shall be capable of recreating classical plasma instabilities including'
+  [two-stream]
+     type = PythonUnitTest
+     input = 'test.py'
+     test_case = TestTwoStream
+     detail = 'the two stream instability'
+     required_python_packages = 'pandas matplotlib numpy'
+  []
+[]
